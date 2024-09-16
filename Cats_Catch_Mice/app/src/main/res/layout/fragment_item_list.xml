@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.dashboard.ItemFragment">
+    tools:context=".ui.itemList.ItemFragment">
 
     <TextView
         android:id="@+id/text_dashboard"
@@ -21,17 +21,15 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-
-
-    <GridView
-        android:id="@+id/item_grid_view"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:numColumns="3"
-        android:verticalSpacing="10dp"
-        android:horizontalSpacing="10dp"
-        android:padding="16dp"
-        android:gravity="center"
+    <ImageView
+        android:id="@+id/sample_item1"
+        android:layout_width="106dp"
+        android:layout_height="101dp"
+        android:src="@drawable/itemicon_item1_demo"
+        android:text="sample_item1"
+        tools:layout_editor_absoluteX="67dp"
+        tools:layout_editor_absoluteY="170dp"
         tools:ignore="MissingConstraints" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

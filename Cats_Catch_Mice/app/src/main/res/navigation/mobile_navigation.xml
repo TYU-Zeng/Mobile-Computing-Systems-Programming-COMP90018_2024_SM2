@@ -9,13 +9,20 @@
         android:id="@+id/navigation_home"
         android:name="com.example.cats_catch_mice.ui.home.HomeFragment"
         android:label="@string/Map"
-        tools:layout="@layout/fragment_home" />
+        tools:layout="@layout/fragment_map" />
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.example.cats_catch_mice.ui.dashboard.ItemFragment"
+        android:name="com.example.cats_catch_mice.ui.itemList.ItemFragment"
         android:label="@string/Item_List"
-        tools:layout="@layout/fragment_dashboard" />
+        tools:layout="@layout/fragment_item_list" />
+
+    <fragment
+        android:id="@+id/itemDetailFragment"
+        android:name="com.example.cats_catch_mice.ItemDetailFragment"
+        android:label="Item Detail"
+        tools:layout="@layout/fragment_item_detail" />
+
 
 
 </navigation>

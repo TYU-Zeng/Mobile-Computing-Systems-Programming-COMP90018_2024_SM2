@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -28,33 +30,30 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // Passing each menu ID as a set of Ids because each
         // menu should be considered as top level destinations.
-        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
-                R.id.navigation_home, R.id.navigation_dashboard)
-                .build();
+        // set navigation detail
+        // 设置导航控制器和 AppBarConfiguration
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+
+        // 配置 AppBarConfiguration，使其处理顶级目的地（导航图中的顶层目的地，不会显示返回按钮）
+        AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
+                R.id.navigation_home, R.id.navigation_dashboard)  // 顶级目的地
+                .build();
+
+        // 设置 ActionBar 与 NavController 关联
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
+
+        // 绑定 BottomNavigationView 和 NavController
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        //set top menu
-        //setContentView(R.layout.activity_main);
 
-
-
-        // 找到ImageView
-        ImageView imageView = findViewById(R.id.sample_item1);
-
-        // 设置点击事件监听器
-        imageView.setOnClickListener(v -> {
-            // 在点击事件中启动新的Activity
-            Intent intent = new Intent(MainActivity.this, ItemDetail.class);
-            startActivity(intent);
-        });
     }
 
 
@@ -82,6 +81,13 @@ public class MainActivity extends AppCompatActivity {
         }
         return true;
 
+    }
+
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        return navController.navigateUp() || super.onSupportNavigateUp();
     }
 
 

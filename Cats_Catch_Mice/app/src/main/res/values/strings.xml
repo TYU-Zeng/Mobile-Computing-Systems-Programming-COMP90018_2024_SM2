@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Cats_Catch_Mice</string>
     <string name="Map">Map</string>
-    <string name="Item_List">Item Lits</string>
+    <string name="Item_List">Item List</string>
+    <string name="quit">Quit</string>
+    <string name="about">About</string>
 
 </resources>
