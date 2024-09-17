@@ -52,8 +52,6 @@ public class MainActivity extends AppCompatActivity {
 
         // 绑定 BottomNavigationView 和 NavController
         NavigationUI.setupWithNavController(binding.navView, navController);
-
-
     }
 
 
