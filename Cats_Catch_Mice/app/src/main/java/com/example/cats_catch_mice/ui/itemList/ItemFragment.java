@@ -31,15 +31,12 @@
             binding = FragmentItemListBinding.inflate(inflater, container, false);
             View root = binding.getRoot();
 
-            // 使用 binding 直接访问 ImageView 并设置点击事件
             binding.sampleItem1.setOnClickListener(v -> {
                 // 使用 NavController 导航到 ItemDetailFragment
                 NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
                 Log.d(TAG, "navigate to item detail");
                 navController.navigate(R.id.itemDetailFragment);
             });
-
-
 
             final TextView textView = binding.textDashboard;
             itemListViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);

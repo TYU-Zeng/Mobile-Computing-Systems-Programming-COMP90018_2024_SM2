@@ -29,18 +29,12 @@ public class ItemDetailFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
-
-
-
-        // 设置其他按钮点击事件
+        // TODO: add button function
         binding.buttonCancel.setOnClickListener(v -> {
-            // 自定义返回逻辑
             ((AppCompatActivity) requireActivity()).getSupportFragmentManager().popBackStack();
-
-
         });
 
+        // TODO: call item function
         binding.buttonUse.setOnClickListener(v -> {
             Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
         });
