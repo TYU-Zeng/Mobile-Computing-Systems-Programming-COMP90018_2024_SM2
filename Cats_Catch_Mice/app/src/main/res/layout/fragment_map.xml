@@ -13,6 +13,8 @@
         android:layout_height="match_parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:cameraZoom="14"/>
+        app:uiZoomControls = "true"
+        app:uiCompass = "true"
+        app:uiTiltGestures="false" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
