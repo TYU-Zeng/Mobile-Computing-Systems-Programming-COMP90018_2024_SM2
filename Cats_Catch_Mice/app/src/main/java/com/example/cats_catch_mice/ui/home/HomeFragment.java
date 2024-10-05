@@ -16,6 +16,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
@@ -39,13 +40,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
-    public void onMapReady(GoogleMap googleMap) {
-        // setting the location at Unimelb
-        LatLng unimelb = new LatLng(-37.79, 144.96);
-        googleMap.addMarker(new MarkerOptions()
-                .position(unimelb)
+    public void onMapReady(GoogleMap map) {
+        // setting the boundary of Unimelb
+        LatLngBounds unimelbBound = new LatLngBounds(
+                new LatLng(-37.802506, 144.956938),
+                new LatLng(-37.796215, 144.965135)
+        );
+        map.addMarker(new MarkerOptions()
+                .position(unimelbBound.getCenter())
                 .title("Marker"));
-        googleMap.moveCamera(CameraUpdateFactory.newLatLng(unimelb));
+        map.setLatLngBoundsForCameraTarget(unimelbBound);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelbBound.getCenter(), 16));
     }
 
     @Override
