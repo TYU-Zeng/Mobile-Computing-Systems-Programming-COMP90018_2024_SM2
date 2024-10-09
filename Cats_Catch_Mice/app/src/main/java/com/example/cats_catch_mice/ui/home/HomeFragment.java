@@ -31,16 +31,16 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback{
+public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String LOG_TAG = "MapFragment";
     private static final int USER_LOCATION_ZOOM = 18;
     private static final int DEFAULT_ZOOM = 16;
-    private static final LatLngBounds UNIMELB_BOUNDARY= new LatLngBounds(
+    private static final LatLngBounds UNIMELB_BOUNDARY = new LatLngBounds(
             new LatLng(-37.802506, 144.956938),
             new LatLng(-37.796215, 144.965135)
     );
-    private static final long TRIGGER_INTERVAL=5000; //milliseconds
+    private static final long TRIGGER_INTERVAL = 5000; //milliseconds
 
     private FragmentMapBinding binding;
     private GoogleMap map;
@@ -58,49 +58,27 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
 
-        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            if(isGranted){
-                Log.d("debugging", "granted");
-                locationPermissionGranted = true;
-                updateLocationUI();
-                getDeviceLocation();
-            }else{
-                Log.d("debugging", "not granted");
-                locationPermissionGranted = false;
-            }
-        });
+        // callback for location permission request
+        setResultPermissionLauncher();
 
-        if(this.getActivity() != null)
+        if (this.getActivity() != null)
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
 
+        // links map to fragment
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
-        if (mapFragment != null){
+        if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
-        locationUpdateTrigger = new Runnable(){
-            public void run(){
-                getDeviceLocation();
-                triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
-            }
-        };
-        startUpdating();
+        // set up and start the trigger to get device location
+        setLocationUpdateTrigger();
+        startUpdatingLocation();
 
         return root;
     }
 
-    private void startUpdating(){
-        Log.d("debugging", "start triggering");
-        triggerHandler.postDelayed(locationUpdateTrigger, TRIGGER_INTERVAL);
-    }
-
-    private void stopUpdating(){
-        Log.d("debugging", "stop triggering");
-        triggerHandler.removeCallbacks(locationUpdateTrigger);
-    }
-
     @Override
-    public void onMapReady(GoogleMap map) {
+    public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         showUnimelb();
         getLocationPermission();
@@ -112,11 +90,43 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-        stopUpdating();
+        stopUpdatingLocation();
     }
 
-    private void showUnimelb(){
-        // setting the boundary of Unimelb
+    private void setResultPermissionLauncher() {
+        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                Log.d("debugging", "granted");
+                locationPermissionGranted = true;
+                updateLocationUI();
+                getDeviceLocation();
+            } else {
+                Log.d("debugging", "not granted");
+                locationPermissionGranted = false;
+            }
+        });
+    }
+
+    private void setLocationUpdateTrigger() {
+        locationUpdateTrigger = new Runnable() {
+            public void run() {
+                getDeviceLocation();
+                triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
+            }
+        };
+    }
+
+    private void startUpdatingLocation() {
+        Log.d("debugging", "start triggering");
+        triggerHandler.postDelayed(locationUpdateTrigger, TRIGGER_INTERVAL);
+    }
+
+    private void stopUpdatingLocation() {
+        Log.d("debugging", "stop triggering");
+        triggerHandler.removeCallbacks(locationUpdateTrigger);
+    }
+
+    private void showUnimelb() {
         map.addMarker(new MarkerOptions()
                 .position(UNIMELB_BOUNDARY.getCenter())
                 .title("Marker"));
@@ -125,51 +135,51 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         Log.d("debugging", "unimelb map rendered");
     }
 
-    private void updateLocationUI(){
+    private void updateLocationUI() {
         Log.d("debugging", "updating UI");
-        if(this.map == null)
+        if (this.map == null)
             return;
-        try{
-            if(this.locationPermissionGranted) {
+        try {
+            if (this.locationPermissionGranted) {
                 this.map.setMyLocationEnabled(true);
                 this.map.getUiSettings().setMyLocationButtonEnabled(true);
-            }else{
+            } else {
                 this.map.setMyLocationEnabled(false);
                 this.map.getUiSettings().setMyLocationButtonEnabled(false);
             }
-        }catch(SecurityException e){
+        } catch (SecurityException e) {
             Log.e(LOG_TAG, "Exception occur when configuring map");
         }
     }
 
-    private void getDeviceLocation(){
-        if(this.getActivity() == null){
+    private void getDeviceLocation() {
+        if (this.getActivity() == null) {
             Log.e(LOG_TAG, "Error when getting activity");
             return;
         }
-        try{
-            if(this.locationPermissionGranted){
+        try {
+            if (this.locationPermissionGranted) {
                 Log.d("debugging", "getting device location");
-                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY,null).addOnSuccessListener(
+                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(
                         this.getActivity(), new OnSuccessListener<Location>() {
-                    @Override
-                    public void onSuccess(Location location) {
-                        if(location!= null){
+                            @Override
+                            public void onSuccess(Location location) {
+                                if (location != null) {
 //                            Log.d("debugging", "last location got");
-                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                    new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
-                            );
-                        }
-                    }
-                });
+                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
+                                    );
+                                }
+                            }
+                        });
             }
-        }catch(SecurityException e){
+        } catch (SecurityException e) {
             Log.e(LOG_TAG, "Error occurred when getting device location");
         }
     }
 
     private void getLocationPermission() {
-        if(this.getContext() == null){
+        if (this.getContext() == null) {
             Log.e(LOG_TAG, "Error when getting context");
             return;
         }
