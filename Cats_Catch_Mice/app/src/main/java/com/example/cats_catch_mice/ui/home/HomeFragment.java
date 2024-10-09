@@ -12,11 +12,8 @@ import android.view.ViewGroup;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
@@ -44,12 +41,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
-    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private ActivityResultLauncher<String> resultPermissionLauncher;
     private FusedLocationProviderClient fusedLocationClient;
-
-    // TODO: create attribute for last known setting
-    // camera view, map tile, user location, etc.
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
