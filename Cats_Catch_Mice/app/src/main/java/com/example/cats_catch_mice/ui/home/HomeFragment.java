@@ -19,6 +19,7 @@ import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -123,7 +124,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         }
         try{
             if(this.locationPermissionGranted){
-                fusedLocationClient.getLastLocation().addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
+                Log.d("debugging", "getting device location");
+                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY,null).addOnSuccessListener(
+                        this.getActivity(), new OnSuccessListener<Location>() {
                     @Override
                     public void onSuccess(Location location) {
                         if(location!= null){
