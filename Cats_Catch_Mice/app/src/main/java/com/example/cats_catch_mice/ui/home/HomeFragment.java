@@ -70,7 +70,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
             }
         });
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
+        if(this.getActivity() != null)
+            fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null){
@@ -123,6 +124,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void getDeviceLocation(){
+        if(this.getActivity() == null){
+            Log.e(LOG_TAG, "Error when getting activity");
+            return;
+        }
         try{
             if(this.locationPermissionGranted){
                 fusedLocationClient.getLastLocation().addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
@@ -143,6 +148,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     }
 
     private void getLocationPermission() {
+        if(this.getContext() == null){
+            Log.e(LOG_TAG, "Error when getting context");
+            return;
+        }
         if (ContextCompat.checkSelfPermission(this.getContext(),
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
