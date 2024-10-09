@@ -47,6 +47,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private ActivityResultLauncher<String> resultPermissionLauncher;
     private FusedLocationProviderClient fusedLocationClient;
+
     // TODO: create attribute for last known setting
     // camera view, map tile, user location, etc.
 
@@ -82,21 +83,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     @Override
     public void onMapReady(GoogleMap map) {
         this.map = map;
-
+        showUnimelb();
         getLocationPermission();
-
-        // setting the boundary of Unimelb
-        LatLngBounds unimelbBound = new LatLngBounds(
-                new LatLng(-37.802506, 144.956938),
-                new LatLng(-37.796215, 144.965135)
-        );
-        map.addMarker(new MarkerOptions()
-                .position(unimelbBound.getCenter())
-                .title("Marker"));
-        map.setLatLngBoundsForCameraTarget(unimelbBound);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelbBound.getCenter(), DEFAULT_ZOOM));
-        Log.d("debugging", "this map is ready.");
-
         updateLocationUI();
         getDeviceLocation();
     }
@@ -105,6 +93,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+    }
+
+    private void showUnimelb(){
+        // setting the boundary of Unimelb
+        map.addMarker(new MarkerOptions()
+                .position(UNIMELB_BOUNDARY.getCenter())
+                .title("Marker"));
+        map.setLatLngBoundsForCameraTarget(UNIMELB_BOUNDARY);
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
+        Log.d("debugging", "unimelb map rendered");
     }
 
     private void updateLocationUI(){
