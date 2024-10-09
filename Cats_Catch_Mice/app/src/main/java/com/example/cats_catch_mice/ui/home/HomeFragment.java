@@ -36,6 +36,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     private static final String LOG_TAG = "MapFragment";
     private static final int USER_LOCATION_ZOOM = 18;
     private static final int DEFAULT_ZOOM = 16;
+    private static final LatLngBounds UNIMELB_BOUNDARY= new LatLngBounds(
+            new LatLng(-37.802506, 144.956938),
+            new LatLng(-37.796215, 144.965135)
+    );
 
     private FragmentMapBinding binding;
     private GoogleMap map;
