@@ -1,11 +1,19 @@
 package com.example.cats_catch_mice.ui.home;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -19,17 +27,30 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
-public class HomeFragment extends Fragment implements OnMapReadyCallback {
+public class HomeFragment extends Fragment implements OnMapReadyCallback{
 
     private FragmentMapBinding binding;
+    private GoogleMap map;
+    private boolean locationPermissionGranted;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private ActivityResultLauncher<String> resultPermissionLauncher;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
+//        HomeViewModel homeViewModel =
+//                new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if(isGranted){
+                updateLocationUI();
+                Log.d("debugging", "granted");
+            }else{
+                Log.d("debugging", "not granted");
+            }
+        });
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null){
@@ -41,6 +62,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(GoogleMap map) {
+        this.map = map;
+
+        getLocationPermission();
+
         // setting the boundary of Unimelb
         LatLngBounds unimelbBound = new LatLngBounds(
                 new LatLng(-37.802506, 144.956938),
@@ -51,6 +76,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .title("Marker"));
         map.setLatLngBoundsForCameraTarget(unimelbBound);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelbBound.getCenter(), 16));
+        Log.d("debugging", "this map is ready.");
     }
 
     @Override
@@ -58,4 +84,20 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onDestroyView();
         binding = null;
     }
+
+    private void updateLocationUI(){
+        Log.d("debugging", "updating UI");
+    }
+
+    private void getLocationPermission() {
+        if (ContextCompat.checkSelfPermission(this.getContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            Log.d("debugging", "check self permission");
+        } else {
+            Log.d("debugging", "request permission");
+            resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+    }
+
 }
