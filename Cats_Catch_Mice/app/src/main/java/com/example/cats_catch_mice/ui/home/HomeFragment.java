@@ -35,6 +35,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private ActivityResultLauncher<String> resultPermissionLauncher;
 
+    // TODO: create attribute for last known setting
+    // camera view, map tile, user location, etc.
+
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 //        HomeViewModel homeViewModel =
