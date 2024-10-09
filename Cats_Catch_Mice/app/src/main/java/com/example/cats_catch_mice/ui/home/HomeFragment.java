@@ -4,6 +4,8 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -38,12 +40,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
             new LatLng(-37.802506, 144.956938),
             new LatLng(-37.796215, 144.965135)
     );
+    private static final long TRIGGER_INTERVAL=5000; //milliseconds
 
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
     private FusedLocationProviderClient fusedLocationClient;
+
+    private Handler triggerHandler = new Handler(Looper.getMainLooper());
+    private Runnable locationUpdateTrigger;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -73,7 +80,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
             mapFragment.getMapAsync(this);
         }
 
+        locationUpdateTrigger = new Runnable(){
+            public void run(){
+                getDeviceLocation();
+                triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
+            }
+        };
+        startUpdating();
+
         return root;
+    }
+
+    private void startUpdating(){
+        Log.d("debugging", "start triggering");
+        triggerHandler.postDelayed(locationUpdateTrigger, TRIGGER_INTERVAL);
+    }
+
+    private void stopUpdating(){
+        Log.d("debugging", "stop triggering");
+        triggerHandler.removeCallbacks(locationUpdateTrigger);
     }
 
     @Override
@@ -89,6 +114,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
+        stopUpdating();
     }
 
     private void showUnimelb(){
@@ -131,7 +157,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                     @Override
                     public void onSuccess(Location location) {
                         if(location!= null){
-                            Log.d("debugging", "last location got");
+//                            Log.d("debugging", "last location got");
                             map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                     new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
                             );
