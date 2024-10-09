@@ -2,6 +2,7 @@ package com.example.cats_catch_mice.ui.home;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,6 +20,8 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -26,6 +29,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback{
 
@@ -38,7 +42,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
     private boolean locationPermissionGranted;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     private ActivityResultLauncher<String> resultPermissionLauncher;
-
+    private FusedLocationProviderClient fusedLocationClient;
     // TODO: create attribute for last known setting
     // camera view, map tile, user location, etc.
 
@@ -60,6 +64,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                 locationPermissionGranted = false;
             }
         });
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
 
         SupportMapFragment mapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mapFragment != null){
@@ -88,6 +94,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         Log.d("debugging", "this map is ready.");
 
         updateLocationUI();
+        getDeviceLocation();
     }
 
     @Override
@@ -110,6 +117,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
             }
         }catch(SecurityException e){
             Log.e(LOG_TAG, "Exception occur when configuring map");
+        }
+    }
+
+    private void getDeviceLocation(){
+        try{
+            if(this.locationPermissionGranted){
+                fusedLocationClient.getLastLocation().addOnSuccessListener(this.getActivity(), new OnSuccessListener<Location>() {
+                    @Override
+                    public void onSuccess(Location location) {
+                        if(location!= null){
+                            Log.d("debugging", "last location got");
+                            map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                    new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
+                            );
+                        }
+                    }
+                });
+            }
+        }catch(SecurityException e){
+            Log.e(LOG_TAG, "Error occurred when getting device location");
         }
     }
 
