@@ -29,6 +29,10 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback{
 
+    private static final String LOG_TAG = "MapFragment";
+    private static final int USER_LOCATION_ZOOM = 18;
+    private static final int DEFAULT_ZOOM = 16;
+
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
@@ -80,7 +84,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                 .position(unimelbBound.getCenter())
                 .title("Marker"));
         map.setLatLngBoundsForCameraTarget(unimelbBound);
-        map.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelbBound.getCenter(), 16));
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelbBound.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "this map is ready.");
 
         updateLocationUI();
@@ -105,7 +109,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                 this.map.getUiSettings().setMyLocationButtonEnabled(false);
             }
         }catch(SecurityException e){
-            Log.e("Google map error", "Exception occur when configuring map");
+            Log.e(LOG_TAG, "Exception occur when configuring map");
         }
     }
 
