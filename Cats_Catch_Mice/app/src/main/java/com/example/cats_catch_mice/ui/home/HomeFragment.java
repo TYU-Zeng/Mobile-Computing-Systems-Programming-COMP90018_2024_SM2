@@ -46,10 +46,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if(isGranted){
                 Log.d("debugging", "granted");
-                enableLocation();
+                locationPermissionGranted = true;
                 updateLocationUI();
             }else{
                 Log.d("debugging", "not granted");
+                locationPermissionGranted = false;
             }
         });
 
@@ -78,6 +79,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         map.setLatLngBoundsForCameraTarget(unimelbBound);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(unimelbBound.getCenter(), 16));
         Log.d("debugging", "this map is ready.");
+
+        updateLocationUI();
     }
 
     @Override
@@ -88,6 +91,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
 
     private void updateLocationUI(){
         Log.d("debugging", "updating UI");
+        if(this.map == null)
+            return;
+        try{
+            if(this.locationPermissionGranted) {
+                this.map.setMyLocationEnabled(true);
+            }else{
+                this.map.setMyLocationEnabled(false);
+            }
+        }catch(SecurityException e){
+            Log.e("Google map error", "Exception occur when configuring map");
+        }
     }
 
     private void getLocationPermission() {
@@ -95,20 +109,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             Log.d("debugging", "check self permission");
-            enableLocation();
-            updateLocationUI();
+            locationPermissionGranted = true;
         } else {
             Log.d("debugging", "request permission");
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-    }
-
-    private void enableLocation(){
-        try{
-            this.map.setMyLocationEnabled(true);
-            Log.d("debugging", "my location enabled");
-        }catch(SecurityException e){
-            e.printStackTrace();
         }
     }
 }
