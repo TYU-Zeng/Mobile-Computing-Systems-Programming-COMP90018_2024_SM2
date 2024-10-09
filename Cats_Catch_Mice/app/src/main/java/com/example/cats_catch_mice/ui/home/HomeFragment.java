@@ -45,8 +45,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
 
         resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if(isGranted){
-                updateLocationUI();
                 Log.d("debugging", "granted");
+                enableLocation();
+                updateLocationUI();
             }else{
                 Log.d("debugging", "not granted");
             }
@@ -94,10 +95,20 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                 android.Manifest.permission.ACCESS_FINE_LOCATION)
                 == PackageManager.PERMISSION_GRANTED) {
             Log.d("debugging", "check self permission");
+            enableLocation();
+            updateLocationUI();
         } else {
             Log.d("debugging", "request permission");
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
 
+    private void enableLocation(){
+        try{
+            this.map.setMyLocationEnabled(true);
+            Log.d("debugging", "my location enabled");
+        }catch(SecurityException e){
+            e.printStackTrace();
+        }
+    }
 }
