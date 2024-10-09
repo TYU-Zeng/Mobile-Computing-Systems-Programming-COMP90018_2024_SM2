@@ -96,8 +96,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
         try{
             if(this.locationPermissionGranted) {
                 this.map.setMyLocationEnabled(true);
+                this.map.getUiSettings().setMyLocationButtonEnabled(true);
             }else{
                 this.map.setMyLocationEnabled(false);
+                this.map.getUiSettings().setMyLocationButtonEnabled(false);
             }
         }catch(SecurityException e){
             Log.e("Google map error", "Exception occur when configuring map");
