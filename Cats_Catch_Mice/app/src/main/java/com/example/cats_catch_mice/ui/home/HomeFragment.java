@@ -58,6 +58,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback{
                 Log.d("debugging", "granted");
                 locationPermissionGranted = true;
                 updateLocationUI();
+                getDeviceLocation();
             }else{
                 Log.d("debugging", "not granted");
                 locationPermissionGranted = false;
