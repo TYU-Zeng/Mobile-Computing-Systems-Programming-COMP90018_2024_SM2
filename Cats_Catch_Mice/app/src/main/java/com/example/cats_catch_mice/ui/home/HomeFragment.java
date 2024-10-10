@@ -2,6 +2,8 @@ package com.example.cats_catch_mice.ui.home;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.BitmapFactory;
+import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
@@ -26,6 +28,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -41,6 +45,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             new LatLng(-37.796215, 144.965135)
     );
     private static final long TRIGGER_INTERVAL = 5000; //milliseconds
+    private static final float MOUSE_ICON_SCALE = 0.1f;
 
     private FragmentMapBinding binding;
     private GoogleMap map;
@@ -126,10 +131,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         triggerHandler.removeCallbacks(locationUpdateTrigger);
     }
 
+    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
+        int height = Math.round(icon.getHeight()*scale);
+        int width= Math.round(icon.getWidth()*scale);
+        Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
+        return BitmapDescriptorFactory.fromBitmap(scaledIcon);
+    }
+
     private void showUnimelb() {
         map.addMarker(new MarkerOptions()
                 .position(UNIMELB_BOUNDARY.getCenter())
-                .title("Marker"));
+                .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
         map.setLatLngBoundsForCameraTarget(UNIMELB_BOUNDARY);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
