@@ -1,0 +1,49 @@
+{
+  "project_info": {
+    "project_number": "324000743796",
+    "firebase_url": "https://comp90018-tutorials-2024-4a5bb-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "comp90018-tutorials-2024-4a5bb",
+    "storage_bucket": "comp90018-tutorials-2024-4a5bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:324000743796:android:b4496586ffef37ed672c21",
+        "android_client_info": {
+          "package_name": "com.example.cats_catch_mice"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZhL3xM3N9a6hQttMmbQ9i79kK3xoIJgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:324000743796:android:14f2d94110219cd5672c21",
+        "android_client_info": {
+          "package_name": "com.example.connectivity_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBZhL3xM3N9a6hQttMmbQ9i79kK3xoIJgA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
