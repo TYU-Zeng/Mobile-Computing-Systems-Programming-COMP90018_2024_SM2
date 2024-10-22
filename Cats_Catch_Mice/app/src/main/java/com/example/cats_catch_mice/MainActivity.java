@@ -43,6 +43,8 @@ public class MainActivity extends AppCompatActivity {
     private RoomManager roomManager;
 
 
+
+
     // current room id for map sharing
     private String currentRoomId = null;
     private Bitmap qrCodeBitmap = null;
@@ -57,8 +59,14 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
+
+        //TODO: 创建所有的manager实例和database实例
         // initial Firebase
         FirebaseApp.initializeApp(this);
+        initialFirebase("example_reference");
+
+        roomManager = new RoomManager(roomData);
 
 
         // TODO: generate user id
@@ -83,10 +91,8 @@ public class MainActivity extends AppCompatActivity {
             writeToFirebase("example_reference", "Hello, Firebase!");
         });
 
-        // initial database manager
-        DatabaseManagerInterface databaseManager = new DatabaseManager();
-        // initial RoomManager
-        roomManager = new RoomManager(databaseManager);
+
+
 
     }
 
@@ -114,35 +120,51 @@ public class MainActivity extends AppCompatActivity {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
 
+            // TODO: double check 是否退出
+            // 如果退出直接roommanager.leaveRoom(currentRoomId, userId);
+            // 停止所有的thread
+            // 删除roomid
+            // 跳转到初始化面
+
         } else if (item.getItemId() == R.id.menu_createRoom) {
 
 
+            //TODO: 创建房间的逻辑
+            //检测房间id是否为空
+
+            //如果房间id不是空的
+            //检测二维码是不是空的
+            //二维码是空的 就用房间id生成二维码 并且跳转到展示二维码的activity
+            //二维码不是空的 就直接跳转到展示二维码的activity
+
+            //如果房间id是空的
+            //创建房间，跳转到展示二维码的activity
 
 
-            // 如果当前房间 ID 为空
-            if (currentRoomId == null) {
 
-                // TODO: function get the current location
-                // 获取当前设备的位置信息（假设是硬编码值）
-                double currentLat = 37.7749;
-                double currentLng = -122.4194;
-
-                // 创建房间并获取房间 ID
-                currentRoomId = roomManager.createRoom(currentLat, currentLng, userId);
-
-                // 写入房间数据到 Firebase
-                writeRoomToFirebase(currentRoomId, currentLat, currentLng);
-
-                // 生成二维码
-                // TODO: 还没有ui显示二维码
-                qrCodeBitmap = roomManager.createQRCode(currentRoomId);roomManager.createQRCode(currentRoomId);
-                Toast.makeText(MainActivity.this, "Room created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
-
-
-            } else {
-                // 如果已经创建了房间
-                Toast.makeText(MainActivity.this, "Room already created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
-            }
+//            // 如果当前房间 ID 为空
+//            if (currentRoomId == null) {
+//
+//
+//                // 获取当前设备的位置信息（假设是硬编码值）
+//                double currentLat = 37.7749;
+//                double currentLng = -122.4194;
+//
+//                // 创建房间并获取房间 ID
+//                currentRoomId = roomManager.createRoom(currentLat, currentLng, userId);
+//
+//                // 写入房间数据到 Firebase
+//                writeRoomToFirebase(currentRoomId, currentLat, currentLng);
+//
+//                // 生成二维码
+//                qrCodeBitmap = roomManager.createQRCode(currentRoomId);roomManager.createQRCode(currentRoomId);
+//                Toast.makeText(MainActivity.this, "Room created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
+//
+//
+//            } else {
+//                // 如果已经创建了房间
+//                Toast.makeText(MainActivity.this, "Room already created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
+//            }
         }
         return true;
     }
