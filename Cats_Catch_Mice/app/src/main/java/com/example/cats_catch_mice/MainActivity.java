@@ -13,6 +13,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.cats_catch_mice.ui.home.HomeFragment;
 import com.example.cats_catch_mice.ui.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     private RoomManager roomManager;
 
     private DatabaseManager databaseManager;
+    private HomeFragment homeFragment;
 
 
     // current room id for map sharing
@@ -64,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-
         //TODO: 创建所有的manager实例和database实例
         // initial Firebase
         FirebaseApp.initializeApp(this);
@@ -72,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
 
         roomManager = new RoomManager(roomData);
 
+        homeFragment = new HomeFragment();
+        getSupportFragmentManager().beginTransaction().add(R.id.nav_host_fragment_activity_main, homeFragment).commit();
 
         // TODO: generate user id
         // TODO: get the data from firebase
@@ -94,8 +97,6 @@ public class MainActivity extends AppCompatActivity {
         writeButton.setOnClickListener(v -> {
             writeToFirebase("example_reference", "Hello, Firebase!");
         });
-
-
     }
 
     /**
