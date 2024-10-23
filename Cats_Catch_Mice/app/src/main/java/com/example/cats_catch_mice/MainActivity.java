@@ -41,7 +41,6 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private HomeViewModel viewModel;
     private DatabaseReference databaseReference;
     private RoomManager roomManager;
 
@@ -57,9 +56,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
-        viewModel.initTest(2);
-        Log.d("debugging", String.format("main: %s", viewModel.getTest().getNum()));
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -96,13 +92,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d("debugging", "back to main");
-        Log.d("debugging", String.format("main: %s", viewModel.getTest().getNum()));
     }
 
     /**
