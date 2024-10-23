@@ -1,11 +1,13 @@
 package com.example.cats_catch_mice;
 
+import androidx.lifecycle.ViewModel;
+
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Map;
 
-public class DatabaseManager{
+public class DatabaseManager extends ViewModel {
 
     private final FirebaseDatabase database;
 

@@ -44,6 +44,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private RoomManager roomManager;
 
+    private DatabaseManager databaseManager;
+
 
     // current room id for map sharing
     private String currentRoomId = null;
@@ -56,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // init firebase on manager created
+        databaseManager = new ViewModelProvider(this).get(DatabaseManager.class);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
