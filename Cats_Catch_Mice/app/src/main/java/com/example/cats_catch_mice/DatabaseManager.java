@@ -7,10 +7,12 @@ import java.util.Map;
 
 public class DatabaseManager{
 
-    private final FirebaseDatabase database;
+    private FirebaseDatabase database;
 
     public DatabaseManager() {
         this.database = FirebaseDatabase.getInstance();
+
+
     }
 
 
