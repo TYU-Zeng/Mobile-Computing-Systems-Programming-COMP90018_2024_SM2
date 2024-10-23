@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -58,4 +60,10 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     implementation("com.google.android.gms:play-services-maps:19.0.0")
-}
+
+    implementation(platform("com.google.firebase:firebase-bom:33.4.0"))
+    implementation("com.google.firebase:firebase-database")
+
+    implementation("com.google.zxing:core:3.4.1")
+    implementation("com.journeyapps:zxing-android-embedded:4.1.0")
+

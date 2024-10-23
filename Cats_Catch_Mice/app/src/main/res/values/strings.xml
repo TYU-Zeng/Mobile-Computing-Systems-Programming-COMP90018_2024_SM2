@@ -4,5 +4,6 @@
     <string name="Item_List">Item List</string>
     <string name="quit">Quit</string>
     <string name="about">About</string>
+    <string name="create_Room">Create Room</string>
 
 </resources>
