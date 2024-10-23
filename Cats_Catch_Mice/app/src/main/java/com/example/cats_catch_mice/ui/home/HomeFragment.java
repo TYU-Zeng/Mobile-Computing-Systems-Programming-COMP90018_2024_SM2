@@ -85,7 +85,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
 
         // set up and start the trigger to get device location
-        setLocationUpdateTrigger();
         startUpdatingLocation();
 
         return root;
@@ -114,21 +113,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    public void setLocationUpdateTrigger() {
+    public void startUpdatingLocation() {
         locationUpdateTrigger = new Runnable() {
             public void run() {
                 if (updating){
+                    Log.d("debugging", "start triggering");
                     getDeviceLocation();
                     triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
                 }
             }
         };
         triggerHandler.post(locationUpdateTrigger);
-    }
-
-    private void startUpdatingLocation() {
-        Log.d("debugging", "start triggering");
-        triggerHandler.postDelayed(locationUpdateTrigger, TRIGGER_INTERVAL);
     }
 
     public void stopUpdatingLocation() {

@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         if(homeFragment!= null){
             homeFragment.setUpdating(true);
-            homeFragment.setLocationUpdateTrigger();
+            homeFragment.startUpdatingLocation();
             Log.d("debugging", "main resume");
         }
     }
