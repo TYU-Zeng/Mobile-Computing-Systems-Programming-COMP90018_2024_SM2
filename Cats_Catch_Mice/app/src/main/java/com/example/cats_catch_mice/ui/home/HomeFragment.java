@@ -58,21 +58,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private Handler triggerHandler = new Handler(Looper.getMainLooper());
     private Runnable locationUpdateTrigger;
 
-    private HomeViewModel viewModel;
-    private Test test;
-
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        this.test = viewModel.getTest();
-        Log.d("debugging", String.format("map: %s", test.getNum()));
-
 
         // callback for location permission request
         setResultPermissionLauncher();
@@ -205,11 +197,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                             new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
                                     );
-
-                                    int i = test.getNum();
-                                    test.setNum(++i);
-                                    Log.d("debugging", String.format("map: %s", test.getNum()));
-
                                 }
                             }
                         });
