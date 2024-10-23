@@ -46,14 +46,11 @@ public class MainActivity extends AppCompatActivity {
     private RoomManager roomManager;
 
 
-
-
     // current room id for map sharing
     private String currentRoomId = null;
     private Bitmap qrCodeBitmap = null;
     private String userId = null;
     private RoomData roomData = null;
-
 
 
     @Override
@@ -66,7 +63,6 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
 
 
         //TODO: 创建所有的manager实例和database实例
@@ -100,8 +96,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-
-
     }
 
     @Override
@@ -113,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Create top menu
+     *
      * @param menu
      * @return
      */
@@ -125,6 +120,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Menu item click event
+     *
      * @param item
      * @return
      */
@@ -156,7 +152,6 @@ public class MainActivity extends AppCompatActivity {
             //创建房间，跳转到展示二维码的activity
 
 
-
 //            // 如果当前房间 ID 为空
 //            if (currentRoomId == null) {
 //
@@ -186,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Click event for button
-     *
      */
     @Override
     public boolean onSupportNavigateUp() {
@@ -196,8 +190,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     // test Firebase
-    private void initialFirebase(String referenceName){
-        FirebaseDatabase firebaseDatabase =  FirebaseDatabase.getInstance();
+    private void initialFirebase(String referenceName) {
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference(referenceName);
 
         databaseReference.addValueEventListener(new ValueEventListener() {
@@ -229,6 +223,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     // test Firebase
     // 写入房间信息到 Firebase
     private void writeRoomToFirebase(String roomId, double lat, double lng) {
@@ -250,5 +245,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+}
 
 
