@@ -19,9 +19,11 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -73,9 +75,6 @@ public class MainActivity extends AppCompatActivity {
 
         roomManager = new RoomManager(roomData);
 
-        homeFragment = new HomeFragment();
-        getSupportFragmentManager().beginTransaction().add(R.id.nav_host_fragment_activity_main, homeFragment).commit();
-
         // TODO: generate user id
         // TODO: get the data from firebase
         // 先从数据库拿出数据 等待选择是创建房间或者加入房间 等待房间id被设置好
@@ -97,6 +96,14 @@ public class MainActivity extends AppCompatActivity {
         writeButton.setOnClickListener(v -> {
             writeToFirebase("example_reference", "Hello, Firebase!");
         });
+
+
+        // obtain home fragment for location update scheduling
+        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
+        Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
+        if (fragment instanceof HomeFragment){
+            homeFragment = (HomeFragment) fragment;
+        }
     }
 
     /**
