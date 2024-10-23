@@ -22,7 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.DatabaseManager;
 import com.example.cats_catch_mice.R;
-import com.example.cats_catch_mice.Test;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
