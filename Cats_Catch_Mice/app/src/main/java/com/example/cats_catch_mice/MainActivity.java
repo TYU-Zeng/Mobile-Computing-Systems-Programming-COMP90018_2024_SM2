@@ -2,6 +2,7 @@ package com.example.cats_catch_mice;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -11,10 +12,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.example.cats_catch_mice.ui.home.HomeViewModel;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
@@ -25,10 +28,15 @@ import com.example.cats_catch_mice.databinding.ActivityMainBinding;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
+    private HomeViewModel viewModel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        viewModel = new ViewModelProvider(this).get(HomeViewModel.class);
+        viewModel.initTest(2);
+        Log.d("debugging", String.format("main: %s", viewModel.getTest().getNum()));
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -49,6 +57,12 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupWithNavController(binding.navView, navController);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("debugging", "back to main");
+        Log.d("debugging", String.format("main: %s", viewModel.getTest().getNum()));
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

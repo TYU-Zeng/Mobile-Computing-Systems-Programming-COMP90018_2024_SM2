@@ -18,8 +18,10 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.R;
+import com.example.cats_catch_mice.Test;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -56,12 +58,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private Handler triggerHandler = new Handler(Looper.getMainLooper());
     private Runnable locationUpdateTrigger;
 
+    private HomeViewModel viewModel;
+    private Test test;
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
+        viewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
+
+        this.test = viewModel.getTest();
+        Log.d("debugging", String.format("map: %s", test.getNum()));
+
 
         // callback for location permission request
         setResultPermissionLauncher();
@@ -89,6 +100,18 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         getLocationPermission();
         updateLocationUI();
         getDeviceLocation();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopUpdatingLocation();
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        stopUpdatingLocation();
     }
 
     @Override
@@ -182,6 +205,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                             new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
                                     );
+
+                                    int i = test.getNum();
+                                    test.setNum(++i);
+                                    Log.d("debugging", String.format("map: %s", test.getNum()));
+
                                 }
                             }
                         });
