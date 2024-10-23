@@ -60,6 +60,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private Handler triggerHandler = new Handler(Looper.getMainLooper());
     private Runnable locationUpdateTrigger;
 
+    // flag for thread scheduling
+    private boolean updating = true;
+
     private DatabaseManager databaseManager;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -115,10 +118,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void setLocationUpdateTrigger() {
         locationUpdateTrigger = new Runnable() {
             public void run() {
-                getDeviceLocation();
-                triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
+                if (updating){
+                    getDeviceLocation();
+                    triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
+                }
             }
         };
+        triggerHandler.post(locationUpdateTrigger);
     }
 
     private void startUpdatingLocation() {
@@ -129,6 +135,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void stopUpdatingLocation() {
         Log.d("debugging", "stop triggering");
         triggerHandler.removeCallbacks(locationUpdateTrigger);
+    }
+
+    // setter
+    public void setUpdating(boolean updating){
+        this.updating = updating;
     }
 
     private BitmapDescriptor getScaledIcon(int resourceID, float scale){
