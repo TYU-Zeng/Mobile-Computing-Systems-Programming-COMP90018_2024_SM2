@@ -20,6 +20,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.example.cats_catch_mice.DatabaseManager;
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.Test;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
@@ -58,10 +59,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private Handler triggerHandler = new Handler(Looper.getMainLooper());
     private Runnable locationUpdateTrigger;
 
+    private DatabaseManager databaseManager;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
+        databaseManager = new ViewModelProvider(requireActivity()).get(DatabaseManager.class);
 
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
