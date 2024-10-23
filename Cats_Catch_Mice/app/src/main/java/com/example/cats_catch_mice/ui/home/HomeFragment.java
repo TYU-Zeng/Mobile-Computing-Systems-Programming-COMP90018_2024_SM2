@@ -56,6 +56,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private ActivityResultLauncher<String> resultPermissionLauncher;
     private FusedLocationProviderClient fusedLocationClient;
 
+    // looper for retrieving player's location
     private Handler triggerHandler = new Handler(Looper.getMainLooper());
     private Runnable locationUpdateTrigger;
 
