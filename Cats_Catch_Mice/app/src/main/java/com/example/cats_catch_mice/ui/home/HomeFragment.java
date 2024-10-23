@@ -98,25 +98,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         getDeviceLocation();
     }
 
-    @Override
-    public void onPause() {
-        super.onPause();
-        stopUpdatingLocation();
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        stopUpdatingLocation();
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        binding = null;
-        stopUpdatingLocation();
-    }
-
     private void setResultPermissionLauncher() {
         resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
