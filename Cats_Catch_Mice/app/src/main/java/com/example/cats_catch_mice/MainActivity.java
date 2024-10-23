@@ -104,6 +104,28 @@ public class MainActivity extends AppCompatActivity {
         if (fragment instanceof HomeFragment){
             homeFragment = (HomeFragment) fragment;
         }
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if(homeFragment!= null){
+            homeFragment.setUpdating(true);
+            homeFragment.setLocationUpdateTrigger();
+            Log.d("debugging", "main resume");
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (homeFragment!= null){
+            homeFragment.setUpdating(false);
+            homeFragment.stopUpdatingLocation();
+            Log.d("debugging", "main stop");
+
+        }
     }
 
     /**
