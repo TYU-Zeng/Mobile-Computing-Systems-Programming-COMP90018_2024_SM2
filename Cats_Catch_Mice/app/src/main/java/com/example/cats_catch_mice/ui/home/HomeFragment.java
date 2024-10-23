@@ -112,7 +112,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-    private void setLocationUpdateTrigger() {
+    public void setLocationUpdateTrigger() {
         locationUpdateTrigger = new Runnable() {
             public void run() {
                 getDeviceLocation();
@@ -126,7 +126,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         triggerHandler.postDelayed(locationUpdateTrigger, TRIGGER_INTERVAL);
     }
 
-    private void stopUpdatingLocation() {
+    public void stopUpdatingLocation() {
         Log.d("debugging", "stop triggering");
         triggerHandler.removeCallbacks(locationUpdateTrigger);
     }
