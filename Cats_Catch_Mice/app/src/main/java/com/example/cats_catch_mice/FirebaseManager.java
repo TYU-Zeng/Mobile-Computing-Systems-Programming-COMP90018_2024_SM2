@@ -221,7 +221,32 @@ public class FirebaseManager extends ViewModel {
     }
 
 
+    public CompletableFuture<Map<String, Object>> getRoomDataAsync(String roomId) {
+        CompletableFuture<Map<String, Object>> future = new CompletableFuture<>();
 
+        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("rooms")
+                .child(roomId)
+                .child("members");
+
+        membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Map<String, Object> allMembersData = (Map<String, Object>) snapshot.getValue();
+                    future.complete(allMembersData);
+                } else {
+                    future.complete(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new RuntimeException("Error when reading members data"));
+            }
+        });
+
+        return future;
+    }
 
     /*
     debugging purpose only: check thread pool status
