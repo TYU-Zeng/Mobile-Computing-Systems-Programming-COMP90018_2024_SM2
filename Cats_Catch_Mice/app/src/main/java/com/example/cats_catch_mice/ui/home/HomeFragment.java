@@ -173,6 +173,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     );
                     Log.d("debugging", "Lat: " + location.getLatitude() +
                             ", Long: " + location.getLongitude());
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+
+                    // TODO: change to actual player id and room id
+                    String playerId = "UUID12345";
+                    String roomId = "roomId12345";
+                    firebaseManager.updateLocation(playerId, lat, lng, roomId);
                 }
             }
         };
