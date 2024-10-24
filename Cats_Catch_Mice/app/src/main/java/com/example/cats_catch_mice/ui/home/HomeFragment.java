@@ -180,11 +180,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             if (this.locationPermissionGranted) {
                 Log.d("debugging", "getting device location");
                 fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(
-                        this.getActivity(), new OnSuccessListener<Location>() {
+                        requireActivity(), new OnSuccessListener<Location>() {
                             @Override
                             public void onSuccess(Location location) {
                                 if (location != null) {
-//                            Log.d("debugging", "last location got");
+                                 Log.d("debugging", "last location got");
                                     map.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                             new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
                                     );
