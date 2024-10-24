@@ -27,11 +27,14 @@ android {
         }
     }
 
+    // 添加 packagingOptions 以排除冲突文件
     packagingOptions {
         resources {
-            excludes += setOf("META-INF/LICENSE.md", "META-INF/LICENSE-notice.md")
+            excludes += "META-INF/LICENSE.md"
+            excludes += "META-INF/LICENSE-notice.md"
         }
     }
+
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -39,6 +42,7 @@ android {
     }
     buildFeatures {
         viewBinding = true
+        buildConfig = true
     }
 }
 
@@ -49,16 +53,19 @@ android {
 //}
 
 dependencies {
-    // AndroidX 基础库依赖，与 API 31 兼容的版本
+    // AndroidX 基础库依赖，选择与 API 30 兼容的版本
     implementation("androidx.appcompat:appcompat:1.3.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.navigation:navigation-fragment:2.3.5")
     implementation("androidx.navigation:navigation-ui:2.3.5")
 
-    // Material Components 依赖
+    // Material Components 依赖，修复主题问题
     implementation("com.google.android.material:material:1.3.0")
+
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+
 
     // 注释掉 CameraX 依赖
     /*
@@ -88,4 +95,9 @@ dependencies {
     implementation("com.google.zxing:core:3.4.1")
     implementation("com.journeyapps:zxing-android-embedded:4.1.0")
     */
+
+    // 二维码依赖
+    implementation("com.google.zxing:core:3.4.1")
+    implementation("com.journeyapps:zxing-android-embedded:4.1.0")
+    androidTestImplementation(libs.junit.jupiter)
 }

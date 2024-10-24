@@ -139,10 +139,12 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (item.getItemId() == R.id.menu_createRoom) {
 
-        } else if (item.getItemId() == R.id.menu_joinRoom) {
-            openQrScannerFragment();
-
         }
+
+//        else if (item.getItemId() == R.id.menu_joinRoom) {
+//
+//
+//        }
         return true;
     }
 
@@ -164,24 +166,6 @@ public class MainActivity extends AppCompatActivity {
             super.onBackPressed();
         }
     }
-
-    private void openQrScannerFragment() {
-        Fragment qrScannerFragment = new QrScannerFragment();
-        FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.fragment_container, qrScannerFragment);
-        transaction.addToBackStack(null);  // Add to back stack so user can navigate back
-        transaction.commit();
-    }
-
-    public void onQrCodeScanned(String qrCodeValue) {
-        // Handle the QR code value here
-        Toast.makeText(this, "QR Code in MainActivity: " + qrCodeValue, Toast.LENGTH_LONG).show();
-
-        // Perform your action with the QR code value
-        // For example, join a room using the scanned room ID
-        // roomManager.joinRoom(qrCodeValue, userId);
-    }
-
 
     @Override
     protected void onResume() {
@@ -223,8 +207,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
     private void showNfcSettingsDialog() {
         new AlertDialog.Builder(this)
                 .setTitle("NFC is disabled")
@@ -239,7 +221,5 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .show();
     }
-
-
 
 }

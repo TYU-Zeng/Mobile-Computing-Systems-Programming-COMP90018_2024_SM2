@@ -4,7 +4,6 @@
     <!-- NFC 权限声明 -->
     <uses-permission android:name="android.permission.NFC" /> <!-- 如果希望你的应用可以读取NFC标签，建议添加以下读取权限 -->
     <uses-permission android:name="android.permission.NFC_TRANSACTION_EVENT" /> <!-- 如果应用支持在设备没有 NFC 硬件的情况下运行，则添加这个 feature 声明 -->
-    <uses-permission android:name="android.permission.CAMERA" />
 
 
     <uses-feature
@@ -44,7 +43,4 @@
             </intent-filter>
         </activity>
     </application>
-
-
-
 </manifest>
