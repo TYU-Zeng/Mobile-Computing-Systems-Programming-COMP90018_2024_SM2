@@ -3,6 +3,7 @@ package com.example.cats_catch_mice;
 import static android.content.ContentValues.TAG;
 
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -13,6 +14,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -115,21 +117,34 @@ public class FirebaseManager extends ViewModel {
             }
         });
     }
-        try{
-            Map<String, Object> oldData = future.get();
-            oldData.replace("lat", lat);
-            oldData.replace("lng", lng);
 
-            memberRef.setValue(oldData).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    System.out.println("Data written successfully to Firebase.");
-                } else {
-                    System.err.println("Failed to write data to Firebase.");
+    public CompletableFuture<ArrayList<Pair<Double, Double>>> getLocations(String roomId){
+        CompletableFuture<ArrayList<Pair<Double, Double>>> locationsFuture = new CompletableFuture<>();
+
+        executor.execute(()-> {
+            CompletableFuture<Map<String, Object>> future = getRoomDataAsync(roomId);
+            try{
+                Map<String, Object> membersData = future.get();
+                Log.d("debugging", membersData.toString());
+
+                ArrayList<Pair<Double, Double>> locations = new ArrayList<>();
+
+                for(Map.Entry<String, Object> member: membersData.entrySet()){
+                    Map<String, Object> memberData = (Map<String, Object>) member.getValue();
+
+                    Double lat = (Double) memberData.get("lat");
+                    Double lng = (Double) memberData.get("lng");
+
+                    Pair<Double, Double> location = new Pair<>(lat, lng);
+                    locations.add(location);
                 }
-            });
-        }catch (ExecutionException | InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+                locationsFuture.complete(locations);
+            }catch (ExecutionException | InterruptedException e) {
+                locationsFuture.completeExceptionally(e);
+            }
+        });
+
+        return locationsFuture;
     }
 
     public void updateItemNum(String playerId, int number, String itemId, String roomId){
