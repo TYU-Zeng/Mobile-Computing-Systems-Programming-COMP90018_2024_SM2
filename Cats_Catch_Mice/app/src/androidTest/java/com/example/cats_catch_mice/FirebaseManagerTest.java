@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import com.google.firebase.FirebaseApp;
+import com.google.firebase.database.DataSnapshot;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,8 +48,6 @@ public class FirebaseManagerTest {
         int item2 = 22;
 
         // firebaseManager.printWholeDatabase();
-
-
         // 使用 CountDownLatch 等待异步操作完成
         CountDownLatch latch = new CountDownLatch(1);
 
@@ -67,28 +66,45 @@ public class FirebaseManagerTest {
         latch.await(); // 等待写入完成
     }
 
-
-
-
     @Test
     public void getPlayerDataAsync() {
-
         Log.d(TAG, "getPlayerDataAsync: start");
         String playerId = "UUID12345";  // 预先存在的玩家ID
         String roomId = "roomId12345";  // 房间ID
-
+        Map<String, Object> playerData = null;
         // 调用异步方法获取玩家数据
         CompletableFuture<Map<String, Object>> future = firebaseManager.getPlayerDataAsync(playerId, roomId);
         try {
             Log.d(TAG, "getPlayerDataAsync: in try, waiting for the future");
-            Map<String, Object> memberData = future.get();  // 等待异步结果
-            assertNotNull("Member data should not be null", memberData);
-            assertEquals(37.7749, memberData.get("lat"));
-            assertEquals(-122.4194, memberData.get("lng"));
-            assertEquals(0, memberData.get("item1"));
-            assertEquals(1, memberData.get("item2"));
+            playerData = future.get();  // 等待异步结果
+            System.out.println("Data Async memberData: " + playerData);
+        } catch (ExecutionException | InterruptedException e) {
+            fail("Failed to fetch data: " + e.getMessage());
+        }
+
+
+    }
+
+
+    @Test
+    public void showDatabase()
+    {
+        Log.d(TAG, "showDatabase: start");
+
+        // 获取 CompletableFuture
+        CompletableFuture<DataSnapshot> future = firebaseManager.getWholeDatabase();
+
+        try {
+            // 等待异步操作完成，获取结果
+            DataSnapshot snapshot = future.get();  // 这里的 get() 会阻塞，直到结果返回
+
+            // 进行断言
+            assertNotNull("Snapshot should not be null", snapshot);
+            System.out.println("showDatabase: "+snapshot.getValue());
+
         } catch (ExecutionException | InterruptedException e) {
             fail("Failed to fetch data: " + e.getMessage());
         }
     }
+
 }

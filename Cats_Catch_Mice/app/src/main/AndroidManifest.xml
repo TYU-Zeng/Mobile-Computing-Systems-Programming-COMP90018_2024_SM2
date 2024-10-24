@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
+    <!-- NFC 权限声明 -->
+    <uses-permission android:name="android.permission.NFC" /> <!-- 如果希望你的应用可以读取NFC标签，建议添加以下读取权限 -->
+    <uses-permission android:name="android.permission.NFC_TRANSACTION_EVENT" /> <!-- 如果应用支持在设备没有 NFC 硬件的情况下运行，则添加这个 feature 声明 -->
+    <uses-permission android:name="android.permission.CAMERA" />
+
+
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -12,9 +24,6 @@
         android:theme="@style/Theme.Cats_Catch_Mice"
         tools:targetApi="31">
 
-        <!-- 注释掉 dataExtractionRules，因为 compileSdkVersion < 31 -->
-        <!-- android:dataExtractionRules="@xml/data_extraction_rules" -->
-
         <activity
             android:name=".ItemDetailFragment"
             android:exported="false" />
@@ -25,11 +34,17 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+            <intent-filter>
+                <action android:name="android.nfc.action.TAG_DISCOVERED" />
 
-        <!-- 确保为其他 Activity 添加 android:exported 属性 -->
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
     </application>
+
+
 
 </manifest>

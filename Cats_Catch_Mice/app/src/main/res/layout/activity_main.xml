@@ -21,7 +21,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <fragment
+    <FrameLayout
+        android:id="@+id/fragment_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+
+
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment_activity_main"
         android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
@@ -33,26 +40,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/mobile_navigation" />
 
-    <Button
-        android:id="@+id/writeButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Write"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.455"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.293" />
 
-    <TextView
-        android:id="@+id/messageDisplay"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Firebase message will appear here"
-        tools:ignore="MissingConstraints"
-        tools:layout_editor_absoluteX="82dp"
-        tools:layout_editor_absoluteY="150dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

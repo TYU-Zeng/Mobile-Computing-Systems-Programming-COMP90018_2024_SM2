@@ -52,23 +52,28 @@ public class FirebaseManager {
         this.database = FirebaseDatabase.getInstance();
     }
 
-    public void printWholeDatabase() {
 
+    // for test
+    public CompletableFuture<DataSnapshot> getWholeDatabase() {
         Log.d(TAG, "printWholeDatabase function first log");
         DatabaseReference reference = database.getReference();
+        CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
+
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Log.d(TAG, "in printWholeDatabase onDataChange");
-                System.out.println(snapshot.getValue());
+                future.complete(snapshot);  // 将数据传给 future
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.d(TAG, "in printWholeDatabase onCancelled");
-                System.err.println("Failed to read data from Firebase.");
+                future.completeExceptionally(new RuntimeException("Failed to read data from Firebase: " + error.getMessage()));
             }
         });
+
+        return future;  // 返回 CompletableFuture
     }
 
     public void addPlayerData(String playerId, double lat, double lng, int item1, int item2, String roomId) {
@@ -139,16 +144,6 @@ public class FirebaseManager {
 
         return future;
     }
-
-
-
-
-
-
-
-
-
-
 
 
 }
