@@ -7,7 +7,8 @@ plugins {
 
 android {
     namespace = "com.example.cats_catch_mice"
-    compileSdk = 30 // 保持 compileSdk 为 API 30
+    compileSdk = 31
+    // 保持 compileSdk 为 API 30
 
     defaultConfig {
         applicationId = "com.example.cats_catch_mice"
