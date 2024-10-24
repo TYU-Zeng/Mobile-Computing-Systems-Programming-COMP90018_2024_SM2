@@ -223,6 +223,17 @@ public class FirebaseManager extends ViewModel {
 
 
 
+    /*
+    debugging purpose only: check thread pool status
+     */
+    public void printThreadInfo(){
+        String info = String.format("Active threads: %s -- Current pool size: %s -- Task count: %s -- ",
+                executor.getActiveCount(),
+                executor.getPoolSize(),
+                executor.getTaskCount()
+        );
+        Log.d("debugging", info);
+    }
 
 
 
