@@ -58,7 +58,7 @@ public class FirebaseManager extends ViewModel {
 
 
     public FirebaseManager() {
-        this.database = FirebaseDatabase.getInstance();
+        database = FirebaseDatabase.getInstance();
         executor = new ThreadPoolExecutor(
                 CORE_THREADS,
                 MAX_THREADS,
