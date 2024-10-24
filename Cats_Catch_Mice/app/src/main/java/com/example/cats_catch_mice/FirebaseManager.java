@@ -51,6 +51,7 @@ public class FirebaseManager extends ViewModel {
       */
 
     private FirebaseDatabase database;
+    private final ThreadPoolExecutor executor;
     private static final int CORE_THREADS = 5;
     private static final int MAX_THREADS = 10;
     private static final int THREAD_LIFE = 30;
@@ -58,6 +59,19 @@ public class FirebaseManager extends ViewModel {
 
     public FirebaseManager() {
         this.database = FirebaseDatabase.getInstance();
+        executor = new ThreadPoolExecutor(
+                CORE_THREADS,
+                MAX_THREADS,
+                THREAD_LIFE,
+                TimeUnit.SECONDS,
+                new SynchronousQueue<>()
+        );
+    }
+
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        executor.shutdown();
     }
 
     public void printWholeDatabase() {
