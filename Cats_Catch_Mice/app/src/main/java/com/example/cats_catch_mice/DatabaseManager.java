@@ -9,10 +9,12 @@ import java.util.Map;
 
 public class DatabaseManager extends ViewModel {
 
-    private final FirebaseDatabase database;
+    private FirebaseDatabase database;
 
     public DatabaseManager() {
         this.database = FirebaseDatabase.getInstance();
+
+
     }
 
 

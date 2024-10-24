@@ -17,42 +17,87 @@ public class RoomManager {
 
     private RoomData roomData;
 
-    public RoomManager(RoomData roomData) {
+    private Bitmap qrCodeBitmap = null;
 
-        this.roomData = roomData;
+    public RoomManager() {
+
+    }
+
+     /*
+    sync data to firebase
+    这里只需要写入数据的子节点 rooms的数据进入database
+    数据格式如下：
+
+    "rooms": {
+    "roomId12345": {
+      "owner": "UUID12345",
+      "members": {
+        "UUID12345": {
+          "lat": 37.7749,
+          "lng": -122.4194,
+          "item1": 0,
+          "item2": 1
+        },
+        "UUID67890": {
+          "lat": 37.7750,
+          "lng": -122.4200,
+          "item1": 2,
+          "item2": 3
+        }
+      }
     }
 
 
+      */
+    // 创建房间 返回当前房间的id给主机
+    // 需要主机的位置信息
 
-    // 创建房间
-    public String createRoom(double lat, double lng, String ownerId) {
+
+
+    public String createRoom(String ownerId) {
         // 生成房间 ID
+        this.roomData = new RoomData(ownerId);
         String roomId = UUID.randomUUID().toString();
 
-
-    // 创建一个新的 RoomData 对象，并设置房主 ID
-        RoomData roomData = new RoomData(ownerId);
-
         // 添加房主为房间成员，并设置其位置信息
-        Map<String, Object> ownerData = new HashMap<>();
-        ownerData.put("lat", lat);
-        ownerData.put("lng", lng);
+
+        // TODO: get current location
+        // ownerData.put("lat", lat);
+        // ownerData.put("lng", lng);
+
+        Map<String, Object> ownerData = createMember(ownerId, 0, 0);
         roomData.addMember(ownerId, ownerData);
+        // 写入数据到房间
 
-        // 将房间数据写入 Firebase
+        // 生成二维码
+        Bitmap qrCode = createQRCode(roomId);
 
-        // 需要返回data
-        // TODO: 返回roomdata
         return roomId;
     }
 
-
-    // TODO: 退出房间的 function
-    public void leaveRoom(String roomId, String userId) {
-        roomData.removeMember(userId);
+    public void joinRoom(RoomData file, String playerId) {
+        // 添加用户为房间成员，并设置其位置信息
+        this.roomData = file;
+        Map<String, Object> memberData = createMember(playerId, 0, 0);
+        roomData.addMember(playerId, memberData);
     }
 
+    private Map<String, Object> createMember(String userId, double lat, double lng) {
+        Map<String, Object> memberData = new HashMap<>();
+        memberData.put("lat", lat);
+        memberData.put("lng", lng);
+        memberData.put("item1", 0);
+        memberData.put("item2", 0);
+        return memberData;
+    }
 
+    public void leaveRoom(String userId) {
+        roomData.removeMember(userId);
+
+        // TODO: 当前主机需要关掉线程 然后删除主机的房间id信息，重置roomdata信息
+
+        // TODO: 如果主机要退出房间
+    }
 
     // create a QR code for the room
     // TODO: 还没有展示二维码的功能 UI
@@ -79,5 +124,7 @@ public class RoomManager {
         return null;
     }
 
-
+    public Bitmap getQrCodeBitmap() {
+        return qrCodeBitmap;
+    }
 }
