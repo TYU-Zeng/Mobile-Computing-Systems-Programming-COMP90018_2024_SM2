@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
         FirebaseApp.initializeApp(this);
         initialFirebase("example_reference");
 
-        roomManager = new RoomManager(roomData);
+        roomManager = new RoomManager();
 
         // TODO: generate user id
         // TODO: get the data from firebase
@@ -84,11 +84,12 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-
+        FirebaseManager firebaseManager = new FirebaseManager();
         // test Firebase -----------------------------------
         Button writeButton = findViewById(R.id.writeButton);
         writeButton.setOnClickListener(v -> {
-            writeToFirebase("example_reference", "Hello, Firebase!");
+            firebaseManager.addPlayerData("UUID111", 37.7750, -122.4200, 0, 2, "roomId123");
+
         });
 
 

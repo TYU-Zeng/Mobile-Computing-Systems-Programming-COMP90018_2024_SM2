@@ -5,13 +5,43 @@ import java.util.Map;
 
 public class RoomData {
 
+     /*
+    sync data to firebase
+    这里只需要写入数据的子节点 rooms的数据进入database
+    数据格式如下：
+
+    "rooms": {
+    "roomId12345": {
+      "owner": "UUID12345",
+      "members": {
+        "UUID12345": {
+          "lat": 37.7749,
+          "lng": -122.4194,
+          "item1": 0,
+          "item2": 1
+        },
+        "UUID67890": {
+          "lat": 37.7750,
+          "lng": -122.4200,
+          "item1": 2,
+          "item2": 3
+        }
+      }
+    }
+    */
+
+
     private String ownerId;
     private Map<String, Object> members;
 
     public RoomData(String ownerId) {
         this.ownerId = ownerId;
+
+        // Members should record all the members in the room include the owner
         this.members = new HashMap<>();
     }
+
+
 
     public String getOwnerId() {
         return ownerId;

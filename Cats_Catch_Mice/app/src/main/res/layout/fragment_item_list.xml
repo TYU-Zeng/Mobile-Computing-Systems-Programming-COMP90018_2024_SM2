@@ -27,11 +27,9 @@
         android:layout_height="101dp"
         android:src="@drawable/itemicon_item1_demo"
         android:text="sample_item1"
-        tools:layout_editor_absoluteX="67dp"
-        tools:layout_editor_absoluteY="170dp"
-        tools:ignore="MissingConstraints" />
-
-
+        tools:ignore="MissingConstraints"
+        tools:layout_editor_absoluteX="54dp"
+        tools:layout_editor_absoluteY="74dp" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
