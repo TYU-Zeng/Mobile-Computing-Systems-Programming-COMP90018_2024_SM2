@@ -93,17 +93,17 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        // obtain home fragment for location update scheduling
+
+    }
+
+    @Override
+    protected void onResume() {        // obtain home fragment for location update scheduling
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
         Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
         if (fragment instanceof HomeFragment){
             homeFragment = (HomeFragment) fragment;
         }
 
-    }
-
-    @Override
-    protected void onResume() {
         super.onResume();
         if(homeFragment!= null){
             homeFragment.setUpdating(true);

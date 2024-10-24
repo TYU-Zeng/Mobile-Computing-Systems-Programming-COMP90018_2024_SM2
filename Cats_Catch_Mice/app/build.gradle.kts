@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.example.cats_catch_mice"
-    compileSdk = 30 // 保持 compileSdk 为 API 30
+    compileSdk = 34 // 保持 compileSdk 为 API 30
 
     defaultConfig {
         applicationId = "com.example.cats_catch_mice"
         minSdk = 28
-        targetSdk = 30  // 保持 targetSdk 为 API 30
+        targetSdk = 34  // 保持 targetSdk 为 API 30
         versionCode = 1
         versionName = "1.0"
 
@@ -61,6 +61,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.navigation:navigation-fragment:2.3.5")
     implementation("androidx.navigation:navigation-ui:2.3.5")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -71,6 +72,7 @@ dependencies {
     implementation(libs.navigation.ui)
     implementation(libs.activity)
     implementation(libs.play.services.location)
+    implementation(libs.recyclerview)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
