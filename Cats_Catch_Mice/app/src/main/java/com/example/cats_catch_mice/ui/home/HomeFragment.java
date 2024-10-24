@@ -6,8 +6,10 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,6 +61,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private LocationCallback locationCallback;
 
     private FirebaseManager firebaseManager;
+    private Handler handler;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -83,6 +86,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         // set up and start the trigger to get device location
         setLocationUpdateCallback();
         startUpdatingLocation();
+
+        handler = new Handler(Looper.getMainLooper());
 
         return root;
     }
