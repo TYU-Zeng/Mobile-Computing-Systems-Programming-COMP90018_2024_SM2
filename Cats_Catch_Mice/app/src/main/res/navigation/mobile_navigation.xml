@@ -13,16 +13,32 @@
 
     <fragment
         android:id="@+id/navigation_dashboard"
-        android:name="com.example.cats_catch_mice.ui.itemList.ItemFragment"
+        android:name="com.example.cats_catch_mice.ui.itemList.ItemListFragment"
         android:label="@string/Item_List"
-        tools:layout="@layout/fragment_item_list" />
+        tools:layout="@layout/fragment_item_list" >
+        <action
+            android:id="@+id/action_itemListFragment_to_itemDetailFragment"
+            app:destination="@id/itemDetailFragment" />
+    </fragment>
+
+<!--    <fragment-->
+<!--        android:id="@+id/itemDetailFragment"-->
+<!--        android:name="com.example.cats_catch_mice.ui.itemList.ItemDetailFragment"-->
+<!--        android:label="Item Detail"-->
+<!--        tools:layout="@layout/fragment_item_detail" />-->
+
+    <fragment
+        android:id="@+id/itemListFragment"
+        android:name="com.example.cats_catch_mice.ui.itemList.ItemListFragment"
+        tools:layout="@layout/fragment_item_list">
+        <action
+            android:id="@+id/action_itemListFragment_to_itemDetailFragment"
+            app:destination="@id/itemDetailFragment" />
+    </fragment>
 
     <fragment
         android:id="@+id/itemDetailFragment"
-        android:name="com.example.cats_catch_mice.ItemDetailFragment"
-        android:label="Item Detail"
+        android:name="com.example.cats_catch_mice.ui.itemList.ItemDetailFragment"
         tools:layout="@layout/fragment_item_detail" />
-
-
 
 </navigation>
