@@ -95,8 +95,26 @@ public class FirebaseManager extends ViewModel {
 
 
     public void updateLocation(String playerId, double lat, double lng, String roomId){
-        DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
-        CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+        executor.execute(() -> {
+            DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
+            CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+            try{
+                Map<String, Object> oldData = future.get();
+                oldData.replace("lat", lat);
+                oldData.replace("lng", lng);
+
+                memberRef.setValue(oldData).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("debugging", "Data written successfully to Firebase.");
+                    } else {
+                        Log.e("debugging", "Failed to write data to Firebase.");
+                    }
+                });
+            }catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
         try{
             Map<String, Object> oldData = future.get();
             oldData.replace("lat", lat);
