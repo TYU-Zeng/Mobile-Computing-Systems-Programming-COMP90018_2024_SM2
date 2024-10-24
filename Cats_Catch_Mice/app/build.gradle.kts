@@ -90,11 +90,9 @@ dependencies {
     implementation(platform("com.google.firebase:firebase-bom:28.0.1"))
     implementation("com.google.firebase:firebase-database")
 
-    // 注释掉 ZXing 二维码扫描库
-    /*
-    implementation("com.google.zxing:core:3.4.1")
+    // ZXing Android Embedded 库
     implementation("com.journeyapps:zxing-android-embedded:4.1.0")
-    */
+    implementation("com.google.zxing:core:3.4.1")
 
     // 二维码依赖
     implementation("com.google.zxing:core:3.4.1")

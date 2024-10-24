@@ -1,5 +1,7 @@
 package com.example.cats_catch_mice;
 
+import static android.content.ContentValues.TAG;
+
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Intent;
@@ -92,6 +94,8 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
+
+
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // set navigation detail
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
@@ -127,7 +131,20 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.menu_quit) {
+        if (item.getItemId() == R.id.menu_createRoom) {
+
+        } else if (item.getItemId() == R.id.menu_scanner) {
+            // 点击后跳转到 QRScannerFragment
+            Log.d(TAG, "onOptionsItemSelected: join room button clicked");
+            // TODO: QRScannerFragment 创建实例
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.action_global_navigation_scanner);
+            // toast
+            Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
+
+
+
+        }else if (item.getItemId() == R.id.menu_quit) {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
 
@@ -137,14 +154,7 @@ public class MainActivity extends AppCompatActivity {
             // 删除roomid
             // 跳转到初始化面
 
-        } else if (item.getItemId() == R.id.menu_createRoom) {
-
         }
-
-//        else if (item.getItemId() == R.id.menu_joinRoom) {
-//
-//
-//        }
         return true;
     }
 
