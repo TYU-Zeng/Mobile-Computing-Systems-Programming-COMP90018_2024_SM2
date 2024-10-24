@@ -25,6 +25,9 @@ import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -62,6 +65,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     // flag for thread scheduling
     private boolean updating = true;
+    private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
     private FirebaseManager firebaseManager;
 
@@ -86,6 +91,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
 
         // set up and start the trigger to get device location
+        setLocationUpdateCallback();
         startUpdatingLocation();
 
         return root;
@@ -98,6 +104,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         getLocationPermission();
         updateLocationUI();
         getDeviceLocation();
+        startUpdatingLocation();
     }
 
     private void setResultPermissionLauncher() {
@@ -107,6 +114,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 locationPermissionGranted = true;
                 updateLocationUI();
                 getDeviceLocation();
+                startUpdatingLocation();
             } else {
                 Log.d("debugging", "not granted");
                 locationPermissionGranted = false;
@@ -191,10 +199,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                 }
                             }
                         });
+    private void setLocationUpdateCallback(){
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    Log.d(LOG_TAG, "Error: location is null");
+                    return;
+                }
+                Location location = locationResult.getLastLocation();
+                if (location != null) {
+                    Log.d("debugging", "last location got");
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
+                    );
+                    Log.d("debugging", "Lat: " + location.getLatitude() +
+                            ", Long: " + location.getLongitude());
+                }
             }
-        } catch (SecurityException e) {
-            Log.e(LOG_TAG, "Error occurred when getting device location");
-        }
+        };
     }
 
     private void getLocationPermission() {
