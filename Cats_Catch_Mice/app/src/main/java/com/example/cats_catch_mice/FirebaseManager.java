@@ -51,6 +51,9 @@ public class FirebaseManager extends ViewModel {
       */
 
     private FirebaseDatabase database;
+    private static final int CORE_THREADS = 5;
+    private static final int MAX_THREADS = 10;
+    private static final int THREAD_LIFE = 30;
 
 
     public FirebaseManager() {
