@@ -38,10 +38,8 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private DatabaseReference databaseReference;
     private RoomManager roomManager;
 
-    private DatabaseManager databaseManager;
     private FirebaseManager firebaseManager;
     private HomeFragment homeFragment;
 
@@ -58,16 +56,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // init firebase on manager created
-        databaseManager = new ViewModelProvider(this).get(DatabaseManager.class);
         firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        //TODO: 创建所有的manager实例和database实例
-        // initial Firebase
-        FirebaseApp.initializeApp(this);
-        initialFirebase("example_reference");
 
         roomManager = new RoomManager();
 
@@ -85,15 +77,6 @@ public class MainActivity extends AppCompatActivity {
         // set ActionBar and NavController
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-
-        FirebaseManager firebaseManager = new FirebaseManager();
-        // test Firebase -----------------------------------
-        Button writeButton = findViewById(R.id.writeButton);
-        writeButton.setOnClickListener(v -> {
-            firebaseManager.addPlayerData("UUID111", 37.7750, -122.4200, 0, 2, "roomId123");
-
-        });
-
 
         // obtain home fragment for location update scheduling
         NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
@@ -206,64 +189,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         return navController.navigateUp() || super.onSupportNavigateUp();
-    }
-
-
-    // test Firebase
-    private void initialFirebase(String referenceName) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference(referenceName);
-
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String inputText = snapshot.getValue(String.class);
-                binding.messageDisplay.setText(inputText);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    // test Firebase
-    // simple text write to Firebase
-    private void writeToFirebase(String referenceName, String data) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference(referenceName);
-
-        // 写入数据
-        databaseReference.setValue(data).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(MainActivity.this, "Data written successfully!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "Failed to write data.", Toast.LENGTH_SHORT).show();
-            }
-        });
-    }
-
-    // test Firebase
-    // 写入房间信息到 Firebase
-    private void writeRoomToFirebase(String roomId, double lat, double lng) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference roomRef = firebaseDatabase.getReference("rooms");
-
-        // 创建房间数据
-        Map<String, Object> roomData = new HashMap<>();
-        roomData.put("owner", "YourOwnerIdHere");
-        roomData.put("lat", lat);
-        roomData.put("lng", lng);
-
-        // 将房间数据写入 Firebase
-        roomRef.child(roomId).setValue(roomData).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(MainActivity.this, "Room data written to Firebase!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "Failed to write room data.", Toast.LENGTH_SHORT).show();
-            }
-        });
     }
 }
 
