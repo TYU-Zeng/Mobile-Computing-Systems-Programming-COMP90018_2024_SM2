@@ -111,8 +111,16 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void startUpdatingLocation() {
+        if(!locationPermissionGranted){
+            return;
+        }
 
-
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
+        try {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        }catch(SecurityException e) {
+            Log.d(LOG_TAG, "Error when request location updates");
+        }
     }
 
     private BitmapDescriptor getScaledIcon(int resourceID, float scale){
