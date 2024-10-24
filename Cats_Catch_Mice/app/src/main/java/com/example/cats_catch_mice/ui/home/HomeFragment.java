@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.DatabaseManager;
+import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -62,12 +63,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     // flag for thread scheduling
     private boolean updating = true;
 
-    private DatabaseManager databaseManager;
+    private FirebaseManager firebaseManager;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        databaseManager = new ViewModelProvider(requireActivity()).get(DatabaseManager.class);
+        firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
 
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
