@@ -162,6 +162,19 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    private void updateMap() {
+        firebaseManager.getLocations("roomId12345").thenAcceptAsync(locations -> {
+            for (Pair<Double, Double> location : locations){
+                map.addMarker(new MarkerOptions()
+                        .position(new LatLng(location.first, location.second))
+                        .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
+            }
+            Log.d("debugging", "unimelb map updated");
+        }, handler::post).exceptionally(throwable -> {
+            return null;
+        });
+    }
+
     private void setLocationUpdateCallback(){
         locationCallback = new LocationCallback() {
             @Override
