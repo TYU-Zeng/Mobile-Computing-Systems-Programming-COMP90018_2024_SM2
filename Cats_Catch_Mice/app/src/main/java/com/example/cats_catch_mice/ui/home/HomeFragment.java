@@ -6,7 +6,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -20,7 +19,6 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.cats_catch_mice.DatabaseManager;
 import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
@@ -39,7 +37,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -57,14 +54,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap map;
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
-    private FusedLocationProviderClient fusedLocationClient;
 
-    // looper for retrieving player's location
-    private Handler triggerHandler = new Handler(Looper.getMainLooper());
-    private Runnable locationUpdateTrigger;
-
-    // flag for thread scheduling
-    private boolean updating = true;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
@@ -103,7 +93,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         showUnimelb();
         getLocationPermission();
         updateLocationUI();
-        getDeviceLocation();
         startUpdatingLocation();
     }
 
@@ -113,7 +102,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 Log.d("debugging", "granted");
                 locationPermissionGranted = true;
                 updateLocationUI();
-                getDeviceLocation();
                 startUpdatingLocation();
             } else {
                 Log.d("debugging", "not granted");
@@ -123,26 +111,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     public void startUpdatingLocation() {
-        locationUpdateTrigger = new Runnable() {
-            public void run() {
-                if (updating){
-                    Log.d("debugging", "start triggering");
-                    getDeviceLocation();
-                    triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
-                }
-            }
-        };
-        triggerHandler.post(locationUpdateTrigger);
-    }
 
-    public void stopUpdatingLocation() {
-        Log.d("debugging", "stop triggering");
-        triggerHandler.removeCallbacks(locationUpdateTrigger);
-    }
 
-    // setter
-    public void setUpdating(boolean updating){
-        this.updating = updating;
     }
 
     private BitmapDescriptor getScaledIcon(int resourceID, float scale){
@@ -179,26 +149,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void getDeviceLocation() {
-        if (this.getActivity() == null) {
-            Log.e(LOG_TAG, "Error when getting activity");
-            return;
-        }
-        try {
-            if (this.locationPermissionGranted) {
-                Log.d("debugging", "getting device location");
-                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(
-                        requireActivity(), new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                if (location != null) {
-                                 Log.d("debugging", "last location got");
-                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
-                                    );
-                                }
-                            }
-                        });
     private void setLocationUpdateCallback(){
         locationCallback = new LocationCallback() {
             @Override
