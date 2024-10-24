@@ -16,6 +16,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class FirebaseManager extends ViewModel {
 
@@ -70,6 +71,46 @@ public class FirebaseManager extends ViewModel {
                 System.err.println("Failed to read data from Firebase.");
             }
         });
+    }
+
+
+    public void updateLocation(String playerId, double lat, double lng, String roomId){
+        DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
+        CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+        try{
+            Map<String, Object> oldData = future.get();
+            oldData.replace("lat", lat);
+            oldData.replace("lng", lng);
+
+            memberRef.setValue(oldData).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    System.out.println("Data written successfully to Firebase.");
+                } else {
+                    System.err.println("Failed to write data to Firebase.");
+                }
+            });
+        }catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void updateItemNum(String playerId, int number, String itemId, String roomId){
+        DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
+        CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+        try{
+            Map<String, Object> oldData = future.get();
+            oldData.replace(itemId, number);
+
+            memberRef.setValue(oldData).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    System.out.println("Data written successfully to Firebase.");
+                } else {
+                    System.err.println("Failed to write data to Firebase.");
+                }
+            });
+        }catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void addPlayerData(String playerId, double lat, double lng, int item1, int item2, String roomId) {
