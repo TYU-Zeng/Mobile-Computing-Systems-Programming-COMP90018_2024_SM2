@@ -42,6 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private RoomManager roomManager;
 
     private DatabaseManager databaseManager;
+    private FirebaseManager firebaseManager;
     private HomeFragment homeFragment;
 
 
@@ -58,6 +59,7 @@ public class MainActivity extends AppCompatActivity {
 
         // init firebase on manager created
         databaseManager = new ViewModelProvider(this).get(DatabaseManager.class);
+        firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
