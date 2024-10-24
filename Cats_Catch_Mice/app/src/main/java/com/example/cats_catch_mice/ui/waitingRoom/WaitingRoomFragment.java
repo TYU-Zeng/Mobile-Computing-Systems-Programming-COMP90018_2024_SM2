@@ -28,12 +28,12 @@ import java.util.Random;
 public class WaitingRoomFragment extends Fragment {
 
     private static final String LOG_TAG = "WaitingRoomFragment";
-//    private FragmentWaitingRoomBinding binding;
+    private FragmentWaitingRoomBinding binding;
     private boolean isHost; // 表示房主状态的标记
     private DatabaseManager databaseManager;
     private Handler handler = new Handler(Looper.getMainLooper());
 
-    // 模拟的玩家动物和名字数组
+    // 玩家动物和名字数组
     private String[] animals = {"Cat", "Dog", "Rabbit", "Mouse"};
     private String[] names = {"Alice", "Bob", "Charlie", "Dave"};
 
@@ -47,8 +47,8 @@ public class WaitingRoomFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-//        binding = FragmentWaitingRoomBinding.inflate(inflater, container, false);
-//        View root = binding.getRoot();
+        binding = FragmentWaitingRoomBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
         View view = null;
 
         databaseManager = new ViewModelProvider(requireActivity()).get(DatabaseManager.class);
@@ -57,17 +57,17 @@ public class WaitingRoomFragment extends Fragment {
         FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
         databaseReference = firebaseDatabase.getReference("rooms");
 
-//        // 获取 QR Code 的 ImageView
-//        qrCodeImageView = binding.qrCodeImage;
+        // 获取 QR Code 的 ImageView
+        qrCodeImageView = binding.qrCodeImage;
 
         // 根据是房主还是玩家显示不同 UI
-//        isHost = checkIfHost(); // 你可以自己实现 checkIfHost() 方法来判断是否为房主
-//        if (isHost) {
-//            binding.startGameButton.setVisibility(View.VISIBLE); // 房主才显示开始游戏按钮
-//            binding.startGameButton.setOnClickListener(v -> startGame());
-//        } else {
-//            binding.startGameButton.setVisibility(View.GONE); // 非房主隐藏按钮
-//        }
+        isHost = checkIfHost(); // 你可以自己实现 checkIfHost() 方法来判断是否为房主
+        if (isHost) {
+            binding.startGameButton.setVisibility(View.VISIBLE); // 房主才显示开始游戏按钮
+            binding.startGameButton.setOnClickListener(v -> startGame());
+        } else {
+            binding.startGameButton.setVisibility(View.GONE); // 非房主隐藏按钮
+        }
 
         // 显示二维码（模拟生成的二维码）
         displayQRCode();
@@ -77,8 +77,7 @@ public class WaitingRoomFragment extends Fragment {
         String randomName = getRandomName();
         Toast.makeText(getContext(), "You are " + randomAnimal + " named " + randomName, Toast.LENGTH_SHORT).show();
 
-//        return root;
-        return view;
+        return root;
     }
 
     // 模拟生成二维码的函数（你可以用 ZXing 或其他库生成二维码）
@@ -97,7 +96,7 @@ public class WaitingRoomFragment extends Fragment {
     // 当房主点击开始游戏时，跳转到地图界面
     private void navigateToMap() {
         NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
-//        navController.navigate(R.id.action_waitingRoomFragment_to_homeFragment);
+        navController.navigate(R.id.action_waitingRoomFragment_to_homeFragment);
     }
 
     // 获取随机动物
@@ -120,11 +119,11 @@ public class WaitingRoomFragment extends Fragment {
     }
 
     // destory View
-/*    @Override
+    @Override
     public void onDestroyView() {
         super.onDestroyView();
         binding = null;
-    }*/
+    }
 
     // 模拟判断是否是房主的方法
     private boolean checkIfHost() {

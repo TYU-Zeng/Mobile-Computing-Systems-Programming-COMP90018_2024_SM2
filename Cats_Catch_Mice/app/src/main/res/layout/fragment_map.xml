@@ -11,10 +11,12 @@
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:uiZoomControls = "true"
-        app:uiCompass = "true"
-        app:uiTiltGestures="false" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="1.0"
+        app:uiCompass="true"
+        app:uiTiltGestures="false"
+        app:uiZoomControls="true"
+        tools:layout_editor_absoluteX="31dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

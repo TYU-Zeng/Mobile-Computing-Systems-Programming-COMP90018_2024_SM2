@@ -156,18 +156,25 @@ public class MainActivity extends AppCompatActivity {
             // 跳转到初始化面
 
         } else if (item.getItemId() == R.id.menu_createRoom) {
+            // 点击 "Create Room" 逻辑
+            Toast.makeText(this, "Create Room clicked", Toast.LENGTH_SHORT).show();
 
+            // 导航到 WaitingRoomFragment
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.action_homeFragment_to_waitingRoomFragment);
+        }
+        return super.onOptionsItemSelected(item);
 
-            //TODO: 创建房间的逻辑
-            //检测房间id是否为空
+        //TODO: 创建房间的逻辑
+        //检测房间id是否为空
 
-            //如果房间id不是空的
-            //检测二维码是不是空的
-            //二维码是空的 就用房间id生成二维码 并且跳转到展示二维码的activity
-            //二维码不是空的 就直接跳转到展示二维码的activity
+        //如果房间id不是空的
+        //检测二维码是不是空的
+        //二维码是空的 就用房间id生成二维码 并且跳转到展示二维码的activity
+        //二维码不是空的 就直接跳转到展示二维码的activity
 
-            //如果房间id是空的
-            //创建房间，跳转到展示二维码的activity
+        //如果房间id是空的
+        //创建房间，跳转到展示二维码的activity
 
 
 //            // 如果当前房间 ID 为空
@@ -193,8 +200,7 @@ public class MainActivity extends AppCompatActivity {
 //                // 如果已经创建了房间
 //                Toast.makeText(MainActivity.this, "Room already created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
 //            }
-        }
-        return true;
+
     }
 
     /**
@@ -264,5 +270,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 }
+
 
 
