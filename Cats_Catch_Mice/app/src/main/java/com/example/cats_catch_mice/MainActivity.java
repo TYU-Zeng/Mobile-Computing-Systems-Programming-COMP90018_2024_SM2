@@ -41,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private RoomManager roomManager;
 
     private FirebaseManager firebaseManager;
-    private HomeFragment homeFragment;
 
 
     // current room id for map sharing
@@ -78,34 +77,6 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        // obtain home fragment for location update scheduling
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
-        Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
-        if (fragment instanceof HomeFragment){
-            homeFragment = (HomeFragment) fragment;
-        }
-
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        if(homeFragment!= null){
-            homeFragment.setUpdating(true);
-            homeFragment.startUpdatingLocation();
-            Log.d("debugging", "main resume");
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (homeFragment!= null){
-            homeFragment.setUpdating(false);
-            homeFragment.stopUpdatingLocation();
-            Log.d("debugging", "main stop");
-
-        }
     }
 
     /**
