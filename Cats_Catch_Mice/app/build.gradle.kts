@@ -1,4 +1,7 @@
 plugins {
+    alias(libs.plugins.android.application)
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+
     id("com.android.application")
     id("com.google.gms.google-services")
 }
@@ -35,7 +38,6 @@ android {
         }
     }
 
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
@@ -46,11 +48,11 @@ android {
     }
 }
 
-///* 如果您在项目的 settings.gradle.kts 中已经配置了 repositories，可以删除下面的 repositories 块 */
-//repositories {
-//    google()
-//    mavenCentral()
-//}
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "local.defaults.properties"
+    ignoreList.add("sdk.*")       // Ignore all keys matching the regexp "sdk.*"
+}
 
 dependencies {
     // AndroidX 基础库依赖，选择与 API 30 兼容的版本
@@ -65,21 +67,8 @@ dependencies {
     implementation("com.google.android.material:material:1.3.0")
 
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation(libs.play.services.location)
 
-
-    // 注释掉 CameraX 依赖
-    /*
-    val camerax_version = "1.1.0"
-    implementation("androidx.camera:camera-core:$camerax_version")
-    implementation("androidx.camera:camera-camera2:$camerax_version")
-    implementation("androidx.camera:camera-lifecycle:$camerax_version")
-    implementation("androidx.camera:camera-view:1.0.0-alpha32")
-    */
-
-    // 注释掉 ML Kit 条形码扫描
-    /*
-    implementation("com.google.mlkit:barcode-scanning:17.0.3")
-    */
 
     // 单元测试和 Android Instrumentation Test 依赖
     testImplementation("junit:junit:4.13.2")

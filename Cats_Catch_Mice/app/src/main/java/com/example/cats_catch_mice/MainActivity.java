@@ -16,15 +16,19 @@ import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.example.cats_catch_mice.ui.home.HomeFragment;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
@@ -45,11 +49,11 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private DatabaseReference databaseReference;
     private RoomManager roomManager;
 
 
     private AppBarConfiguration appBarConfiguration; // Declare as a field
+    private FirebaseManager firebaseManager;
 
     // NFC variables
     private NfcAdapter nfcAdapter;
@@ -66,9 +70,14 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // init firebase on manager created
+        firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
+
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        roomManager = new RoomManager();
         // Initialize NfcController
         nfcController = new NfcController(this);
 
@@ -99,16 +108,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
-
-
         // set navigation detail
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-
+        // set AppBarConfiguration
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_dashboard)
                 .build();
-        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         // set ActionBar and NavController
+        NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
         FirebaseManager firebaseManager = new FirebaseManager();
@@ -176,6 +183,10 @@ public class MainActivity extends AppCompatActivity {
         }
         return navigatedUp;
     }
+}
+
+
+
 
 
 

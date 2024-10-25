@@ -3,8 +3,10 @@ package com.example.cats_catch_mice;
 import static android.content.ContentValues.TAG;
 
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModel;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -12,11 +14,16 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
-public class FirebaseManager {
+public class FirebaseManager extends ViewModel {
 
     /*
     sync data to firebase
@@ -46,34 +53,117 @@ public class FirebaseManager {
       */
 
     private FirebaseDatabase database;
+    private final ThreadPoolExecutor executor;
+    private static final int CORE_THREADS = 5;
+    private static final int MAX_THREADS = 10;
+    private static final int THREAD_LIFE = 30;
 
 
     public FirebaseManager() {
-        this.database = FirebaseDatabase.getInstance();
+        database = FirebaseDatabase.getInstance();
+        executor = new ThreadPoolExecutor(
+                CORE_THREADS,
+                MAX_THREADS,
+                THREAD_LIFE,
+                TimeUnit.SECONDS,
+                new SynchronousQueue<>()
+        );
     }
 
+    @Override
+    protected void onCleared() {
+        super.onCleared();
+        executor.shutdown();
+    }
 
-    // for test
-    public CompletableFuture<DataSnapshot> getWholeDatabase() {
+    public void printWholeDatabase() {
+
         Log.d(TAG, "printWholeDatabase function first log");
         DatabaseReference reference = database.getReference();
-        CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
-
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 Log.d(TAG, "in printWholeDatabase onDataChange");
-                future.complete(snapshot);  // 将数据传给 future
+                System.out.println(snapshot.getValue());
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.d(TAG, "in printWholeDatabase onCancelled");
-                future.completeExceptionally(new RuntimeException("Failed to read data from Firebase: " + error.getMessage()));
+                System.err.println("Failed to read data from Firebase.");
+            }
+        });
+    }
+
+
+    public void updateLocation(String playerId, double lat, double lng, String roomId){
+        executor.execute(() -> {
+            DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
+            CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+            try{
+                Map<String, Object> oldData = future.get();
+                oldData.replace("lat", lat);
+                oldData.replace("lng", lng);
+
+                memberRef.setValue(oldData).addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Log.d("debugging", "Data written successfully to Firebase.");
+                    } else {
+                        Log.e("debugging", "Failed to write data to Firebase.");
+                    }
+                });
+            }catch (ExecutionException | InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        });
+    }
+
+    public CompletableFuture<ArrayList<Pair<Double, Double>>> getLocations(String roomId){
+        CompletableFuture<ArrayList<Pair<Double, Double>>> locationsFuture = new CompletableFuture<>();
+
+        executor.execute(()-> {
+            CompletableFuture<Map<String, Object>> future = getRoomDataAsync(roomId);
+            try{
+                Map<String, Object> membersData = future.get();
+                Log.d("debugging", membersData.toString());
+
+                ArrayList<Pair<Double, Double>> locations = new ArrayList<>();
+
+                for(Map.Entry<String, Object> member: membersData.entrySet()){
+                    Map<String, Object> memberData = (Map<String, Object>) member.getValue();
+
+                    Double lat = (Double) memberData.get("lat");
+                    Double lng = (Double) memberData.get("lng");
+
+                    Pair<Double, Double> location = new Pair<>(lat, lng);
+                    locations.add(location);
+                }
+                locationsFuture.complete(locations);
+            }catch (ExecutionException | InterruptedException e) {
+                locationsFuture.completeExceptionally(e);
             }
         });
 
-        return future;  // 返回 CompletableFuture
+        return locationsFuture;
+    }
+
+    public void updateItemNum(String playerId, int number, String itemId, String roomId){
+        DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
+        CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+        try{
+            Map<String, Object> oldData = future.get();
+            oldData.replace(itemId, number);
+
+            memberRef.setValue(oldData).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    System.out.println("Data written successfully to Firebase.");
+                } else {
+                    System.err.println("Failed to write data to Firebase.");
+                }
+            });
+        }catch (ExecutionException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void addPlayerData(String playerId, double lat, double lng, int item1, int item2, String roomId) {
@@ -144,6 +234,52 @@ public class FirebaseManager {
 
         return future;
     }
+
+
+    public CompletableFuture<Map<String, Object>> getRoomDataAsync(String roomId) {
+        CompletableFuture<Map<String, Object>> future = new CompletableFuture<>();
+
+        DatabaseReference membersRef = FirebaseDatabase.getInstance().getReference("rooms")
+                .child(roomId)
+                .child("members");
+
+        membersRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    Map<String, Object> allMembersData = (Map<String, Object>) snapshot.getValue();
+                    future.complete(allMembersData);
+                } else {
+                    future.complete(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new RuntimeException("Error when reading members data"));
+            }
+        });
+
+        return future;
+    }
+
+    /*
+    debugging purpose only: check thread pool status
+     */
+    public void printThreadInfo(){
+        String info = String.format("Active threads: %s -- Current pool size: %s -- Task count: %s -- ",
+                executor.getActiveCount(),
+                executor.getPoolSize(),
+                executor.getTaskCount()
+        );
+        Log.d("debugging", info);
+    }
+
+
+
+
+
+
 
 
 }
