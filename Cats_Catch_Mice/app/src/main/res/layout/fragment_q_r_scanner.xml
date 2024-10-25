@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
         android:layout_marginTop="20dp"
-        android:text="Scan the QR code"
+        android:text="Scan the QR code to join the room"
         android:textSize="18sp"
         android:textColor="@android:color/white" />
 

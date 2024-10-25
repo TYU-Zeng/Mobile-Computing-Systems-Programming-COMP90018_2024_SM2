@@ -29,9 +29,6 @@
         android:label="@string/QR_Scanner"
         tools:layout="@layout/fragment_q_r_scanner" />
 
-    <action
-        android:id="@+id/action_global_navigation_scanner"
-        app:destination="@id/navigation_scanner" />
 
 
 </navigation>

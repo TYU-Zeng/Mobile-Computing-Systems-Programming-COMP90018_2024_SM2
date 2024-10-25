@@ -9,6 +9,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.NavController;
+import androidx.navigation.fragment.NavHostFragment;
 
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
@@ -29,36 +31,39 @@ public class QRScannerFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // 初始化相机预览
+        // Initialize camera preview
         barcodeView = view.findViewById(R.id.barcode_scanner);
         barcodeView.decodeContinuous(new BarcodeCallback() {
             @Override
             public void barcodeResult(BarcodeResult result) {
-                // 获取扫描结果
                 if (result != null) {
                     String scannedData = result.getText();
-                    Toast.makeText(getActivity(), "扫描结果: " + scannedData, Toast.LENGTH_LONG).show();
+                    Toast.makeText(getActivity(), "Scan Result: " + scannedData, Toast.LENGTH_LONG).show();
 
-                    // 返回上一个界面并传递扫描结果
+                    // Return to the previous fragment and pass the scan result
                     Bundle bundle = new Bundle();
                     bundle.putString("scanned_qr_code", scannedData);
                     getParentFragmentManager().setFragmentResult("requestKey", bundle);
-                    getParentFragmentManager().popBackStack(); // 返回上一个fragment
+
+                    // Navigate back using NavController
+                    NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
+                    navController.navigateUp();
                 }
             }
         });
-        barcodeView.resume();  // 启动相机预览
+        barcodeView.resume();  // Start camera preview
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        barcodeView.pause();  // 暂停相机预览
+        barcodeView.pause();  // Pause camera preview
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        barcodeView.resume();  // 恢复相机预览
+        barcodeView.resume();  // Resume camera preview
     }
 }
+
