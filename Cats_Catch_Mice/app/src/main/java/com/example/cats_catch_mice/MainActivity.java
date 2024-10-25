@@ -61,6 +61,7 @@
         private Bitmap qrCodeBitmap = null;
         private String userId = null;
         private RoomData roomData = null;
+        private Boolean isHost = false;
 
         @Override
         protected void onCreate(Bundle savedInstanceState) {
