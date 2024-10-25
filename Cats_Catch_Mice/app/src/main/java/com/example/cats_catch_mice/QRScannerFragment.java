@@ -21,6 +21,7 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 public class QRScannerFragment extends Fragment {
 
     private CompoundBarcodeView barcodeView;
+    private String roomId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -38,7 +39,26 @@ public class QRScannerFragment extends Fragment {
             public void barcodeResult(BarcodeResult result) {
                 if (result != null) {
                     String scannedData = result.getText();
-                    Toast.makeText(getActivity(), "Scan Result: " + scannedData, Toast.LENGTH_LONG).show();
+                    if (scannedData != null && scannedData.startsWith("roomId")) {
+                        // Proceed if valid
+                        roomId = scannedData;
+
+                        // 用buddle 传回参数
+                        Bundle bundle = new Bundle();
+                        bundle.putString("scanned_qr_code", scannedData);
+
+                        getParentFragmentManager().setFragmentResult("requestKey", bundle);
+
+
+                        NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
+                        navController.navigateUp();
+
+                    } else {
+                        // Show an error message
+                        Toast.makeText(getActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
+                    }
+
+
 
                     // Return to the previous fragment and pass the scan result
                     Bundle bundle = new Bundle();
