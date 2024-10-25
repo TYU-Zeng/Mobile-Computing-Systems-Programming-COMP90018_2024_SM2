@@ -94,15 +94,16 @@ public class MainActivity extends AppCompatActivity {
             );
         }
 
-
-
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // set navigation detail
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+
         // set AppBarConfiguration
         AppBarConfiguration appBarConfiguration = new AppBarConfiguration.Builder(
                 R.id.navigation_home, R.id.navigation_dashboard)
                 .build();
+
+
         // set ActionBar and NavController
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
@@ -143,7 +144,6 @@ public class MainActivity extends AppCompatActivity {
             Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
 
 
-
         }else if (item.getItemId() == R.id.menu_quit) {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
@@ -170,12 +170,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0) {
-            getSupportFragmentManager().popBackStack();
-        } else {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        // 判断是否能返回上一个 Fragment，如果不能，则执行默认行为（即退出应用）
+        if (!navController.popBackStack()) {
             super.onBackPressed();
         }
     }
+
 
     @Override
     protected void onResume() {

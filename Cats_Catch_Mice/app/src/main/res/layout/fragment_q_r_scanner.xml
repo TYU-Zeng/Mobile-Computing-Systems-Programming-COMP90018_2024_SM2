@@ -3,12 +3,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- 占位符，用于显示相机预览 -->
-    <SurfaceView
-        android:id="@+id/qr_code_surface_view"
+
+    <!-- 显示相机预览的 ZXing BarcodeView -->
+    <com.journeyapps.barcodescanner.CompoundBarcodeView
+        android:id="@+id/barcode_scanner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"/>
+        android:layout_height="match_parent" />
 
     <!-- 一个提示文本，显示在相机预览上方 -->
     <TextView

@@ -34,6 +34,8 @@ public class NfcController {
 
             // 提示用户已检测到标签
             Toast.makeText(activity, "NFC Tag detected!", Toast.LENGTH_SHORT).show();
+
+            // 读取item
         } else {
             Log.d("NFC", "No NFC tag found.");
         }
@@ -46,5 +48,25 @@ public class NfcController {
             sb.append(String.format("%02X", b));
         }
         return sb.toString();
+    }
+
+    public void writeTag(Intent intent) {
+        // 从 Intent 获取 NFC 标签
+        Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+        if (tag != null) {
+            // 打印标签的唯一 ID（例如，标签的字节数组转换成十六进制字符串）
+            byte[] tagId = tag.getId();
+            Log.d("NFC", "Tag ID: " + bytesToHex(tagId));
+
+
+
+            // TODO: 当前坐标
+            // ItemId 设置
+            // 写入坐标和ItemId
+            // 提示用户已检测到标签
+            Toast.makeText(activity, "NFC Tag writed!", Toast.LENGTH_SHORT).show();
+        } else {
+            Log.d("NFC", "No NFC tag found.");
+        }
     }
 }
