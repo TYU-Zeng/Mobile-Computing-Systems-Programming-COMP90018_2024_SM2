@@ -157,8 +157,18 @@ public class MainActivity extends AppCompatActivity {
             // 删除roomid
             // 跳转到初始化面
 
+        } else if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
         }
         return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        if (!navController.navigateUp()) {
+            super.onBackPressed();
+        }
     }
 
     /**
