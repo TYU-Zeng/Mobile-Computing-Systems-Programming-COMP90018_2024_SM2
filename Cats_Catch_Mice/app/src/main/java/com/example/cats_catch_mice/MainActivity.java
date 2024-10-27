@@ -183,14 +183,6 @@ public class MainActivity extends AppCompatActivity {
         }
         return navigatedUp;
     }
-}
-
-
-
-
-
-
-
 
     @Override
     protected void onResume() {
@@ -227,8 +219,9 @@ public class MainActivity extends AppCompatActivity {
                         NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
                         NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())
         )) {
+            // 写入模式
             Log.d("NFC", "NFC Tag discovered!");
-            nfcController.handleTag(intent);
+            nfcController.handleTag(intent); // Temporarily write to the tag
         }
     }
 

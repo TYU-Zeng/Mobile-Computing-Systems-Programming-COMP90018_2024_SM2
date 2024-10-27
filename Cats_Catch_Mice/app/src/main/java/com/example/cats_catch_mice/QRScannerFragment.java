@@ -49,7 +49,6 @@ public class QRScannerFragment extends Fragment {
 
                         getParentFragmentManager().setFragmentResult("requestKey", bundle);
 
-
                         NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
                         navController.navigateUp();
 
