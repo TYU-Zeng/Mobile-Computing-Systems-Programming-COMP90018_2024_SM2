@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         roomManager = new RoomManager();
         // Initialize NfcController
-        nfcController = new NfcController(this);
+        nfcController = new NfcController(this, "UUID11111", firebaseManager, "roomId12345");
 
         // Initialize NfcAdapter
         nfcAdapter = NfcAdapter.getDefaultAdapter(this);

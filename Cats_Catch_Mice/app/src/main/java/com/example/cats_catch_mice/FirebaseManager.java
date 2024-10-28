@@ -12,7 +12,11 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -260,6 +264,40 @@ public class FirebaseManager extends ViewModel {
 
         return future;
     }
+
+    public void incrementItemCount(String playerId, String itemId, String roomId) {
+        executor.execute(() -> {
+            DatabaseReference itemRef = database.getReference("rooms")
+                    .child(roomId)
+                    .child("members")
+                    .child(playerId)
+                    .child(itemId);
+
+            itemRef.runTransaction(new Transaction.Handler() {
+                @NonNull
+                @Override
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    Integer currentValue = currentData.getValue(Integer.class);
+                    if (currentValue == null) {
+                        currentData.setValue(1);
+                    } else {
+                        currentData.setValue(currentValue + 1);
+                    }
+                    return Transaction.success(currentData);
+                }
+
+                @Override
+                public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot dataSnapshot) {
+                    if (committed) {
+                        Log.d("FirebaseManager", "Item count incremented successfully.");
+                    } else {
+                        Log.e("FirebaseManager", "Failed to increment item count.", databaseError.toException());
+                    }
+                }
+            });
+        });
+    }
+
 
     /*
     debugging purpose only: check thread pool status

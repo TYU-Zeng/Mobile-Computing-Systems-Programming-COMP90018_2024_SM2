@@ -18,10 +18,17 @@ import java.util.Arrays;
 public class NfcController {
 
     private Activity activity;
+    private String playerId;
+    private String roomId;
+    private FirebaseManager firebaseManager;
+
 
     // 构造函数，传入 Activity
-    public NfcController(Activity activity) {
+    public NfcController(Activity activity, String playerId, FirebaseManager firebaseManager, String roomId) {
         this.activity = activity;
+        this.playerId = playerId;
+        this.roomId = roomId;
+        this.firebaseManager = firebaseManager;
     }
 
     // 处理 NFC 标签的逻辑
@@ -30,7 +37,6 @@ public class NfcController {
         if (tag != null) {
             Log.d("NFC", "handleTag: fubd tag");
             // toast
-            Toast.makeText(activity, "NFC Tag found!", Toast.LENGTH_SHORT).show();
             readFromTag(tag);
         } else {
             Log.d("NFC", "No NFC tag found.");
@@ -48,12 +54,12 @@ public class NfcController {
                     for (NdefRecord record : records) {
                         if (record.getTnf() == NdefRecord.TNF_WELL_KNOWN &&
                                 Arrays.equals(record.getType(), NdefRecord.RTD_TEXT)) {
-                            String text = readText(record);
-                            Toast.makeText(activity, "Read content: " + text, Toast.LENGTH_SHORT).show();
+                            String itemId = readText(record);
+                            Toast.makeText(activity, "Read content: " + itemId, Toast.LENGTH_SHORT).show();
 
+                            firebaseManager.incrementItemCount(playerId, itemId, roomId);
 
-
-                            Log.d("NFC", "Read content: " + text);
+                            Log.d("NFC", "Read content: " + itemId);
                         }
                     }
                 }
@@ -65,6 +71,9 @@ public class NfcController {
             Log.e("NFC", "Tag doesn't support NDEF.");
         }
     }
+
+
+
 
     private String readText(NdefRecord record) throws UnsupportedEncodingException {
         byte[] payload = record.getPayload();
