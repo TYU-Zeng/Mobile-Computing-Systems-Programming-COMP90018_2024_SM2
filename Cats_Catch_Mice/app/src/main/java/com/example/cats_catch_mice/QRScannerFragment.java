@@ -1,6 +1,7 @@
 package com.example.cats_catch_mice;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -39,7 +40,9 @@ public class QRScannerFragment extends Fragment {
             public void barcodeResult(BarcodeResult result) {
                 if (result != null) {
                     String scannedData = result.getText();
-                    if (scannedData != null && scannedData.startsWith("roomId")) {
+                    if (scannedData != null && scannedData.startsWith("test")) {
+
+                        Log.d("Scanner" ,"barcodeResult: " + scannedData);
                         // Proceed if valid
                         roomId = scannedData;
 
@@ -56,8 +59,6 @@ public class QRScannerFragment extends Fragment {
                         // Show an error message
                         Toast.makeText(getActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
                     }
-
-
 
                     // Return to the previous fragment and pass the scan result
                     Bundle bundle = new Bundle();

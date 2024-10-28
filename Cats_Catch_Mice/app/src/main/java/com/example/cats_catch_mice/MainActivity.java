@@ -144,6 +144,23 @@ public class MainActivity extends AppCompatActivity {
 
         if (item.getItemId() == R.id.menu_createRoom) {
 
+            Log.d("Bitmap", "onOptionsItemSelected: create bit map");
+
+            // Pass the roomId as an argument
+            String roomId = "testRoomId11111";
+
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+
+            // Use Bundle to pass the roomId
+            Bundle bundle = new Bundle();
+            bundle.putString("room_id", roomId);
+
+            navController.navigate(R.id.action_global_navigation_qr_test, bundle);
+
+            return true;
+
+
+
         } else if (item.getItemId() == R.id.menu_scanner) {
             // 点击后跳转到 QRScannerFragment
             Log.d(TAG, "onOptionsItemSelected: join room button clicked");

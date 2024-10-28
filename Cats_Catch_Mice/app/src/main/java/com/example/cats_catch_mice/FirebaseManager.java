@@ -186,8 +186,6 @@ public class FirebaseManager extends ViewModel {
         });
     }
 
-
-
     /*
     // 定义一个 memberData 变量来存储异步结果
     Map<String, Object> memberData = new HashMap<>();
