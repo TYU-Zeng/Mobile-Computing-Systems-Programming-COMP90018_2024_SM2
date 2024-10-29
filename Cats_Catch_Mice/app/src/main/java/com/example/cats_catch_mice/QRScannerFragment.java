@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -24,10 +25,14 @@ public class QRScannerFragment extends Fragment {
     private CompoundBarcodeView barcodeView;
     private String roomId;
 
+    private FirebaseManager firebaseManager;
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
+
         return inflater.inflate(R.layout.fragment_q_r_scanner, container, false);
     }
 
