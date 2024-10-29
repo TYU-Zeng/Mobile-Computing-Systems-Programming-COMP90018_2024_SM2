@@ -10,9 +10,19 @@
         android:id="@+id/qrCodeImageView"
         android:layout_width="300dp"
         android:layout_height="300dp"
-        android:contentDescription="QR Code"
-        android:layout_gravity="center" />
+        android:layout_gravity="center"
+        android:contentDescription="QR Code" />
 
+    <TextView
+        android:id="@+id/qrCodeRoomId"
+        android:layout_width="275dp"
+        android:layout_height="91dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="470dp"
+        android:gravity="center"
+        android:text=""
+        android:textColor="@android:color/black"
+        android:textSize="18sp" />
 
 
 </FrameLayout>

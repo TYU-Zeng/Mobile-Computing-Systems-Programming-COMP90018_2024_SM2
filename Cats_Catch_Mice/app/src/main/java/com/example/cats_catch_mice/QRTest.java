@@ -4,10 +4,12 @@ package com.example.cats_catch_mice;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +39,8 @@ public class QRTest extends Fragment {
             // If using Safe Args:
             // QRTestArgs args = QRTestArgs.fromBundle(getArguments());
             // roomId = args.getRoomId();
+
+
         }
     }
 
@@ -47,6 +51,19 @@ public class QRTest extends Fragment {
         View view = inflater.inflate(R.layout.fragment_q_r_test, container, false);
 
         ImageView qrCodeImageView = view.findViewById(R.id.qrCodeImageView);
+        TextView roomIdTextView = view.findViewById(R.id.qrCodeRoomId);
+        Log.d("QRTestFragment", "onViewCreated: roomId = " + roomId);
+
+        // 设置 TextView 的文本为 roomId
+        if (roomId != null && !roomId.isEmpty()) {
+            roomIdTextView.setText("Room ID: " + roomId);
+            Log.d("QRTestFragment", "TextView set to: " + roomIdTextView.getText());
+        } else {
+            roomIdTextView.setText("未找到房间ID");
+            Log.d("QRTestFragment", "TextView set to: 未找到房间ID");
+        }
+
+
 
         if (roomId != null) {
             Bitmap qrCodeBitmap = createQRCode(roomId);
