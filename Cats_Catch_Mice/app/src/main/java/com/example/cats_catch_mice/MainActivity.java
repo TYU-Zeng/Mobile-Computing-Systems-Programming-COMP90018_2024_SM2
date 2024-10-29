@@ -1,6 +1,15 @@
 package com.example.cats_catch_mice;
 
+import static android.content.ContentValues.TAG;
+
+import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Bitmap;
+import android.nfc.NfcAdapter;
+import android.nfc.NfcManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -9,12 +18,16 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.example.cats_catch_mice.ui.home.HomeFragment;
+
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.fragment.NavHostFragment;
@@ -32,24 +45,32 @@ import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private DatabaseReference databaseReference;
     private RoomManager roomManager;
 
-    private DatabaseManager databaseManager;
-    private HomeFragment homeFragment;
 
+    private AppBarConfiguration appBarConfiguration; // Declare as a field
+    private FirebaseManager firebaseManager;
+
+    // NFC variables
+    private NfcAdapter nfcAdapter;
+    private PendingIntent pendingIntent;
+    private NfcController nfcController;
 
     // current room id for map sharing
     private String currentRoomId = null;
     private Bitmap qrCodeBitmap = null;
     private String userId = null;
     private RoomData roomData = null;
+    private Boolean isHost = false;
 
 
     @Override
@@ -57,21 +78,42 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         // init firebase on manager created
-        databaseManager = new ViewModelProvider(this).get(DatabaseManager.class);
+        firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
+        //userId = generateUUID();
+        Log.d("UUID", "onCreate: UUID: " + userId);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        //TODO: 创建所有的manager实例和database实例
-        // initial Firebase
-        FirebaseApp.initializeApp(this);
-        initialFirebase("example_reference");
-
         roomManager = new RoomManager();
+        // Initialize NfcController
+        nfcController = new NfcController(this, "UUID11111", firebaseManager, "roomId12345");
 
-        // TODO: generate user id
-        // TODO: get the data from firebase
-        // 先从数据库拿出数据 等待选择是创建房间或者加入房间 等待房间id被设置好
+        // Initialize NfcAdapter
+        nfcAdapter = NfcAdapter.getDefaultAdapter(this);
+
+        if (nfcAdapter == null) {
+            // Device doesn't support NFC
+            Toast.makeText(this, "This device does not support NFC.", Toast.LENGTH_SHORT).show();
+        } else if (!nfcAdapter.isEnabled()) {
+            // NFC is disabled
+            showNfcSettingsDialog();
+        } else {
+            // NFC is enabled
+            // Create PendingIntent with appropriate flags
+            int flags = 0;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                flags = PendingIntent.FLAG_MUTABLE;
+            } else {
+                flags = 0;
+            }
+
+            pendingIntent = PendingIntent.getActivity(
+                    this, 0,
+                    new Intent(this, getClass()).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
+                    flags
+            );
+        }
 
         BottomNavigationView navView = findViewById(R.id.nav_view);
         // set navigation detail
@@ -84,48 +126,15 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        FirebaseManager firebaseManager = new FirebaseManager();
-        // test Firebase -----------------------------------
-        Button writeButton = findViewById(R.id.writeButton);
-        writeButton.setOnClickListener(v -> {
-            firebaseManager.addPlayerData("UUID111", 37.7750, -122.4200, 0, 2, "roomId123");
+        // FirebaseManager firebaseManager = new FirebaseManager();
 
-        });
+        // 监听从 QRScannerFragment 传回的数据
 
 
-
-    }
-
-    @Override
-    protected void onResume() {        // obtain home fragment for location update scheduling
-        NavHostFragment navHostFragment = (NavHostFragment) getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
-        Fragment fragment = navHostFragment.getChildFragmentManager().getPrimaryNavigationFragment();
-        if (fragment instanceof HomeFragment){
-            homeFragment = (HomeFragment) fragment;
-        }
-
-        super.onResume();
-        if(homeFragment!= null){
-            homeFragment.setUpdating(true);
-            homeFragment.startUpdatingLocation();
-            Log.d("debugging", "main resume");
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        if (homeFragment!= null){
-            homeFragment.setUpdating(false);
-            homeFragment.stopUpdatingLocation();
-            Log.d("debugging", "main stop");
-
-        }
     }
 
     /**
      * Create top menu
-     *
      * @param menu
      * @return
      */
@@ -138,14 +147,33 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Menu item click event
-     *
      * @param item
      * @return
      */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if (item.getItemId() == R.id.menu_quit) {
+        if (item.getItemId() == R.id.menu_createRoom) {
+
+            return true;
+
+
+
+        } else if (item.getItemId() == R.id.menu_scanner) {
+            // 点击后跳转到 QRScannerFragment
+            Log.d(TAG, "onOptionsItemSelected: join room button clicked");
+            // TODO: QRScannerFragment 创建实例
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.navigation_scanner);
+            // toast
+//            Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
+
+            return true;
+
+
+
+
+        }else if (item.getItemId() == R.id.menu_quit) {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
 
@@ -155,121 +183,117 @@ public class MainActivity extends AppCompatActivity {
             // 删除roomid
             // 跳转到初始化面
 
-        } else if (item.getItemId() == R.id.menu_createRoom) {
-            // 点击 "Create Room" 逻辑
-            Toast.makeText(this, "Create Room clicked", Toast.LENGTH_SHORT).show();
+        } else if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+        } else if (item.getItemId() == R.id.menu_qrCode) {
+            Log.d("Bitmap", "onOptionsItemSelected: create bit map");
+            //
 
-            // 导航到 WaitingRoomFragment
+//            String shareRoomId = "roomId123";
+            // Pass the roomId as an argument
+            String shareRoomId = firebaseManager.getRoomId();
+            Log.d(TAG, "onOptionsItemSelected: roomId = " + shareRoomId);
+
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-            navController.navigate(R.id.action_homeFragment_to_waitingRoomFragment);
+
+            // Use Bundle to pass the roomId
+            Bundle bundle = new Bundle();
+            bundle.putString("room_id", shareRoomId);
+
+            navController.navigate(R.id.action_global_navigation_qr_test, bundle);
+
+            return true;
         }
-        return super.onOptionsItemSelected(item);
+        return true;
+    }
 
-        //TODO: 创建房间的逻辑
-        //检测房间id是否为空
-
-        //如果房间id不是空的
-        //检测二维码是不是空的
-        //二维码是空的 就用房间id生成二维码 并且跳转到展示二维码的activity
-        //二维码不是空的 就直接跳转到展示二维码的activity
-
-        //如果房间id是空的
-        //创建房间，跳转到展示二维码的activity
-
-
-//            // 如果当前房间 ID 为空
-//            if (currentRoomId == null) {
-//
-//
-//                // 获取当前设备的位置信息（假设是硬编码值）
-//                double currentLat = 37.7749;
-//                double currentLng = -122.4194;
-//
-//                // 创建房间并获取房间 ID
-//                currentRoomId = roomManager.createRoom(currentLat, currentLng, userId);
-//
-//                // 写入房间数据到 Firebase
-//                writeRoomToFirebase(currentRoomId, currentLat, currentLng);
-//
-//                // 生成二维码
-//                qrCodeBitmap = roomManager.createQRCode(currentRoomId);roomManager.createQRCode(currentRoomId);
-//                Toast.makeText(MainActivity.this, "Room created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
-//
-//
-//            } else {
-//                // 如果已经创建了房间
-//                Toast.makeText(MainActivity.this, "Room already created with ID: " + currentRoomId, Toast.LENGTH_SHORT).show();
-//            }
-
+    @Override
+    public void onBackPressed() {
+        NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+        if (!navController.navigateUp()) {
+            super.onBackPressed();
+        }
     }
 
     /**
      * Click event for button
+     *
      */
     @Override
     public boolean onSupportNavigateUp() {
+        Log.d(TAG, "onSupportNavigateUp called");
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-        return navController.navigateUp() || super.onSupportNavigateUp();
+        boolean navigatedUp = NavigationUI.navigateUp(navController, appBarConfiguration);
+        if (!navigatedUp) {
+            // Handle the case where navigateUp() returns false
+            finish(); // or super.onSupportNavigateUp();
+        }
+        return navigatedUp;
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-    // test Firebase
-    private void initialFirebase(String referenceName) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        databaseReference = firebaseDatabase.getReference(referenceName);
-
-        databaseReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                String inputText = snapshot.getValue(String.class);
-                binding.messageDisplay.setText(inputText);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    // test Firebase
-    // simple text write to Firebase
-    private void writeToFirebase(String referenceName, String data) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference databaseReference = firebaseDatabase.getReference(referenceName);
-
-        // 写入数据
-        databaseReference.setValue(data).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(MainActivity.this, "Data written successfully!", Toast.LENGTH_SHORT).show();
+        if (nfcAdapter != null) {
+            if (!nfcAdapter.isEnabled()) {
+                // NFC is disabled
+                showNfcSettingsDialog();
             } else {
-                Toast.makeText(MainActivity.this, "Failed to write data.", Toast.LENGTH_SHORT).show();
+                // Enable foreground dispatch
+                nfcAdapter.enableForegroundDispatch(this, pendingIntent, null, null);
             }
-        });
+        }
     }
 
-    // test Firebase
-    // 写入房间信息到 Firebase
-    private void writeRoomToFirebase(String roomId, double lat, double lng) {
-        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-        DatabaseReference roomRef = firebaseDatabase.getReference("rooms");
+    @Override
+    protected void onPause() {
+        super.onPause();
 
-        // 创建房间数据
-        Map<String, Object> roomData = new HashMap<>();
-        roomData.put("owner", "YourOwnerIdHere");
-        roomData.put("lat", lat);
-        roomData.put("lng", lng);
+        if (nfcAdapter != null) {
+            // Disable foreground dispatch
+            nfcAdapter.disableForegroundDispatch(this);
+        }
+    }
 
-        // 将房间数据写入 Firebase
-        roomRef.child(roomId).setValue(roomData).addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                Toast.makeText(MainActivity.this, "Room data written to Firebase!", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "Failed to write room data.", Toast.LENGTH_SHORT).show();
-            }
-        });
+    // Handle NFC intents
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+
+        if (intent != null && (
+                NfcAdapter.ACTION_TAG_DISCOVERED.equals(intent.getAction()) ||
+                        NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
+                        NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())
+        )) {
+            // 写入模式
+            Log.d("NFC", "NFC Tag discovered!");
+//            nfcController.writeTag(intent);
+
+            nfcController.handleTag(intent);
+        }
+    }
+
+    private void showNfcSettingsDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("NFC is disabled")
+                .setMessage("NFC is required to use this feature. Do you want to enable NFC?")
+                .setPositiveButton("Yes", (dialog, which) -> {
+                    // Open NFC settings
+                    startActivity(new Intent(android.provider.Settings.ACTION_NFC_SETTINGS));
+                })
+                .setNegativeButton("No", (dialog, which) -> {
+                    // User chose not to enable NFC
+                    Toast.makeText(MainActivity.this, "NFC is required for this feature.", Toast.LENGTH_SHORT).show();
+                })
+                .show();
+    }
+
+    private String generateUUID() {
+        String randomId = UUID.randomUUID().toString().substring(0, 8);
+        int randomFiveDigitNumber = (int) (Math.random() * 90000) + 10000;
+        userId = "UUID" + randomId + randomFiveDigitNumber;
+        return userId;
+
     }
 }
-
-
-

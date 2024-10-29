@@ -1,29 +1,39 @@
 package com.example.cats_catch_mice.ui.home;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.cats_catch_mice.DatabaseManager;
+import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -35,7 +45,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -53,27 +62,32 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap map;
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
+
     private FusedLocationProviderClient fusedLocationClient;
+    private LocationCallback locationCallback;
 
-    // looper for retrieving player's location
-    private Handler triggerHandler = new Handler(Looper.getMainLooper());
-    private Runnable locationUpdateTrigger;
+    private FirebaseManager firebaseManager;
+    private Handler handler;
 
-    // flag for thread scheduling
-    private boolean updating = true;
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
-    private DatabaseManager databaseManager;
+        firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
+        handler = new Handler(Looper.getMainLooper());
+
+        // callback for location permission request
+        setResultPermissionLauncher();
+
+        // set up and start the trigger to get device location
+        setLocationUpdateCallback();
+    }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
 
-        databaseManager = new ViewModelProvider(requireActivity()).get(DatabaseManager.class);
-
         binding = FragmentMapBinding.inflate(inflater, container, false);
         View root = binding.getRoot();
-
-        // callback for location permission request
-        setResultPermissionLauncher();
 
         if (this.getActivity() != null)
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
@@ -84,11 +98,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        // set up and start the trigger to get device location
         startUpdatingLocation();
+
+        // TODO: hotfix for null room id cuz we don't have landing page here
+        firebaseManager.setRoomId("roomId12345");
 
         return root;
     }
+
+    /* Map */
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
@@ -96,52 +114,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         showUnimelb();
         getLocationPermission();
         updateLocationUI();
-        getDeviceLocation();
+
+        if(!joinedRoom()){
+            Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        startUpdatingLocation();
     }
 
-    private void setResultPermissionLauncher() {
-        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            if (isGranted) {
-                Log.d("debugging", "granted");
-                locationPermissionGranted = true;
-                updateLocationUI();
-                getDeviceLocation();
-            } else {
-                Log.d("debugging", "not granted");
-                locationPermissionGranted = false;
-            }
-        });
-    }
-
-    public void startUpdatingLocation() {
-        locationUpdateTrigger = new Runnable() {
-            public void run() {
-                if (updating){
-                    Log.d("debugging", "start triggering");
-                    getDeviceLocation();
-                    triggerHandler.postDelayed(this, TRIGGER_INTERVAL);
-                }
-            }
-        };
-        triggerHandler.post(locationUpdateTrigger);
-    }
-
-    public void stopUpdatingLocation() {
-        Log.d("debugging", "stop triggering");
-        triggerHandler.removeCallbacks(locationUpdateTrigger);
-    }
-
-    // setter
-    public void setUpdating(boolean updating){
-        this.updating = updating;
-    }
-
-    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
-        int height = Math.round(icon.getHeight()*scale);
-        int width= Math.round(icon.getWidth()*scale);
-        Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
-        return BitmapDescriptorFactory.fromBitmap(scaledIcon);
+    private boolean joinedRoom(){
+        return firebaseManager.getRoomId() != null;
     }
 
     private void showUnimelb() {
@@ -152,7 +135,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
     }
-
     private void updateLocationUI() {
         Log.d("debugging", "updating UI");
         if (this.map == null)
@@ -170,31 +152,70 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private void getDeviceLocation() {
-        if (this.getActivity() == null) {
-            Log.e(LOG_TAG, "Error when getting activity");
+    // helper for icon rendering on map
+    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
+        int height = Math.round(icon.getHeight()*scale);
+        int width= Math.round(icon.getWidth()*scale);
+        Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
+        return BitmapDescriptorFactory.fromBitmap(scaledIcon);
+    }
+
+    /* Periodic map update*/
+
+    private void startUpdatingLocation() {
+        if(!locationPermissionGranted){
             return;
         }
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
         try {
-            if (this.locationPermissionGranted) {
-                Log.d("debugging", "getting device location");
-                fusedLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(
-                        this.getActivity(), new OnSuccessListener<Location>() {
-                            @Override
-                            public void onSuccess(Location location) {
-                                if (location != null) {
-//                            Log.d("debugging", "last location got");
-                                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
-                                    );
-                                }
-                            }
-                        });
-            }
-        } catch (SecurityException e) {
-            Log.e(LOG_TAG, "Error occurred when getting device location");
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        }catch(SecurityException e) {
+            Log.d(LOG_TAG, "Error when request location updates");
         }
     }
+    private void updateMap() {
+        firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
+            for (Pair<Double, Double> location : locations){
+                map.addMarker(new MarkerOptions()
+                        .position(new LatLng(location.first, location.second))
+                        .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
+            }
+            Log.d("debugging", "unimelb map updated");
+        }, handler::post).exceptionally(throwable -> {
+            return null;
+        });
+    }
+    private void setLocationUpdateCallback(){
+        locationCallback = new LocationCallback() {
+            @Override
+            public void onLocationResult(LocationResult locationResult) {
+                if (locationResult == null) {
+                    Log.d(LOG_TAG, "Error: location is null");
+                    return;
+                }
+                Location location = locationResult.getLastLocation();
+                if (location != null) {
+                    Log.d("debugging", "last location got");
+                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
+                    );
+                    Log.d("debugging", "Lat: " + location.getLatitude() +
+                            ", Long: " + location.getLongitude());
+                    double lat = location.getLatitude();
+                    double lng = location.getLongitude();
+
+                    // TODO: change to actual player id
+                    String playerId = "UUID67890";
+                    firebaseManager.updateLocation(playerId, lat, lng, firebaseManager.getRoomId());
+                    updateMap();
+                }
+            }
+        };
+    }
+
+
+    /* Location permission */
 
     private void getLocationPermission() {
         if (this.getContext() == null) {
@@ -210,5 +231,40 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Log.d("debugging", "request permission");
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
+    }
+    private void setResultPermissionLauncher() {
+        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                Log.d("debugging", "granted");
+                locationPermissionGranted = true;
+                updateLocationUI();
+                startUpdatingLocation();
+            } else {
+                Log.d("debugging", "not granted");
+                locationPermissionGranted = false;
+                showLocationRequireDialog();
+            }
+        });
+    }
+
+    /* Location permission dialog when permission denied */
+
+    // show dialog when user denies location permission
+    private void showLocationRequireDialog() {
+        new AlertDialog.Builder(this.getContext())
+                .setTitle("Location permission required")
+                .setMessage("The game needs location permission to function properly. Please turn it on.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> openSettings())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+    // open Settings on user's phone
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", requireActivity().getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 }

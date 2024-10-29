@@ -68,6 +68,15 @@ public class FirebaseManagerTest {
     }
 
 
+    @Test
+    public void t(){
+        String playerId = "UUID12345";  // 预先存在的玩家ID
+        String roomId = "roomId12345";  // 房间ID
+        String itemId = "item1";
+
+        firebaseManager.updateItemNum(playerId, 20, itemId , roomId);
+
+    }
 
 
     @Test

@@ -5,19 +5,13 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
-    <!-- Home Fragment (地图界面) -->
     <fragment
         android:id="@+id/navigation_home"
         android:name="com.example.cats_catch_mice.ui.home.HomeFragment"
         android:label="@string/Map"
         tools:layout="@layout/fragment_map" />
 
-        <!-- Action: Navigate to WaitingRoomFragment -->
-        <action
-        android:id="@+id/action_homeFragment_to_waitingRoomFragment"
-        app:destination="@id/waitingRoomFragment" />
-
-        <fragment
+    <fragment
         android:id="@+id/navigation_dashboard"
         android:name="com.example.cats_catch_mice.ui.itemList.ItemFragment"
         android:label="@string/Item_List"
@@ -29,28 +23,34 @@
         android:label="Item Detail"
         tools:layout="@layout/fragment_item_detail" />
 
-    <!-- Waiting Room Fragment -->
     <fragment
-        android:id="@+id/waitingRoomFragment"
-        android:name="com.example.cats_catch_mice.ui.waitingRoom.WaitingRoomFragment"
-        android:label="Waiting Room"
-        tools:layout="@layout/fragment_waiting_room">
+        android:id="@+id/navigation_scanner"
+        android:name="com.example.cats_catch_mice.QRScannerFragment"
+        android:label="@string/QR_Scanner"
+        tools:layout="@layout/fragment_q_r_scanner" />
 
-        <!-- Action: Navigate back to HomeFragment (optional, if needed) -->
-        <action
-            android:id="@+id/action_waitingRoomFragment_to_homeFragment"
-            app:destination="@id/navigation_home" />
+
+<!--        测试片段      -->
+
+
+    <action
+        android:id="@+id/action_global_navigation_qr_test"
+        app:destination="@id/navigation_qr_test" />
+
+
+    <fragment
+        android:id="@+id/navigation_qr_test"
+        android:name="com.example.cats_catch_mice.QRTest"
+        android:label="QR Code"
+        tools:layout="@layout/fragment_q_r_test">
+        <argument
+            android:name="room_id"
+            app:argType="string" />
     </fragment>
-<!--    <fragment-->
-<!--        android:id="@+id/waitingRoomFragment"-->
-<!--        android:name="com.example.cats_catch_mice.ui.waitingRoom.WaitingRoomFragment">-->
-<!--        <action-->
-<!--            android:id="@+id/action_waitingRoomFragment_to_homeFragment"-->
-<!--            app:destination="@id/homeFragment" />-->
-<!--    </fragment>-->
 
-<!--    <fragment-->
-<!--        android:id="@+id/homeFragment"-->
-<!--        android:name="com.example.cats_catch_mice.ui.home.HomeFragment" />-->
+
+
+
+
 
 </navigation>

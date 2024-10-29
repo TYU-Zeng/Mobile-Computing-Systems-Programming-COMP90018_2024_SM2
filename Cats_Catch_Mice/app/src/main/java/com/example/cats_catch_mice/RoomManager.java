@@ -52,15 +52,18 @@ public class RoomManager {
     // 创建房间 返回当前房间的id给主机
     // 需要主机的位置信息
 
-
-
     public String createRoom(String ownerId) {
         // 生成房间 ID
         this.roomData = new RoomData(ownerId);
-        String roomId = UUID.randomUUID().toString();
+        String uuidPart = UUID.randomUUID().toString().substring(0, 8);
+
+        // 生成一个 5 位随机数字
+        int randomFiveDigitNumber = (int) (Math.random() * 90000) + 10000;
+
+        // 将 UUID 和 5 位数字组合成最终的 roomId
+        String roomId = "roomId" + uuidPart + randomFiveDigitNumber;
 
         // 添加房主为房间成员，并设置其位置信息
-
         // TODO: get current location
         // ownerData.put("lat", lat);
         // ownerData.put("lng", lng);

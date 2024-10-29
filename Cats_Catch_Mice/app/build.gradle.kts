@@ -1,18 +1,19 @@
 plugins {
-    alias(libs.plugins.android.application)
+
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 
+    id("com.android.application")
     id("com.google.gms.google-services")
 }
 
 android {
     namespace = "com.example.cats_catch_mice"
-    compileSdk = 34 // 保持 compileSdk 为 API 30
+    compileSdk = 31
 
     defaultConfig {
         applicationId = "com.example.cats_catch_mice"
         minSdk = 28
-        targetSdk = 34  // 保持 targetSdk 为 API 30
+        targetSdk = 31
         versionCode = 1
         versionName = "1.0"
 
@@ -56,39 +57,31 @@ secrets {
 dependencies {
     // AndroidX 基础库依赖，选择与 API 30 兼容的版本
     implementation("androidx.appcompat:appcompat:1.3.1")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.4")
     implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.3.1")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.1")
     implementation("androidx.navigation:navigation-fragment:2.3.5")
     implementation("androidx.navigation:navigation-ui:2.3.5")
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
 
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.constraintlayout)
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.viewmodel.ktx)
-    implementation(libs.navigation.fragment)
-    implementation(libs.navigation.ui)
-    implementation(libs.activity)
-    implementation(libs.play.services.location)
-    implementation(libs.recyclerview)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-
-    implementation("com.google.android.gms:play-services-maps:19.0.0")
     // Material Components 依赖，修复主题问题
     implementation("com.google.android.material:material:1.3.0")
+
+    implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation(libs.play.services.location)
+
 
     // 单元测试和 Android Instrumentation Test 依赖
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.2")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 
-    // Firebase 依赖，确保 Firebase 与 API 30 兼容
-    implementation(platform("com.google.firebase:firebase-bom:28.0.1"))  // 使用与 API 30 兼容的 Firebase BOM
+    // Firebase
+    implementation(platform("com.google.firebase:firebase-bom:28.0.1"))
     implementation("com.google.firebase:firebase-database")
+
+    // ZXing Android Embedded 库
+    implementation("com.journeyapps:zxing-android-embedded:4.1.0")
+    implementation("com.google.zxing:core:3.4.1")
 
     // 二维码依赖
     implementation("com.google.zxing:core:3.4.1")
