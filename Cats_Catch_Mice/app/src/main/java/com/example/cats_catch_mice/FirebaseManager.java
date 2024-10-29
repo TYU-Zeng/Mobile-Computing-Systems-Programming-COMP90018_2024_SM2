@@ -63,6 +63,8 @@ public class FirebaseManager extends ViewModel {
     private static final int MAX_THREADS = 10;
     private static final int THREAD_LIFE = 30;
 
+    private String roomId;
+    private String playerId;
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -324,6 +326,23 @@ public class FirebaseManager extends ViewModel {
         return ids;
     }
 
+    // setter
+    public void setRoomId(String id){
+        this.roomId = id;
+    }
+
+    public void setPlayerId(String id){
+        this.playerId = id;
+    }
+
+    // getter
+    public String getRoomId(){
+        return this.roomId;
+    }
+
+    public String getPlayerId(){
+        return this.playerId;
+    }
 
 
 }
