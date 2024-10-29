@@ -17,6 +17,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -107,7 +108,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         showUnimelb();
         getLocationPermission();
         updateLocationUI();
+
+        if(!joinedRoom()){
+            Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         startUpdatingLocation();
+    }
+
+    private boolean joinedRoom(){
+        return firebaseManager.getRoomId() != null;
     }
 
     private void showUnimelb() {
