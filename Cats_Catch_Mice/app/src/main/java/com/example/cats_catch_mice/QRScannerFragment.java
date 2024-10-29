@@ -24,6 +24,8 @@ public class QRScannerFragment extends Fragment {
     private CompoundBarcodeView barcodeView;
     private String roomId;
 
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_q_r_scanner, container, false);
@@ -40,13 +42,12 @@ public class QRScannerFragment extends Fragment {
             public void barcodeResult(BarcodeResult result) {
                 if (result != null) {
                     String scannedData = result.getText();
-                    if (scannedData != null && scannedData.startsWith("test")) {
+                    if (scannedData != null && scannedData.startsWith("roomId")) {
 
                         Log.d("Scanner" ,"barcodeResult: " + scannedData);
-                        // Proceed if valid
                         roomId = scannedData;
 
-                        // 用buddle 传回参数
+
                         Bundle bundle = new Bundle();
                         bundle.putString("scanned_qr_code", scannedData);
 

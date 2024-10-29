@@ -52,8 +52,6 @@ public class RoomManager {
     // 创建房间 返回当前房间的id给主机
     // 需要主机的位置信息
 
-
-
     public String createRoom(String ownerId) {
         // 生成房间 ID
         this.roomData = new RoomData(ownerId);

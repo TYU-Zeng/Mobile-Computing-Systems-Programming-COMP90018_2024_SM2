@@ -23,6 +23,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentResultListener;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -43,6 +44,7 @@ import com.google.firebase.database.ValueEventListener;
 import androidx.annotation.NonNull;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -69,13 +71,14 @@ public class MainActivity extends AppCompatActivity {
     private RoomData roomData = null;
     private Boolean isHost = false;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
         // init firebase on manager created
         firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
-        userId = generateUUID();
+        //userId = generateUUID();
         Log.d("UUID", "onCreate: UUID: " + userId);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
@@ -124,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseManager firebaseManager = new FirebaseManager();
 
+        // 监听从 QRScannerFragment 传回的数据
+
+
     }
 
     /**
@@ -151,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("Bitmap", "onOptionsItemSelected: create bit map");
 
             // Pass the roomId as an argument
-            String roomId = "testRoomId11111";
+            String roomId = "roomId11111";
 
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
 
@@ -172,7 +178,11 @@ public class MainActivity extends AppCompatActivity {
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
             navController.navigate(R.id.navigation_scanner);
             // toast
-            Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
+
+            return true;
+
+
 
 
         }else if (item.getItemId() == R.id.menu_quit) {
@@ -274,22 +284,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private String generateUUID() {
-        // 从数据库中获取所有现有的 ID，并存储在一个 Set 中
-        Set<String> existingIds = firebaseManager.getAllExistingIdsFromDatabase();
 
-        String uuidString;
-        do {
-            // 生成一个随机的 5 位数
-            int randomFiveDigitNumber = (int)(Math.random() * 90000) + 10000;
-
-            // 组合字符串
-            uuidString = "UUID" + randomFiveDigitNumber;
-
-        } while (existingIds.contains(uuidString)); // 如果生成的 ID 已存在，则重新生成
-
-        return uuidString;
-    }
 
 
 }
