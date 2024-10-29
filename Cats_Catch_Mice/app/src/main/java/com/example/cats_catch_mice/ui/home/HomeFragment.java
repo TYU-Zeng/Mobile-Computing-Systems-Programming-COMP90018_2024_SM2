@@ -1,13 +1,17 @@
 package com.example.cats_catch_mice.ui.home;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -111,6 +115,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             } else {
                 Log.d("debugging", "not granted");
                 locationPermissionGranted = false;
+                showLocationRequireDialog();
             }
         });
     }
@@ -218,5 +223,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Log.d("debugging", "request permission");
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
+    }
+
+    // show dialog when user denies location permission
+    private void showLocationRequireDialog() {
+        new AlertDialog.Builder(this.getContext())
+                .setTitle("Location permission required")
+                .setMessage("The game needs location permission to function properly. Please turn it on.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> openSettings())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+
+    // open Settings on user's phone
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", requireActivity().getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 }
