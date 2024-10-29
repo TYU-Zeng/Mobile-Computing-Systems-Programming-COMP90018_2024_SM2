@@ -9,6 +9,7 @@ import android.content.IntentFilter;
 import android.graphics.Bitmap;
 import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
@@ -125,7 +126,7 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        FirebaseManager firebaseManager = new FirebaseManager();
+        // FirebaseManager firebaseManager = new FirebaseManager();
 
         // 监听从 QRScannerFragment 传回的数据
 
@@ -153,19 +154,6 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_createRoom) {
-
-            Log.d("Bitmap", "onOptionsItemSelected: create bit map");
-
-            // Pass the roomId as an argument
-            String roomId = "roomId11111";
-
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-
-            // Use Bundle to pass the roomId
-            Bundle bundle = new Bundle();
-            bundle.putString("room_id", roomId);
-
-            navController.navigate(R.id.action_global_navigation_qr_test, bundle);
 
             return true;
 
@@ -197,6 +185,24 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (item.getItemId() == android.R.id.home) {
             onBackPressed();
+        } else if (item.getItemId() == R.id.menu_qrCode) {
+            Log.d("Bitmap", "onOptionsItemSelected: create bit map");
+            //
+
+//            String shareRoomId = "roomId123";
+            // Pass the roomId as an argument
+            String shareRoomId = firebaseManager.getRoomId();
+            Log.d(TAG, "onOptionsItemSelected: roomId = " + shareRoomId);
+
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+
+            // Use Bundle to pass the roomId
+            Bundle bundle = new Bundle();
+            bundle.putString("room_id", shareRoomId);
+
+            navController.navigate(R.id.action_global_navigation_qr_test, bundle);
+
+            return true;
         }
         return true;
     }

@@ -330,6 +330,7 @@ public class FirebaseManager extends ViewModel {
 
     // setter
     public void setRoomId(String id){
+        Log.d("FirebaseManager", "setRoomId to: " + id);
         this.roomId = id;
     }
 
@@ -339,6 +340,7 @@ public class FirebaseManager extends ViewModel {
 
     // getter
     public String getRoomId(){
+        Log.d("FirebaseManager", "getRoomId: " + roomId);
         return this.roomId;
     }
 
