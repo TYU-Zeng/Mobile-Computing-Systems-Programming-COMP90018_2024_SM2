@@ -63,6 +63,8 @@ public class FirebaseManager extends ViewModel {
     private static final int MAX_THREADS = 10;
     private static final int THREAD_LIFE = 30;
 
+    private static final int MAX_NUM_ITEMS = 2;
+
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -282,7 +284,7 @@ public class FirebaseManager extends ViewModel {
                     if (currentValue == null) {
                         currentData.setValue(1);
                     } else {
-                        currentData.setValue(currentValue + 1);
+                        currentData.setValue(Math.min(currentValue + 1, MAX_NUM_ITEMS));
                     }
                     return Transaction.success(currentData);
                 }
