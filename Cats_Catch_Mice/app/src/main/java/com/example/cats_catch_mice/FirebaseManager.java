@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -62,6 +64,7 @@ public class FirebaseManager extends ViewModel {
     private static final int CORE_THREADS = 5;
     private static final int MAX_THREADS = 10;
     private static final int THREAD_LIFE = 30;
+    private static final int QUEUE_CAP = 10;
 
     private static final int MAX_NUM_ITEMS = 2;
 
@@ -75,7 +78,9 @@ public class FirebaseManager extends ViewModel {
                 MAX_THREADS,
                 THREAD_LIFE,
                 TimeUnit.SECONDS,
-                new SynchronousQueue<>()
+                new LinkedBlockingDeque<>(QUEUE_CAP),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.CallerRunsPolicy()
         );
     }
 
