@@ -73,8 +73,6 @@ public class NfcController {
     }
 
 
-
-
     private String readText(NdefRecord record) throws UnsupportedEncodingException {
         byte[] payload = record.getPayload();
 
@@ -100,8 +98,10 @@ public class NfcController {
     public void writeTag(Intent intent) {
         Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
         if (tag != null) {
+
+            Log.d("NfcController", "writeTag: trying to write tag");
             // Create an NDEF record with the text data
-            NdefRecord ndefRecord = NdefRecord.createTextRecord(null, "item1");
+            NdefRecord ndefRecord = NdefRecord.createTextRecord(null, "item2");
 
             // Create an NDEF message containing the record
             NdefMessage ndefMessage = new NdefMessage(new NdefRecord[]{ndefRecord});

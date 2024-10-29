@@ -21,6 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.SynchronousQueue;
@@ -311,10 +312,17 @@ public class FirebaseManager extends ViewModel {
         Log.d("debugging", info);
     }
 
-
-
-
-
+    public Set<String> getAllExistingIdsFromDatabase() {
+        DatabaseReference reference = database.getReference("rooms");
+        Set<String> ids = null;
+        try {
+            DataSnapshot snapshot = reference.get().getResult();
+            ids = (Set<String>) snapshot.getValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return ids;
+    }
 
 
 

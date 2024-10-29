@@ -44,6 +44,8 @@ import androidx.annotation.NonNull;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -73,6 +75,8 @@ public class MainActivity extends AppCompatActivity {
 
         // init firebase on manager created
         firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
+        userId = generateUUID();
+        Log.d("UUID", "onCreate: UUID: " + userId);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -248,7 +252,9 @@ public class MainActivity extends AppCompatActivity {
         )) {
             // 写入模式
             Log.d("NFC", "NFC Tag discovered!");
-            nfcController.handleTag(intent); // Temporarily write to the tag
+//            nfcController.writeTag(intent);
+
+            nfcController.handleTag(intent);
         }
     }
 
@@ -266,5 +272,24 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .show();
     }
+
+
+    private String generateUUID() {
+        // 从数据库中获取所有现有的 ID，并存储在一个 Set 中
+        Set<String> existingIds = firebaseManager.getAllExistingIdsFromDatabase();
+
+        String uuidString;
+        do {
+            // 生成一个随机的 5 位数
+            int randomFiveDigitNumber = (int)(Math.random() * 90000) + 10000;
+
+            // 组合字符串
+            uuidString = "UUID" + randomFiveDigitNumber;
+
+        } while (existingIds.contains(uuidString)); // 如果生成的 ID 已存在，则重新生成
+
+        return uuidString;
+    }
+
 
 }
