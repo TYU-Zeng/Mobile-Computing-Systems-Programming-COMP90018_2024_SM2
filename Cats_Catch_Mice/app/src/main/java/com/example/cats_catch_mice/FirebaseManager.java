@@ -285,7 +285,7 @@ public class FirebaseManager extends ViewModel {
                     if (currentValue == null) {
                         currentData.setValue(1);
                     } else {
-                        currentData.setValue(Math.max(currentValue + 1, MAX_NUM_ITEM));
+                        currentData.setValue(Math.min(currentValue + 1, MAX_NUM_ITEM));
                     }
                     return Transaction.success(currentData);
                 }
