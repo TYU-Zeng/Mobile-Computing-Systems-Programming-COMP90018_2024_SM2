@@ -22,6 +22,7 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -68,16 +69,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private FirebaseManager firebaseManager;
     private Handler handler;
 
-    public View onCreateView(@NonNull LayoutInflater inflater,
-                             ViewGroup container, Bundle savedInstanceState) {
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
-
-        binding = FragmentMapBinding.inflate(inflater, container, false);
-        View root = binding.getRoot();
+        handler = new Handler(Looper.getMainLooper());
 
         // callback for location permission request
         setResultPermissionLauncher();
+
+        // set up and start the trigger to get device location
+        setLocationUpdateCallback();
+    }
+
+    public View onCreateView(@NonNull LayoutInflater inflater,
+                             ViewGroup container, Bundle savedInstanceState) {
+
+        binding = FragmentMapBinding.inflate(inflater, container, false);
+        View root = binding.getRoot();
 
         if (this.getActivity() != null)
             fusedLocationClient = LocationServices.getFusedLocationProviderClient(this.getActivity());
@@ -88,11 +98,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        // set up and start the trigger to get device location
-        setLocationUpdateCallback();
         startUpdatingLocation();
-
-        handler = new Handler(Looper.getMainLooper());
 
         // TODO: hotfix for null room id cuz we don't have landing page here
         firebaseManager.setRoomId("roomId12345");
