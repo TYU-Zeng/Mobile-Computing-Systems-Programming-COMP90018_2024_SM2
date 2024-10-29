@@ -180,25 +180,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return null;
         });
     }
-
-
-    /* Location permission */
-
-    private void getLocationPermission() {
-        if (this.getContext() == null) {
-            Log.e(LOG_TAG, "Error when getting context");
-            return;
-        }
-        if (ContextCompat.checkSelfPermission(this.getContext(),
-                android.Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            Log.d("debugging", "check self permission");
-            locationPermissionGranted = true;
-        } else {
-            Log.d("debugging", "request permission");
-            resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
-        }
-    }
     private void setLocationUpdateCallback(){
         locationCallback = new LocationCallback() {
             @Override
@@ -225,6 +206,25 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         };
+    }
+
+
+    /* Location permission */
+
+    private void getLocationPermission() {
+        if (this.getContext() == null) {
+            Log.e(LOG_TAG, "Error when getting context");
+            return;
+        }
+        if (ContextCompat.checkSelfPermission(this.getContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            Log.d("debugging", "check self permission");
+            locationPermissionGranted = true;
+        } else {
+            Log.d("debugging", "request permission");
+            resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
     }
     private void setResultPermissionLauncher() {
         resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
