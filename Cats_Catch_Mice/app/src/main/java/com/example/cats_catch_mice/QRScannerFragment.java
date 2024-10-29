@@ -53,11 +53,6 @@ public class QRScannerFragment extends Fragment {
                         roomId = scannedData;
 
 
-                        Bundle bundle = new Bundle();
-                        bundle.putString("scanned_qr_code", scannedData);
-
-                        getParentFragmentManager().setFragmentResult("requestKey", bundle);
-
                         NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
                         navController.navigateUp();
 
@@ -65,11 +60,6 @@ public class QRScannerFragment extends Fragment {
                         // Show an error message
                         Toast.makeText(getActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
                     }
-
-                    // Return to the previous fragment and pass the scan result
-                    Bundle bundle = new Bundle();
-                    bundle.putString("scanned_qr_code", scannedData);
-                    getParentFragmentManager().setFragmentResult("requestKey", bundle);
 
                     // Navigate back using NavController
                     NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
