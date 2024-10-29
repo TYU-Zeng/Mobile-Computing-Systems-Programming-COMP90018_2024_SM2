@@ -128,6 +128,8 @@ public class FirebaseManager extends ViewModel {
                 });
             }catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
+            }catch (NullPointerException e){
+                Log.e("debugging", "Null object reference");
             }
         });
     }
@@ -154,6 +156,8 @@ public class FirebaseManager extends ViewModel {
                 }
                 locationsFuture.complete(locations);
             }catch (ExecutionException | InterruptedException e) {
+                locationsFuture.completeExceptionally(e);
+            }catch (Exception e){
                 locationsFuture.completeExceptionally(e);
             }
         });
