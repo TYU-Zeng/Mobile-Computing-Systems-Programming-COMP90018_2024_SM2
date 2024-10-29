@@ -101,7 +101,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         startUpdatingLocation();
 
         // TODO: hotfix for null room id cuz we don't have landing page here
-        firebaseManager.setRoomId("roomId12345");
 
         return root;
     }
@@ -206,7 +205,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     double lng = location.getLongitude();
 
                     // TODO: change to actual player id
-                    String playerId = "UUID67890";
+                    String playerId = "UUID11111";
                     firebaseManager.updateLocation(playerId, lat, lng, firebaseManager.getRoomId());
                     updateMap();
                 }

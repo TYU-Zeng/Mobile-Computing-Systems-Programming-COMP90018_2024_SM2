@@ -65,7 +65,7 @@ public class FirebaseManager extends ViewModel {
     private static final int MAX_THREADS = 10;
     private static final int THREAD_LIFE = 30;
     private static final int QUEUE_CAP = 10;
-
+    private static final int MIN_NUM_ITEMS = 0;
     private static final int MAX_NUM_ITEMS = 2;
 
     private String roomId;
@@ -293,9 +293,9 @@ public class FirebaseManager extends ViewModel {
                 public Transaction.Result doTransaction(@NonNull MutableData currentData) {
                     Integer currentValue = currentData.getValue(Integer.class);
                     if (currentValue == null) {
-                        currentData.setValue(1);
+                        currentData.setValue(0);
                     } else {
-                        currentData.setValue(currentValue + 1);
+                        currentData.setValue(Math.min(currentValue + 1, MAX_NUM_ITEMS));
                     }
                     return Transaction.success(currentData);
                 }
@@ -308,6 +308,39 @@ public class FirebaseManager extends ViewModel {
                         Log.e("FirebaseManager", "Failed to increment item count.", databaseError.toException());
                     }
                 }
+            });
+        });
+    }
+
+    public void decreaseItemCount(String playerId, String itemId, String roomId) {
+        executor.execute(() -> {
+            DatabaseReference itemRef = database.getReference("rooms")
+                    .child(roomId)
+                    .child("members")
+                    .child(playerId)
+                    .child(itemId);
+
+            itemRef.runTransaction(new Transaction.Handler() {
+                @NonNull
+                @Override
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    Integer currentValue = currentData.getValue(Integer.class);
+                    if (currentValue == null) {
+                        currentData.setValue(0);
+                    } else {
+                        currentData.setValue(Math.max(currentValue - 1, MIN_NUM_ITEMS));
+                    }
+                    return Transaction.success(currentData);
+                }
+                @Override
+                public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot dataSnapshot) {
+                    if (committed) {
+                        Log.d("FirebaseManager", "Item count incremented successfully.");
+                    } else {
+                        Log.e("FirebaseManager", "Failed to increment item count.", databaseError.toException());
+                    }
+                }
+
             });
         });
     }

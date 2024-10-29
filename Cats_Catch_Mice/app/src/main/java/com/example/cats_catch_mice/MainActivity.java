@@ -75,10 +75,13 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+
         super.onCreate(savedInstanceState);
 
         // init firebase on manager created
         firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
+
         //userId = generateUUID();
         Log.d("UUID", "onCreate: UUID: " + userId);
 
@@ -192,11 +195,12 @@ public class MainActivity extends AppCompatActivity {
 //            String shareRoomId = "roomId123";
             // Pass the roomId as an argument
             String shareRoomId = firebaseManager.getRoomId();
+
             Log.d(TAG, "onOptionsItemSelected: roomId = " + shareRoomId);
 
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
 
-            // Use Bundle to pass the roomId
+
             Bundle bundle = new Bundle();
             bundle.putString("room_id", shareRoomId);
 
