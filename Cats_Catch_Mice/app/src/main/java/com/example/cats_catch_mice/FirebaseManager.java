@@ -65,6 +65,8 @@ public class FirebaseManager extends ViewModel {
 
     private static final int MAX_NUM_ITEMS = 2;
 
+    private String roomId;
+    private String playerId;
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -284,7 +286,7 @@ public class FirebaseManager extends ViewModel {
                     if (currentValue == null) {
                         currentData.setValue(1);
                     } else {
-                        currentData.setValue(Math.min(currentValue + 1, MAX_NUM_ITEMS));
+                        currentData.setValue(currentValue + 1);
                     }
                     return Transaction.success(currentData);
                 }
@@ -326,6 +328,23 @@ public class FirebaseManager extends ViewModel {
         return ids;
     }
 
+    // setter
+    public void setRoomId(String id){
+        this.roomId = id;
+    }
+
+    public void setPlayerId(String id){
+        this.playerId = id;
+    }
+
+    // getter
+    public String getRoomId(){
+        return this.roomId;
+    }
+
+    public String getPlayerId(){
+        return this.playerId;
+    }
 
 
 }

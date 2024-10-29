@@ -1,18 +1,23 @@
 package com.example.cats_catch_mice.ui.home;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.BitmapFactory;
 import android.graphics.Bitmap;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.provider.Settings;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -89,8 +94,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         handler = new Handler(Looper.getMainLooper());
 
+        // TODO: hotfix for null room id cuz we don't have landing page here
+        firebaseManager.setRoomId("roomId12345");
+
         return root;
     }
+
+    /* Map */
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
@@ -98,42 +108,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         showUnimelb();
         getLocationPermission();
         updateLocationUI();
-        startUpdatingLocation();
-    }
 
-    private void setResultPermissionLauncher() {
-        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
-            if (isGranted) {
-                Log.d("debugging", "granted");
-                locationPermissionGranted = true;
-                updateLocationUI();
-                startUpdatingLocation();
-            } else {
-                Log.d("debugging", "not granted");
-                locationPermissionGranted = false;
-            }
-        });
-    }
-
-    public void startUpdatingLocation() {
-        if(!locationPermissionGranted){
+        if(!joinedRoom()){
+            Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
-        try {
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-        }catch(SecurityException e) {
-            Log.d(LOG_TAG, "Error when request location updates");
-        }
+        startUpdatingLocation();
     }
 
-    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
-        int height = Math.round(icon.getHeight()*scale);
-        int width= Math.round(icon.getWidth()*scale);
-        Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
-        return BitmapDescriptorFactory.fromBitmap(scaledIcon);
+    private boolean joinedRoom(){
+        return firebaseManager.getRoomId() != null;
     }
 
     private void showUnimelb() {
@@ -144,7 +129,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
     }
-
     private void updateLocationUI() {
         Log.d("debugging", "updating UI");
         if (this.map == null)
@@ -162,8 +146,30 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
+    // helper for icon rendering on map
+    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
+        int height = Math.round(icon.getHeight()*scale);
+        int width= Math.round(icon.getWidth()*scale);
+        Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
+        return BitmapDescriptorFactory.fromBitmap(scaledIcon);
+    }
+
+    /* Periodic map update*/
+
+    private void startUpdatingLocation() {
+        if(!locationPermissionGranted){
+            return;
+        }
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
+        try {
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
+        }catch(SecurityException e) {
+            Log.d(LOG_TAG, "Error when request location updates");
+        }
+    }
     private void updateMap() {
-        firebaseManager.getLocations("roomId12345").thenAcceptAsync(locations -> {
+        firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
             for (Pair<Double, Double> location : locations){
                 map.addMarker(new MarkerOptions()
                         .position(new LatLng(location.first, location.second))
@@ -174,7 +180,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return null;
         });
     }
-
     private void setLocationUpdateCallback(){
         locationCallback = new LocationCallback() {
             @Override
@@ -194,15 +199,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     double lat = location.getLatitude();
                     double lng = location.getLongitude();
 
-                    // TODO: change to actual player id and room id
+                    // TODO: change to actual player id
                     String playerId = "UUID67890";
-                    String roomId = "roomId12345";
-                    firebaseManager.updateLocation(playerId, lat, lng, roomId);
+                    firebaseManager.updateLocation(playerId, lat, lng, firebaseManager.getRoomId());
                     updateMap();
                 }
             }
         };
     }
+
+
+    /* Location permission */
 
     private void getLocationPermission() {
         if (this.getContext() == null) {
@@ -218,5 +225,40 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Log.d("debugging", "request permission");
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
+    }
+    private void setResultPermissionLauncher() {
+        resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
+            if (isGranted) {
+                Log.d("debugging", "granted");
+                locationPermissionGranted = true;
+                updateLocationUI();
+                startUpdatingLocation();
+            } else {
+                Log.d("debugging", "not granted");
+                locationPermissionGranted = false;
+                showLocationRequireDialog();
+            }
+        });
+    }
+
+    /* Location permission dialog when permission denied */
+
+    // show dialog when user denies location permission
+    private void showLocationRequireDialog() {
+        new AlertDialog.Builder(this.getContext())
+                .setTitle("Location permission required")
+                .setMessage("The game needs location permission to function properly. Please turn it on.")
+                .setPositiveButton("Go to Settings", (dialog, which) -> openSettings())
+                .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                .setCancelable(false)
+                .create()
+                .show();
+    }
+    // open Settings on user's phone
+    private void openSettings() {
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", requireActivity().getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
     }
 }

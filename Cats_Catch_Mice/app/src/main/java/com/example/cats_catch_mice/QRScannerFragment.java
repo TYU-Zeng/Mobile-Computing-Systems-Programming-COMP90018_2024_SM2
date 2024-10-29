@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
@@ -24,10 +25,14 @@ public class QRScannerFragment extends Fragment {
     private CompoundBarcodeView barcodeView;
     private String roomId;
 
+    private FirebaseManager firebaseManager;
+
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
+
         return inflater.inflate(R.layout.fragment_q_r_scanner, container, false);
     }
 
@@ -47,11 +52,8 @@ public class QRScannerFragment extends Fragment {
                         Log.d("Scanner" ,"barcodeResult: " + scannedData);
                         roomId = scannedData;
 
-
-                        Bundle bundle = new Bundle();
-                        bundle.putString("scanned_qr_code", scannedData);
-
-                        getParentFragmentManager().setFragmentResult("requestKey", bundle);
+                        // set room id for the player
+                        firebaseManager.setRoomId(scannedData);
 
                         NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
                         navController.navigateUp();
@@ -61,7 +63,9 @@ public class QRScannerFragment extends Fragment {
                         Toast.makeText(getActivity(), "Invalid QR Code", Toast.LENGTH_SHORT).show();
                     }
 
-
+                    // Navigate back using NavController
+                    NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
+                    navController.navigateUp();
                 }
             }
         });
