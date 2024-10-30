@@ -14,20 +14,17 @@ import java.util.UUID;
 
 public class RoomManager {
 
-
     private RoomData roomData;
 
     private Bitmap qrCodeBitmap = null;
 
     public RoomManager() {
-
     }
 
      /*
     sync data to firebase
     这里只需要写入数据的子节点 rooms的数据进入database
     数据格式如下：
-
     "rooms": {
     "roomId12345": {
       "owner": "UUID12345",
@@ -46,11 +43,8 @@ public class RoomManager {
         }
       }
     }
-
-
       */
-    // 创建房间 返回当前房间的id给主机
-    // 需要主机的位置信息
+
 
     public String createRoom(String ownerId) {
         // 生成房间 ID
@@ -70,11 +64,9 @@ public class RoomManager {
 
         Map<String, Object> ownerData = createMember(ownerId, 0, 0);
         roomData.addMember(ownerId, ownerData);
+
         // 写入数据到房间
-
         // 生成二维码
-        Bitmap qrCode = createQRCode(roomId);
-
         return roomId;
     }
 

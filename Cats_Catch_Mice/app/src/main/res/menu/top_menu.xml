@@ -14,8 +14,6 @@
         android:title="@string/share_qrcode"/>
 
 
-    <item android:id="@+id/menu_scanner"
-        android:title="@string/scanner"/>
 
     <item android:id="@+id/menu_quit"
         android:title="@string/quit"/>
