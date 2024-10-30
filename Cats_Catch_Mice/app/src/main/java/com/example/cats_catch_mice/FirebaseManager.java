@@ -274,6 +274,28 @@ public class FirebaseManager extends ViewModel {
     }
 
     public void setFirebaseRoomData(String roomId, String roomOwnerId) {
+        DatabaseReference roomRefs = FirebaseDatabase.getInstance().getReference();
+
+        Map<String, Object> memberData = new HashMap<>();
+        memberData.put("lat", 0.0d);
+        memberData.put("lng", 0.0d);
+        memberData.put("item1", 0);
+        memberData.put("item2", 0);
+
+        Map<String, Object> members = new HashMap<>();
+        members.put(roomOwnerId, memberData);
+
+        Map<String, Object> roomData = new HashMap<>();
+        roomData.put("members", members);
+        roomData.put("owner", roomOwnerId);
+
+        roomRefs.child("rooms").child(roomId).setValue(roomData).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d("debugging", "Data written successfully to Firebase.");
+            } else {
+                Log.d("debugging", "Failed to write data to Firebase.");
+            }
+        });
 
     }
 
