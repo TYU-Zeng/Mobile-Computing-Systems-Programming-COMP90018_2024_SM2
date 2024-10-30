@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -17,7 +18,10 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
+import androidx.lifecycle.ViewModelProvider;
+
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -45,6 +49,14 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -62,12 +74,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     );
     private static final long TRIGGER_INTERVAL = 5000; //milliseconds
     private static final float MOUSE_ICON_SCALE = 0.1f;
+    private static final long CATCH_BUTTON_COOLDOWN_PERIOD = 30000L; // 30 seconds in milliseconds
 
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
+    private boolean catchButtonCooldown = false;
 
+    private HomeViewModel homeViewModel;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
@@ -83,6 +98,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
+
         firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
         handler = new Handler(Looper.getMainLooper());
 
@@ -95,6 +112,92 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         // set single thread to check if player joins room
         executor = Executors.newSingleThreadScheduledExecutor();
     }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+        // Check if cooldown is active and update button text accordingly
+        long currentTime = System.currentTimeMillis();
+        if (currentTime < homeViewModel.catchButtonCooldownEndTime) {
+            startCooldownTimer(catchMouseButton, homeViewModel.catchButtonCooldownEndTime - currentTime);
+        } else {
+            catchMouseButton.setText("Catch");
+        }
+
+
+        // Check if cooldown is active and update button text accordingly
+
+        catchMouseButton.setOnClickListener(v -> {
+
+            long currentTime1 = System.currentTimeMillis();
+            if (currentTime1 < homeViewModel.catchButtonCooldownEndTime) {
+                long remainingTime = (homeViewModel.catchButtonCooldownEndTime - currentTime1) / 1000; // in seconds
+
+                return;
+            }
+
+
+            homeViewModel.catchButtonCooldownEndTime = currentTime1 + CATCH_BUTTON_COOLDOWN_PERIOD;
+            startCooldownTimer(catchMouseButton, CATCH_BUTTON_COOLDOWN_PERIOD);
+            Toast.makeText(getContext(), "Catch!", Toast.LENGTH_SHORT).show();
+
+
+
+
+//            String roomId = "roomIddummy1111";
+//            firebaseManager.getFullRoomDataAsync(roomId)
+//                    .thenAccept(roomSnapshot -> {
+//                        if (roomSnapshot != null) {
+//                            // Get the cat's coordinate
+//                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+//                            // Get the mice's coordinates
+//                            List<Pair<Double, Double>> mouseCoordinates = getMouseCoordinates(roomSnapshot);
+//
+//                            // Log the cat's coordinate
+//                            if (catCoordinate != null) {
+//                                Log.d("HomeFragment", "Cat Coordinate: Lat=" + catCoordinate.first + ", Lng=" + catCoordinate.second);
+//                            } else {
+//                                Log.e("HomeFragment", "Cat coordinate not found");
+//                            }
+//
+//                            // Log the mice's coordinates
+//                            if (!mouseCoordinates.isEmpty()) {
+//                                for (int i = 0; i < mouseCoordinates.size(); i++) {
+//                                    Pair<Double, Double> mouseCoord = mouseCoordinates.get(i);
+//                                    Log.d("HomeFragment", "Mouse " + (i + 1) + " Coordinate: Lat=" + mouseCoord.first + ", Lng=" + mouseCoord.second);
+//                                }
+//                            } else {
+//                                Log.e("HomeFragment", "No mouse coordinates found");
+//                            }
+//                        } else {
+//                            Log.e("HomeFragment", "Room data is null");
+//                        }
+//                    })
+//                    .exceptionally(throwable -> {
+//                        Log.e("HomeFragment", "Error retrieving room data: " + throwable.getMessage());
+//                        return null;
+//                    });
+
+
+        });
+    }
+
+    private void startCooldownTimer(Button button, long cooldownDuration) {
+        new CountDownTimer(cooldownDuration, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                long secondsRemaining = millisUntilFinished / 1000;
+                button.setText("Cool down: " + secondsRemaining + " s");
+            }
+
+            public void onFinish() {
+                button.setText("Catch");
+            }
+        }.start();
+    }
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -167,6 +270,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         updateLocationUI();
         startUpdatingLocation();
     }
+
+
 
     private boolean joinedRoom(){
         return firebaseManager.getRoomId() != null;
@@ -311,4 +416,101 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         intent.setData(uri);
         startActivity(intent);
     }
-}
+
+    private List<Pair<Double, Double>> getMouseCoordinates(DataSnapshot roomSnapshot) {
+        List<Pair<Double, Double>> mouseCoordinates = new ArrayList<>();
+
+        if (roomSnapshot == null) {
+            Log.e("HomeFragment", "Room snapshot is null");
+            return mouseCoordinates; // Return empty list
+        }
+
+        // Retrieve the owner ID (cat's player ID)
+        String ownerId = roomSnapshot.child("owner").getValue(String.class);
+        Log.d("HomeFragment", "Owner ID: " + ownerId);
+        if (ownerId == null) {
+            Log.e("HomeFragment", "Owner ID not found in room data");
+            return mouseCoordinates; // Return empty list
+        }
+
+        // Get the 'members' snapshot
+        DataSnapshot membersSnapshot = roomSnapshot.child("members");
+        if (!membersSnapshot.exists()) {
+            Log.e("HomeFragment", "Members data does not exist");
+            return mouseCoordinates; // Return empty list
+        }
+
+        Log.d("HomeFragment", "Number of members: " + membersSnapshot.getChildrenCount());
+
+        // Iterate through each member
+        for (DataSnapshot memberSnapshot : membersSnapshot.getChildren()) {
+            String memberId = memberSnapshot.getKey();
+            Log.d("HomeFragment", "Processing member ID: " + memberId);
+
+            // Skip the owner (cat)
+            if (memberId.equals(ownerId)) {
+                Log.d("HomeFragment", "Skipping owner");
+                continue;
+            }
+
+            // Get the 'visible' field
+            Boolean visible = memberSnapshot.child("visible").getValue(Boolean.class);
+            Log.d("HomeFragment", "Member " + memberId + " visible: " + visible);
+
+            // Temporarily ignore 'visible' check for debugging
+            // if (visible == null || !visible) {
+            //     Log.d("HomeFragment", "Skipping member " + memberId + " due to visibility");
+            //     continue;
+            // }
+
+            // Get latitude and longitude
+            Double lat = memberSnapshot.child("lat").getValue(Double.class);
+            Double lng = memberSnapshot.child("lng").getValue(Double.class);
+            Log.d("HomeFragment", "Member " + memberId + " coordinates: Lat=" + lat + ", Lng=" + lng);
+
+            // Ensure lat and lng are not null
+            if (lat != null && lng != null) {
+                mouseCoordinates.add(new Pair<>(lat, lng));
+            } else {
+                Log.e("HomeFragment", "Invalid coordinates for member: " + memberId);
+            }
+        }
+
+        return mouseCoordinates;
+    }
+
+
+    private Pair<Double, Double> getCatCoordinate(DataSnapshot roomSnapshot) {
+        if (roomSnapshot == null) {
+            Log.e("HomeFragment", "Room snapshot is null");
+            return null;
+        }
+
+        // Retrieve the owner ID (cat's player ID)
+        String ownerId = roomSnapshot.child("owner").getValue(String.class);
+        if (ownerId == null) {
+            Log.e("HomeFragment", "Owner ID not found in room data");
+            return null;
+        }
+
+        // Get the owner's data from 'members'
+        DataSnapshot ownerSnapshot = roomSnapshot.child("members").child(ownerId);
+        if (!ownerSnapshot.exists()) {
+            Log.e("HomeFragment", "Owner data does not exist in members");
+            return null;
+        }
+
+        // Get latitude and longitude
+        Double lat = ownerSnapshot.child("lat").getValue(Double.class);
+        Double lng = ownerSnapshot.child("lng").getValue(Double.class);
+
+        // Ensure lat and lng are not null
+        if (lat != null && lng != null) {
+            return new Pair<>(lat, lng);
+        } else {
+            Log.e("HomeFragment", "Invalid coordinates for owner");
+            return null;
+        }
+    }
+
+

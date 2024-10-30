@@ -4,6 +4,8 @@ import static android.content.ContentValues.TAG;
 
 import android.util.Log;
 import android.util.Pair;
+
+import java.lang.reflect.Array;
 import java.security.SecureRandom;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -113,7 +115,6 @@ public class FirebaseManager extends ViewModel {
         });
     }
 
-
     public void updateLocation(String playerId, double lat, double lng, String roomId){
         executor.execute(() -> {
             DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
@@ -136,6 +137,32 @@ public class FirebaseManager extends ViewModel {
                 Log.e("debugging", "Null object reference");
             }
         });
+    }
+
+    public CompletableFuture<String> getRoomOwnerAsync(String roomId) {
+        CompletableFuture<String> future = new CompletableFuture<>();
+
+        DatabaseReference ownerRef = FirebaseDatabase.getInstance().getReference("rooms")
+                .child(roomId)
+                .child("owner");
+
+        ownerRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    String ownerId = snapshot.getValue(String.class);
+                    future.complete(ownerId);
+                } else {
+                    future.complete(null);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new RuntimeException("Error when reading owner data"));
+            }
+        });
+        return future;
     }
 
     public CompletableFuture<ArrayList<Pair<Double, Double>>> getLocations(String roomId){
@@ -273,7 +300,7 @@ public class FirebaseManager extends ViewModel {
         roomId = ROOM_ID_PREFIX + surfixId;
         setFirebaseRoomData(roomId, ownerId);
 
-        return roomId;  // e.g., "roomId1234545678"
+        return roomId;
     }
 
     public void setFirebaseRoomData(String roomId, String roomOwnerId) {
@@ -399,6 +426,8 @@ public class FirebaseManager extends ViewModel {
     }
 
 
+
+
     /*
     debugging purpose only: check thread pool status
      */
@@ -422,6 +451,32 @@ public class FirebaseManager extends ViewModel {
         }
         return ids;
     }
+
+    public CompletableFuture<DataSnapshot> getFullRoomDataAsync(String roomId) {
+        CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
+
+        DatabaseReference roomRef = FirebaseDatabase.getInstance().getReference("rooms")
+                .child(roomId);
+
+        roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    future.complete(snapshot);
+                } else {
+                    future.completeExceptionally(new RuntimeException("Room data not found"));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new RuntimeException("Error when reading room data", error.toException()));
+            }
+        });
+
+        return future;
+    }
+
 
     // setter
     public void setRoomId(String id){
