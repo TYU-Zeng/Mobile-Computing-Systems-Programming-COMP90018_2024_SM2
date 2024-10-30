@@ -105,6 +105,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
 
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+        String platerId = firebaseManager.getPlayerId();
+
+
+
         // Check if cooldown is active and update button text accordingly
         long currentTime = System.currentTimeMillis();
         if (currentTime < homeViewModel.catchButtonCooldownEndTime) {

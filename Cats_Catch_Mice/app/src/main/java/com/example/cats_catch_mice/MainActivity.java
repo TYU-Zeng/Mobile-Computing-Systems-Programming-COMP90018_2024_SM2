@@ -291,11 +291,5 @@ public class MainActivity extends AppCompatActivity {
                 .show();
     }
 
-    private String generateUUID() {
-        String randomId = UUID.randomUUID().toString().substring(0, 8);
-        int randomFiveDigitNumber = (int) (Math.random() * 90000) + 10000;
-        userId = "UUID" + randomId + randomFiveDigitNumber;
-        return userId;
 
-    }
 }
