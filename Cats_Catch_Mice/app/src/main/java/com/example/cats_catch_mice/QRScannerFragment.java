@@ -23,7 +23,6 @@ import com.journeyapps.barcodescanner.CompoundBarcodeView;
 public class QRScannerFragment extends Fragment {
 
     private CompoundBarcodeView barcodeView;
-    private String roomId;
 
     private FirebaseManager firebaseManager;
 
@@ -50,13 +49,13 @@ public class QRScannerFragment extends Fragment {
                     if (scannedData != null && scannedData.startsWith("roomId")) {
 
                         Log.d("Scanner" ,"barcodeResult: " + scannedData);
-                        roomId = scannedData;
 
                         // set room id for the player
                         firebaseManager.setRoomId(scannedData);
 
                         Log.d("Scanner", "barcodeResult: firebasemanager set room id");
 
+                        firebaseManager.addPlayerData(firebaseManager.getPlayerId(), 0d, 0d, 0, 0, scannedData);
                         Toast.makeText(getContext(), "Joined room. Room Id: " + scannedData.substring(6), Toast.LENGTH_SHORT).show();
 
                         NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
