@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executors;
@@ -182,6 +183,13 @@ public class FirebaseManager extends ViewModel {
         }catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    public void generatePlayerId() {
+        String randomId = UUID.randomUUID().toString().substring(0, 8);
+        int randomFiveDigitNumber = (int) (Math.random() * 90000) + 10000;
+        String playerId = "UUID" + randomId + randomFiveDigitNumber;
+        setPlayerId(playerId);
     }
 
     public void addPlayerData(String playerId, double lat, double lng, int item1, int item2, String roomId) {
