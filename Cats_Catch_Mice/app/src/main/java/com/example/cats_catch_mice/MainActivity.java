@@ -131,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Create top menu
+     *
      * @param menu
      * @return
      */
@@ -143,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Menu item click event
+     *
      * @param item
      * @return
      */
@@ -150,14 +152,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_createRoom) {
-            String generateRoomId = firebaseManager.createRoom(userId);
+            String generateRoomId = firebaseManager.createRoom(firebaseManager.getPlayerId());
             Log.d("MailActivity", "Create room: Room ID: " + generateRoomId);
 
             Toast.makeText(this, "Room id: " + generateRoomId.substring(6), Toast.LENGTH_SHORT).show();
 
 
             return true;
-
 
 
         } else if (item.getItemId() == R.id.menu_joinRoom) {
@@ -170,9 +171,7 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
 
-
-
-        }else if (item.getItemId() == R.id.menu_quit) {
+        } else if (item.getItemId() == R.id.menu_quit) {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
 
@@ -200,7 +199,7 @@ public class MainActivity extends AppCompatActivity {
                 bundle.putString("room_id", shareRoomId);
 
                 navController.navigate(R.id.action_global_navigation_qr_test, bundle);
-            }else {
+            } else {
                 Log.d(TAG, "onOptionsItemSelected: roomId is null");
                 Toast.makeText(this, "Cannot Share QR Code before join a room!", Toast.LENGTH_SHORT).show();
             }
@@ -227,7 +226,6 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Click event for button
-     *
      */
     @Override
     public boolean onSupportNavigateUp() {
@@ -298,3 +296,4 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .show();
     }
+}
