@@ -46,8 +46,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -92,25 +95,44 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+
+
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
         catchMouseButton.setOnClickListener(v -> {
-            //show owner id
-            firebaseManager.getRoomOwnerAsync("roomId12345").thenAccept(ownerId -> {
-                if (ownerId != null) {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), "Owner ID: " + ownerId, Toast.LENGTH_SHORT).show();
+            String roomId = "roomIddummy1111";
+            firebaseManager.getFullRoomDataAsync(roomId)
+                    .thenAccept(roomSnapshot -> {
+                        if (roomSnapshot != null) {
+                            // Get the cat's coordinate
+                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+                            // Get the mice's coordinates
+                            List<Pair<Double, Double>> mouseCoordinates = getMouseCoordinates(roomSnapshot);
+
+                            // Log the cat's coordinate
+                            if (catCoordinate != null) {
+                                Log.d("HomeFragment", "Cat Coordinate: Lat=" + catCoordinate.first + ", Lng=" + catCoordinate.second);
+                            } else {
+                                Log.e("HomeFragment", "Cat coordinate not found");
+                            }
+
+                            // Log the mice's coordinates
+                            if (!mouseCoordinates.isEmpty()) {
+                                for (int i = 0; i < mouseCoordinates.size(); i++) {
+                                    Pair<Double, Double> mouseCoord = mouseCoordinates.get(i);
+                                    Log.d("HomeFragment", "Mouse " + (i + 1) + " Coordinate: Lat=" + mouseCoord.first + ", Lng=" + mouseCoord.second);
+                                }
+                            } else {
+                                Log.e("HomeFragment", "No mouse coordinates found");
+                            }
+                        } else {
+                            Log.e("HomeFragment", "Room data is null");
+                        }
+                    })
+                    .exceptionally(throwable -> {
+                        Log.e("HomeFragment", "Error retrieving room data: " + throwable.getMessage());
+                        return null;
                     });
-                } else {
-                    getActivity().runOnUiThread(() -> {
-                        Toast.makeText(getContext(), "Owner ID not found.", Toast.LENGTH_SHORT).show();
-                    });
-                }
-            }).exceptionally(throwable -> {
-                getActivity().runOnUiThread(() -> {
-                    Toast.makeText(getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                });
-                return null;
-            });
 
 
 //            if (catchMouseState) {
@@ -121,51 +143,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         });
     }
 
-//    public boolean catchMouse(String ownerId) {
-//        Double playerLat;/* obtain current player's latitude */;
-//        Double playerLng; /* obtain current player's longitude */;
-//
-//        CompletableFuture<Boolean> catchStatusFuture = new CompletableFuture<>();
-//
-//        firebaseManager.getLocatioWithId(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
-//            for (HashMap<String, Pair<Double, Double>> locationData : locations) {
-//                for (Map.Entry<String, Pair<Double, Double>> entry : locationData.entrySet()) {
-//                    String playerId = entry.getKey();
-//                    // if owner id is the key id set playerLat and playerLng
-//                    if (){
-//                        playerLat = entry.getValue().first;
-//                        playerLng = entry.getValue().second;
-//                    }
-//                    Double mouseLat = entry.getValue().first;
-//                    Double mouseLng = entry.getValue().second;
-//
-//                    // Calculate distance
-//                    float[] result = new float[1];
-//                    Location.distanceBetween(playerLat, playerLng, mouseLat, mouseLng, result);
-//                    float distanceInMeters = result[0];
-//
-//                    if (distanceInMeters <= 15) {
-//                        // Mouse caught, store the UUID for communication
-//                        firebaseManager.setPlayerId(playerId); // Save caught player’s ID
-//                        catchStatusFuture.complete(true);
-//                        return;
-//                    }
-//                }
-//            }
-//            catchStatusFuture.complete(false); // No mouse caught if we exit loop without finding one
-//        }).exceptionally(e -> {
-//            Log.e("catchMouse", "Error fetching locations", e);
-//            catchStatusFuture.complete(false);
-//            return null;
-//        });
-//
-//        try {
-//            return catchStatusFuture.get(); // Get result of the async operation
-//        } catch (InterruptedException | ExecutionException e) {
-//            Log.e("catchMouse", "Error completing catch status future", e);
-//            return false;
-//        }
-//    }
 
 
 
@@ -352,4 +329,102 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         intent.setData(uri);
         startActivity(intent);
     }
+
+    private List<Pair<Double, Double>> getMouseCoordinates(DataSnapshot roomSnapshot) {
+        List<Pair<Double, Double>> mouseCoordinates = new ArrayList<>();
+
+        if (roomSnapshot == null) {
+            Log.e("HomeFragment", "Room snapshot is null");
+            return mouseCoordinates; // Return empty list
+        }
+
+        // Retrieve the owner ID (cat's player ID)
+        String ownerId = roomSnapshot.child("owner").getValue(String.class);
+        Log.d("HomeFragment", "Owner ID: " + ownerId);
+        if (ownerId == null) {
+            Log.e("HomeFragment", "Owner ID not found in room data");
+            return mouseCoordinates; // Return empty list
+        }
+
+        // Get the 'members' snapshot
+        DataSnapshot membersSnapshot = roomSnapshot.child("members");
+        if (!membersSnapshot.exists()) {
+            Log.e("HomeFragment", "Members data does not exist");
+            return mouseCoordinates; // Return empty list
+        }
+
+        Log.d("HomeFragment", "Number of members: " + membersSnapshot.getChildrenCount());
+
+        // Iterate through each member
+        for (DataSnapshot memberSnapshot : membersSnapshot.getChildren()) {
+            String memberId = memberSnapshot.getKey();
+            Log.d("HomeFragment", "Processing member ID: " + memberId);
+
+            // Skip the owner (cat)
+            if (memberId.equals(ownerId)) {
+                Log.d("HomeFragment", "Skipping owner");
+                continue;
+            }
+
+            // Get the 'visible' field
+            Boolean visible = memberSnapshot.child("visible").getValue(Boolean.class);
+            Log.d("HomeFragment", "Member " + memberId + " visible: " + visible);
+
+            // Temporarily ignore 'visible' check for debugging
+            // if (visible == null || !visible) {
+            //     Log.d("HomeFragment", "Skipping member " + memberId + " due to visibility");
+            //     continue;
+            // }
+
+            // Get latitude and longitude
+            Double lat = memberSnapshot.child("lat").getValue(Double.class);
+            Double lng = memberSnapshot.child("lng").getValue(Double.class);
+            Log.d("HomeFragment", "Member " + memberId + " coordinates: Lat=" + lat + ", Lng=" + lng);
+
+            // Ensure lat and lng are not null
+            if (lat != null && lng != null) {
+                mouseCoordinates.add(new Pair<>(lat, lng));
+            } else {
+                Log.e("HomeFragment", "Invalid coordinates for member: " + memberId);
+            }
+        }
+
+        return mouseCoordinates;
+    }
+
+
+    private Pair<Double, Double> getCatCoordinate(DataSnapshot roomSnapshot) {
+        if (roomSnapshot == null) {
+            Log.e("HomeFragment", "Room snapshot is null");
+            return null;
+        }
+
+        // Retrieve the owner ID (cat's player ID)
+        String ownerId = roomSnapshot.child("owner").getValue(String.class);
+        if (ownerId == null) {
+            Log.e("HomeFragment", "Owner ID not found in room data");
+            return null;
+        }
+
+        // Get the owner's data from 'members'
+        DataSnapshot ownerSnapshot = roomSnapshot.child("members").child(ownerId);
+        if (!ownerSnapshot.exists()) {
+            Log.e("HomeFragment", "Owner data does not exist in members");
+            return null;
+        }
+
+        // Get latitude and longitude
+        Double lat = ownerSnapshot.child("lat").getValue(Double.class);
+        Double lng = ownerSnapshot.child("lng").getValue(Double.class);
+
+        // Ensure lat and lng are not null
+        if (lat != null && lng != null) {
+            return new Pair<>(lat, lng);
+        } else {
+            Log.e("HomeFragment", "Invalid coordinates for owner");
+            return null;
+        }
+    }
+
+
 }

@@ -138,6 +138,7 @@ public class FirebaseManager extends ViewModel {
             }
         });
     }
+
     public CompletableFuture<String> getRoomOwnerAsync(String roomId) {
         CompletableFuture<String> future = new CompletableFuture<>();
 
@@ -163,9 +164,6 @@ public class FirebaseManager extends ViewModel {
         });
         return future;
     }
-
-
-
 
     public CompletableFuture<ArrayList<Pair<Double, Double>>> getLocations(String roomId){
         CompletableFuture<ArrayList<Pair<Double, Double>>> locationsFuture = new CompletableFuture<>();
@@ -197,45 +195,6 @@ public class FirebaseManager extends ViewModel {
 
         return locationsFuture;
     }
-
-    public CompletableFuture<ArrayList<HashMap<String, Pair<Double, Double>>>> getLocatioWithId(String roomId){
-        CompletableFuture<ArrayList<HashMap<String, Pair<Double, Double>>>> locationsFuture = new CompletableFuture<>();
-
-        executor.execute(() -> {
-            CompletableFuture<Map<String, Object>> future = getRoomDataAsync(roomId);
-            try {
-                DataSnapshot membersSnapshot = (DataSnapshot) future.get();
-                if (membersSnapshot == null) {
-                    locationsFuture.completeExceptionally(new RuntimeException("No members data found"));
-                    return;
-                }
-
-                ArrayList<HashMap<String, Pair<Double, Double>>> locations = new ArrayList<>();
-
-                for (DataSnapshot memberSnapshot : membersSnapshot.getChildren()) {
-                    String id = memberSnapshot.getKey();
-                    Double lat = memberSnapshot.child("lat").getValue(Double.class);
-                    Double lng = memberSnapshot.child("lng").getValue(Double.class);
-
-                    if (lat != null && lng != null) {
-                        Pair<Double, Double> location = new Pair<>(lat, lng);
-                        HashMap<String, Pair<Double, Double>> playerLocation = new HashMap<>();
-                        playerLocation.put(id, location);
-                        locations.add(playerLocation);
-                    }
-                }
-                locationsFuture.complete(locations);
-            } catch (ExecutionException | InterruptedException e) {
-                locationsFuture.completeExceptionally(e);
-            } catch (Exception e) {
-                locationsFuture.completeExceptionally(e);
-            }
-        });
-
-        return locationsFuture;
-    }
-
-
 
     public void updateItemNum(String playerId, int number, String itemId, String roomId){
         DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
@@ -331,7 +290,7 @@ public class FirebaseManager extends ViewModel {
         roomId = ROOM_ID_PREFIX + surfixId;
         setFirebaseRoomData(roomId, ownerId);
 
-        return roomId;  // e.g., "roomId1234545678"
+        return roomId;
     }
 
     public void setFirebaseRoomData(String roomId, String roomOwnerId) {
@@ -434,6 +393,8 @@ public class FirebaseManager extends ViewModel {
     }
 
 
+
+
     /*
     debugging purpose only: check thread pool status
      */
@@ -457,6 +418,32 @@ public class FirebaseManager extends ViewModel {
         }
         return ids;
     }
+
+    public CompletableFuture<DataSnapshot> getFullRoomDataAsync(String roomId) {
+        CompletableFuture<DataSnapshot> future = new CompletableFuture<>();
+
+        DatabaseReference roomRef = FirebaseDatabase.getInstance().getReference("rooms")
+                .child(roomId);
+
+        roomRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    future.complete(snapshot);
+                } else {
+                    future.completeExceptionally(new RuntimeException("Room data not found"));
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                future.completeExceptionally(new RuntimeException("Error when reading room data", error.toException()));
+            }
+        });
+
+        return future;
+    }
+
 
     // setter
     public void setRoomId(String id){
