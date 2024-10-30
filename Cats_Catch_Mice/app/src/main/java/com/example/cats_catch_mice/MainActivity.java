@@ -168,8 +168,6 @@ public class MainActivity extends AppCompatActivity {
             // TODO: QRScannerFragment 创建实例
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
             navController.navigate(R.id.navigation_scanner);
-            // toast
-//            Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
 
             return true;
 
