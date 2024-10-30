@@ -70,7 +70,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             new LatLng(-37.796215, 144.965135)
     );
     private static final long TRIGGER_INTERVAL = 5000; //milliseconds
-    private static final float MOUSE_ICON_SCALE = 0.1f;
+    private static final float ICON_SCALE = 0.08f;
     private static final long CATCH_BUTTON_COOLDOWN_PERIOD = 30000L; // 30 seconds in milliseconds
 
     private FragmentMapBinding binding;
