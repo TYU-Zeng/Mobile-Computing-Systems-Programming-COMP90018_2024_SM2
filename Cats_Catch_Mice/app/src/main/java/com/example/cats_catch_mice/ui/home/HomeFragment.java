@@ -118,6 +118,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
 
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+        String platerId = firebaseManager.getPlayerId();
+
+
+
         // Check if cooldown is active and update button text accordingly
         long currentTime = System.currentTimeMillis();
         if (currentTime < homeViewModel.catchButtonCooldownEndTime) {
@@ -138,46 +142,64 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 return;
             }
 
+            // Proceed with the button's action
+            String roomId = firebaseManager.getRoomId(); // Get the actual room ID
+            if (roomId == null) {
+                Toast.makeText(getContext(), "You are not in a room.", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
             homeViewModel.catchButtonCooldownEndTime = currentTime1 + CATCH_BUTTON_COOLDOWN_PERIOD;
             startCooldownTimer(catchMouseButton, CATCH_BUTTON_COOLDOWN_PERIOD);
-            Toast.makeText(getContext(), "Catch!", Toast.LENGTH_SHORT).show();
 
+            firebaseManager.getFullRoomDataAsync(roomId)
+                    .thenAccept(roomSnapshot -> {
+                        if (roomSnapshot != null) {
+                            // Get the cat's coordinate
+                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+                            if (catCoordinate == null) {
+                                Log.e("HomeFragment", "Cat coordinate not found");
+                                return;
+                            }
 
-//            String roomId = "roomIddummy1111";
-//            firebaseManager.getFullRoomDataAsync(roomId)
-//                    .thenAccept(roomSnapshot -> {
-//                        if (roomSnapshot != null) {
-//                            // Get the cat's coordinate
-//                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
-//                            // Get the mice's coordinates
-//                            List<Pair<Double, Double>> mouseCoordinates = getMouseCoordinates(roomSnapshot);
-//
-//                            // Log the cat's coordinate
-//                            if (catCoordinate != null) {
-//                                Log.d("HomeFragment", "Cat Coordinate: Lat=" + catCoordinate.first + ", Lng=" + catCoordinate.second);
-//                            } else {
-//                                Log.e("HomeFragment", "Cat coordinate not found");
-//                            }
-//
-//                            // Log the mice's coordinates
-//                            if (!mouseCoordinates.isEmpty()) {
-//                                for (int i = 0; i < mouseCoordinates.size(); i++) {
-//                                    Pair<Double, Double> mouseCoord = mouseCoordinates.get(i);
-//                                    Log.d("HomeFragment", "Mouse " + (i + 1) + " Coordinate: Lat=" + mouseCoord.first + ", Lng=" + mouseCoord.second);
-//                                }
-//                            } else {
-//                                Log.e("HomeFragment", "No mouse coordinates found");
-//                            }
-//                        } else {
-//                            Log.e("HomeFragment", "Room data is null");
-//                        }
-//                    })
-//                    .exceptionally(throwable -> {
-//                        Log.e("HomeFragment", "Error retrieving room data: " + throwable.getMessage());
-//                        return null;
-//                    });
+                            // Get the mice's IDs and coordinates
+                            List<Map<String, Pair<Double, Double>>> mouseDataList = getMouseCoordinatesWithId(roomSnapshot);
+                            if (mouseDataList.isEmpty()) {
+                                Log.e("HomeFragment", "No mouse data found");
+                                getActivity().runOnUiThread(() -> {
+                                    Toast.makeText(getContext(), "No mice to catch.", Toast.LENGTH_SHORT).show();
+                                });
+                                return;
+                            }
 
+                            // Find the caught mouse
+                            String caughtMouseId = findCaughtMouse(catCoordinate, mouseDataList);
+
+                            if (caughtMouseId != null) {
+                                // Mouse is within 15 meters
+                                Log.d("HomeFragment", "Caught Mouse ID: " + caughtMouseId);
+
+                                // You can update the mouse's status in Firebase if needed
+                                // For example:
+                                // firebaseManager.updateMouseCaught(roomId, caughtMouseId);
+
+                                getActivity().runOnUiThread(() -> {
+                                    Toast.makeText(getContext(), "Mouse caught!" , Toast.LENGTH_SHORT).show();
+                                });
+                            } else {
+                                // No mouse within 15 meters
+                                getActivity().runOnUiThread(() -> {
+                                    Toast.makeText(getContext(), "No mouse catched...", Toast.LENGTH_SHORT).show();
+                                });
+                            }
+                        } else {
+                            Log.e("HomeFragment", "Room data is null");
+                        }
+                    })
+                    .exceptionally(throwable -> {
+                        Log.e("HomeFragment", "Error retrieving room data: " + throwable.getMessage());
+                        return null;
+                    });
 
         });
     }
@@ -481,6 +503,89 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         return mouseCoordinates;
     }
 
+    private String findCaughtMouse(
+            Pair<Double, Double> catCoordinate,
+            List<Map<String, Pair<Double, Double>>> mouseDataList
+    ) {
+        if (catCoordinate == null || mouseDataList == null || mouseDataList.isEmpty()) {
+            return null;
+        }
+
+        Location catLocation = new Location("cat");
+        catLocation.setLatitude(catCoordinate.first);
+        catLocation.setLongitude(catCoordinate.second);
+
+        String closestMouseId = null;
+        float minDistance = Float.MAX_VALUE;
+
+        for (Map<String, Pair<Double, Double>> mouseData : mouseDataList) {
+            for (Map.Entry<String, Pair<Double, Double>> entry : mouseData.entrySet()) {
+                String mouseId = entry.getKey();
+                Pair<Double, Double> mouseCoordinate = entry.getValue();
+
+                Location mouseLocation = new Location("mouse");
+                mouseLocation.setLatitude(mouseCoordinate.first);
+                mouseLocation.setLongitude(mouseCoordinate.second);
+
+                float distance = catLocation.distanceTo(mouseLocation);
+                if (distance <= 15 && distance < minDistance) {
+                    minDistance = distance;
+                    closestMouseId = mouseId;
+                }
+            }
+        }
+
+        return closestMouseId;
+    }
+
+
+    private List<Map<String, Pair<Double, Double>>> getMouseCoordinatesWithId(DataSnapshot roomSnapshot) {
+        List<Map<String, Pair<Double, Double>>> mouseDataList = new ArrayList<>();
+
+        if (roomSnapshot == null) {
+            Log.e("HomeFragment", "Room snapshot is null");
+            return mouseDataList; // Return empty list
+        }
+
+        // Retrieve the owner ID (cat's player ID)
+        String ownerId = roomSnapshot.child("owner").getValue(String.class);
+        if (ownerId == null) {
+            Log.e("HomeFragment", "Owner ID not found in room data");
+            return mouseDataList; // Return empty list
+        }
+
+        // Get the 'members' snapshot
+        DataSnapshot membersSnapshot = roomSnapshot.child("members");
+        if (!membersSnapshot.exists()) {
+            Log.e("HomeFragment", "Members data does not exist");
+            return mouseDataList; // Return empty list
+        }
+
+        // Iterate through each member
+        for (DataSnapshot memberSnapshot : membersSnapshot.getChildren()) {
+            String memberId = memberSnapshot.getKey();
+
+            // Skip the owner (cat)
+            if (memberId.equals(ownerId)) {
+                continue;
+            }
+
+            // Get latitude and longitude
+            Double lat = memberSnapshot.child("lat").getValue(Double.class);
+            Double lng = memberSnapshot.child("lng").getValue(Double.class);
+
+            // Ensure lat and lng are not null
+            if (lat != null && lng != null) {
+                Map<String, Pair<Double, Double>> mouseData = new HashMap<>();
+                mouseData.put(memberId, new Pair<>(lat, lng));
+                mouseDataList.add(mouseData);
+            } else {
+                Log.e("HomeFragment", "Invalid coordinates for member: " + memberId);
+            }
+        }
+
+        return mouseDataList;
+    }
 
     private Pair<Double, Double> getCatCoordinate(DataSnapshot roomSnapshot) {
         if (roomSnapshot == null) {
