@@ -46,6 +46,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String LOG_TAG = "MapFragment";
@@ -69,6 +74,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private FirebaseManager firebaseManager;
     private Handler handler;
 
+    private ScheduledExecutorService executor;
+    private ScheduledFuture<?> roomCheckTask;
+    private static final long ROOM_CHECK_INTERVAL = 5;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +91,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         // set up and start the trigger to get device location
         setLocationUpdateCallback();
+
+        // set single thread to check if player joins room
+        executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -98,11 +111,43 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        startUpdatingLocation();
-
-        // TODO: hotfix for null room id cuz we don't have landing page here
+        if(joinedRoom()) {
+            startUpdatingLocation();
+        } else {
+            Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
+        }
 
         return root;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(executor != null) executor.shutdown();
+    }
+
+    /* Periodic check if player joins room */
+
+    private void startJoinRoomCheck() {
+        if (roomCheckTask == null || roomCheckTask.isCancelled()) {
+            roomCheckTask = executor.scheduleWithFixedDelay(
+                    this::checkRoomSchedule,
+                    0,
+                    ROOM_CHECK_INTERVAL,
+                    TimeUnit.SECONDS
+            );
+        }
+    }
+
+    private void checkRoomSchedule() {
+        if(joinedRoom()){
+            mainHandler.post(() -> {
+                onMapReady(this.map);
+                if (roomCheckTask != null && !roomCheckTask.isCancelled()) {
+                    roomCheckTask.cancel(true);
+                }
+            });
+        }
     }
 
     /* Map */
@@ -111,14 +156,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         showUnimelb();
-        getLocationPermission();
-        updateLocationUI();
 
-        if(!joinedRoom()){
+        if (!joinedRoom()) {
             Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
+            startJoinRoomCheck();
             return;
         }
 
+        getLocationPermission();
+        updateLocationUI();
         startUpdatingLocation();
     }
 
