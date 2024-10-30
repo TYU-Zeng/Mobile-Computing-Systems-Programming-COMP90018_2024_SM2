@@ -24,6 +24,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -62,7 +64,9 @@ public class FirebaseManager extends ViewModel {
     private static final int CORE_THREADS = 5;
     private static final int MAX_THREADS = 10;
     private static final int THREAD_LIFE = 30;
-    private static final int MAX_NUM_ITEM = 2;
+    private static final int QUEUE_CAP = 10;
+    private static final int MIN_NUM_ITEMS = 0;
+    private static final int MAX_NUM_ITEMS = 2;
 
     private String roomId;
     private String playerId;
@@ -74,7 +78,9 @@ public class FirebaseManager extends ViewModel {
                 MAX_THREADS,
                 THREAD_LIFE,
                 TimeUnit.SECONDS,
-                new SynchronousQueue<>()
+                new LinkedBlockingDeque<>(QUEUE_CAP),
+                Executors.defaultThreadFactory(),
+                new ThreadPoolExecutor.CallerRunsPolicy()
         );
     }
 
@@ -122,6 +128,8 @@ public class FirebaseManager extends ViewModel {
                 });
             }catch (ExecutionException | InterruptedException e) {
                 throw new RuntimeException(e);
+            }catch (NullPointerException e){
+                Log.e("debugging", "Null object reference");
             }
         });
     }
@@ -148,6 +156,8 @@ public class FirebaseManager extends ViewModel {
                 }
                 locationsFuture.complete(locations);
             }catch (ExecutionException | InterruptedException e) {
+                locationsFuture.completeExceptionally(e);
+            }catch (Exception e){
                 locationsFuture.completeExceptionally(e);
             }
         });
@@ -283,9 +293,9 @@ public class FirebaseManager extends ViewModel {
                 public Transaction.Result doTransaction(@NonNull MutableData currentData) {
                     Integer currentValue = currentData.getValue(Integer.class);
                     if (currentValue == null) {
-                        currentData.setValue(1);
+                        currentData.setValue(0);
                     } else {
-                        currentData.setValue(Math.min(currentValue + 1, MAX_NUM_ITEM));
+                        currentData.setValue(Math.min(currentValue + 1, MAX_NUM_ITEMS));
                     }
                     return Transaction.success(currentData);
                 }
@@ -298,6 +308,39 @@ public class FirebaseManager extends ViewModel {
                         Log.e("FirebaseManager", "Failed to increment item count.", databaseError.toException());
                     }
                 }
+            });
+        });
+    }
+
+    public void decreaseItemCount(String playerId, String itemId, String roomId) {
+        executor.execute(() -> {
+            DatabaseReference itemRef = database.getReference("rooms")
+                    .child(roomId)
+                    .child("members")
+                    .child(playerId)
+                    .child(itemId);
+
+            itemRef.runTransaction(new Transaction.Handler() {
+                @NonNull
+                @Override
+                public Transaction.Result doTransaction(@NonNull MutableData currentData) {
+                    Integer currentValue = currentData.getValue(Integer.class);
+                    if (currentValue == null) {
+                        currentData.setValue(0);
+                    } else {
+                        currentData.setValue(Math.max(currentValue - 1, MIN_NUM_ITEMS));
+                    }
+                    return Transaction.success(currentData);
+                }
+                @Override
+                public void onComplete(@Nullable DatabaseError databaseError, boolean committed, @Nullable DataSnapshot dataSnapshot) {
+                    if (committed) {
+                        Log.d("FirebaseManager", "Item count incremented successfully.");
+                    } else {
+                        Log.e("FirebaseManager", "Failed to increment item count.", databaseError.toException());
+                    }
+                }
+
             });
         });
     }
@@ -329,6 +372,7 @@ public class FirebaseManager extends ViewModel {
 
     // setter
     public void setRoomId(String id){
+        Log.d("FirebaseManager", "setRoomId to: " + id);
         this.roomId = id;
     }
 
@@ -338,6 +382,7 @@ public class FirebaseManager extends ViewModel {
 
     // getter
     public String getRoomId(){
+        Log.d("FirebaseManager", "getRoomId: " + roomId);
         return this.roomId;
     }
 

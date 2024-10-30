@@ -34,8 +34,19 @@
             binding.sampleItem1.setOnClickListener(v -> {
                 // 使用 NavController 导航到 ItemDetailFragment
                 NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
+                Bundle bundle = new Bundle();
+                bundle.putString("item_id", "item1");
                 Log.d(TAG, "navigate to item detail");
-                navController.navigate(R.id.itemDetailFragment);
+                navController.navigate(R.id.itemDetailFragment, bundle);
+            });
+
+            binding.sampleItem2.setOnClickListener(v -> {
+                // 使用 NavController 导航到 ItemDetailFragment
+                NavController navController = Navigation.findNavController(requireActivity(), R.id.nav_host_fragment_activity_main);
+                Bundle bundle = new Bundle();
+                bundle.putString("item_id", "item2");
+                Log.d(TAG, "navigate to item detail");
+                navController.navigate(R.id.itemDetailFragment, bundle);
             });
 
             final TextView textView = binding.textDashboard;
