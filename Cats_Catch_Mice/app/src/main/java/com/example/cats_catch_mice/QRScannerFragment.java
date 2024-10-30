@@ -57,6 +57,8 @@ public class QRScannerFragment extends Fragment {
 
                         Log.d("Scanner", "barcodeResult: firebasemanager set room id");
 
+                        Toast.makeText(getContext(), "Joined room. Room Id: " + scannedData.substring(6), Toast.LENGTH_SHORT).show();
+
                         NavController navController = NavHostFragment.findNavController(QRScannerFragment.this);
                         navController.navigateUp();
 
