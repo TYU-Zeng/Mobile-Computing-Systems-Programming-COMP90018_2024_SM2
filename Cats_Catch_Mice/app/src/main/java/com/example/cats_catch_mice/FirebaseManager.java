@@ -8,8 +8,11 @@ import android.util.Pair;
 import java.lang.reflect.Array;
 import java.security.SecureRandom;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.cats_catch_mice.ui.itemList.Item;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -42,9 +46,9 @@ public class FirebaseManager extends ViewModel {
 
     "rooms": {
     "roomId12345": {
-      "owner": "UUID12345",
-      "members": {
-        "UUID12345": {
+      
+        "UUID12345":"owner": "UUID12345",
+      "members": { {
           "lat": 37.7749,
           "lng": -122.4194,
           "item1": 0,
@@ -75,6 +79,8 @@ public class FirebaseManager extends ViewModel {
     private FirebaseDatabase database;
     private String roomId;
     private String playerId;
+
+    private MutableLiveData<List<Item>> itemListLiveData;
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -330,6 +336,42 @@ public class FirebaseManager extends ViewModel {
 
     }
 
+
+    public LiveData<List<Item>> getItemListLiveData() {
+        List<Item> itemList = new ArrayList<>();
+
+        String playerId = "UUID12345";  // 预先存在的玩家ID
+        String roomId = "roomId12345";
+
+        if (this.getPlayerId() == null ){
+            Log.d("itemListLiveData", "Error: playerId is null, using 12345");
+        } else if ( this.getRoomId() == null){
+            Log.d("itemListLiveData", "Error: roomId is null, using 12345");
+        }
+        else{
+            playerId = this.getPlayerId();  // 预先存在的玩家ID
+            roomId = this.getRoomId();
+        }
+        CompletableFuture<Map<String, Object>> future = this.getPlayerDataAsync(playerId,roomId);
+        try {
+            Log.d("itemListLiveData", "getPlayerDataAsync: in try, waiting for the future");
+            Map<String, Object> memberData = future.get();  // 等待异步结果
+            Log.d("itemListLiveData", "item data accquired");
+            int item1Count = (int) memberData.get("item1");
+            int item2Count = (int) memberData.get("item2");
+            itemList.add(new Item("item1", "item1 description", item1Count, R.drawable.itemicon_item1_demo));
+            itemList.add(new Item("item2", "item2 description", item2Count, R.drawable.mouse));
+            itemListLiveData.postValue(itemList);
+        } catch (ExecutionException | InterruptedException e) {
+            Log.d("itemListLiveData", "failed to get player data, load dummy item data");
+            itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+            itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+            itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+            itemListLiveData.postValue(itemList);
+        }
+
+        return itemListLiveData;
+    }
 
 
     public CompletableFuture<Map<String, Object>> getRoomDataAsync(String roomId) {
