@@ -174,6 +174,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
     private void updateMap() {
+        map.clear();
         firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
             for (Pair<Double, Double> location : locations){
                 map.addMarker(new MarkerOptions()
