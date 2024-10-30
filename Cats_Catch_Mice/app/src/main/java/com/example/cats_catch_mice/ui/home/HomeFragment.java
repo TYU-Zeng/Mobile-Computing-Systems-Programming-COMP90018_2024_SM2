@@ -204,9 +204,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     double lat = location.getLatitude();
                     double lng = location.getLongitude();
 
-                    // TODO: change to actual player id
-                    String playerId = "UUID11111";
-                    firebaseManager.updateLocation(playerId, lat, lng, firebaseManager.getRoomId());
+                    firebaseManager.updateLocation(firebaseManager.getPlayerId(), lat, lng, firebaseManager.getRoomId());
                     updateMap();
                 }
             }
