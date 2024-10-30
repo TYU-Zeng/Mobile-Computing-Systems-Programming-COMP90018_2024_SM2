@@ -143,8 +143,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             }
 
             // Proceed with the button's action
-//            String roomId = firebaseManager.getRoomId(); // Get the actual room ID
-            String roomId = "roomIddummy1111";
+            String roomId = firebaseManager.getRoomId(); // Get the actual room ID
             if (roomId == null) {
                 Toast.makeText(getContext(), "You are not in a room.", Toast.LENGTH_SHORT).show();
                 return;
