@@ -56,7 +56,7 @@ public class QRTest extends Fragment {
 
         // 设置 TextView 的文本为 roomId
         if (roomId != null && !roomId.isEmpty()) {
-            roomIdTextView.setText("Room ID: " + roomId);
+            roomIdTextView.setText("Room ID: " + roomId.substring(6));
             Log.d("QRTestFragment", "TextView set to: " + roomIdTextView.getText());
         } else {
             roomIdTextView.setText("未找到房间ID");

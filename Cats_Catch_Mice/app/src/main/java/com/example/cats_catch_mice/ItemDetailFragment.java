@@ -21,8 +21,6 @@ public class ItemDetailFragment extends Fragment {
     private FragmentItemDetailBinding binding;
     private FirebaseManager firebaseManager;
 
-
-
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
