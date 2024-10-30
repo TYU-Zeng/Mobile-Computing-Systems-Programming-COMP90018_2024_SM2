@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
     // current room id for map sharing
     private String currentRoomId = null;
     private Bitmap qrCodeBitmap = null;
-    private String userId = null;
     private RoomData roomData = null;
     private Boolean isHost = false;
 
@@ -81,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
 
         // init firebase on manager created
         firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
-
-        //userId = generateUUID();
-        Log.d("UUID", "onCreate: UUID: " + userId);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -128,11 +124,6 @@ public class MainActivity extends AppCompatActivity {
         // set ActionBar and NavController
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
-
-        // FirebaseManager firebaseManager = new FirebaseManager();
-
-        // 监听从 QRScannerFragment 传回的数据
-
 
     }
 
@@ -289,13 +280,5 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "NFC is required for this feature.", Toast.LENGTH_SHORT).show();
                 })
                 .show();
-    }
-
-    private String generateUUID() {
-        String randomId = UUID.randomUUID().toString().substring(0, 8);
-        int randomFiveDigitNumber = (int) (Math.random() * 90000) + 10000;
-        userId = "UUID" + randomId + randomFiveDigitNumber;
-        return userId;
-
     }
 }
