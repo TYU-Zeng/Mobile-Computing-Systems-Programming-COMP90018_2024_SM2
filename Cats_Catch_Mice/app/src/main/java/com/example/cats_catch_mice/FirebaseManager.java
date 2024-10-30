@@ -152,6 +152,8 @@ public class FirebaseManager extends ViewModel {
                 for(Map.Entry<String, Object> member: membersData.entrySet()){
                     Map<String, Object> memberData = (Map<String, Object>) member.getValue();
 
+                    if (!(Boolean) memberData.get("visible")) continue;
+
                     Double lat = (Double) memberData.get("lat");
                     Double lng = (Double) memberData.get("lng");
 
