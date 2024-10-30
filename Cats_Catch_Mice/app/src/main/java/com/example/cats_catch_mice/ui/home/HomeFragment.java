@@ -9,6 +9,7 @@ import android.graphics.Bitmap;
 import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
@@ -19,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
+import androidx.lifecycle.ViewModelProvider;
+
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
@@ -66,12 +69,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     );
     private static final long TRIGGER_INTERVAL = 5000; //milliseconds
     private static final float MOUSE_ICON_SCALE = 0.1f;
+    private static final long CATCH_BUTTON_COOLDOWN_PERIOD = 30000L; // 30 seconds in milliseconds
 
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
+    private boolean catchButtonCooldown = false;
 
+    private HomeViewModel homeViewModel;
     private FusedLocationProviderClient fusedLocationClient;
     private LocationCallback locationCallback;
 
@@ -81,6 +87,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
         handler = new Handler(Looper.getMainLooper());
@@ -96,54 +104,86 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
-
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+        // Check if cooldown is active and update button text accordingly
+        long currentTime = System.currentTimeMillis();
+        if (currentTime < homeViewModel.catchButtonCooldownEndTime) {
+            startCooldownTimer(catchMouseButton, homeViewModel.catchButtonCooldownEndTime - currentTime);
+        } else {
+            catchMouseButton.setText("Catch");
+        }
+
+
+        // Check if cooldown is active and update button text accordingly
+
         catchMouseButton.setOnClickListener(v -> {
-            String roomId = "roomIddummy1111";
-            firebaseManager.getFullRoomDataAsync(roomId)
-                    .thenAccept(roomSnapshot -> {
-                        if (roomSnapshot != null) {
-                            // Get the cat's coordinate
-                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
-                            // Get the mice's coordinates
-                            List<Pair<Double, Double>> mouseCoordinates = getMouseCoordinates(roomSnapshot);
 
-                            // Log the cat's coordinate
-                            if (catCoordinate != null) {
-                                Log.d("HomeFragment", "Cat Coordinate: Lat=" + catCoordinate.first + ", Lng=" + catCoordinate.second);
-                            } else {
-                                Log.e("HomeFragment", "Cat coordinate not found");
-                            }
+            long currentTime1 = System.currentTimeMillis();
+            if (currentTime1 < homeViewModel.catchButtonCooldownEndTime) {
+                long remainingTime = (homeViewModel.catchButtonCooldownEndTime - currentTime1) / 1000; // in seconds
 
-                            // Log the mice's coordinates
-                            if (!mouseCoordinates.isEmpty()) {
-                                for (int i = 0; i < mouseCoordinates.size(); i++) {
-                                    Pair<Double, Double> mouseCoord = mouseCoordinates.get(i);
-                                    Log.d("HomeFragment", "Mouse " + (i + 1) + " Coordinate: Lat=" + mouseCoord.first + ", Lng=" + mouseCoord.second);
-                                }
-                            } else {
-                                Log.e("HomeFragment", "No mouse coordinates found");
-                            }
-                        } else {
-                            Log.e("HomeFragment", "Room data is null");
-                        }
-                    })
-                    .exceptionally(throwable -> {
-                        Log.e("HomeFragment", "Error retrieving room data: " + throwable.getMessage());
-                        return null;
-                    });
+                return;
+            }
 
 
-//            if (catchMouseState) {
-//                Toast.makeText(getContext(), "Mouse caught!", Toast.LENGTH_SHORT).show();
-//            } else {
-//                Toast.makeText(getContext(), "No mouse caught!", Toast.LENGTH_SHORT).show();
-//            }
+            homeViewModel.catchButtonCooldownEndTime = currentTime1 + CATCH_BUTTON_COOLDOWN_PERIOD;
+            startCooldownTimer(catchMouseButton, CATCH_BUTTON_COOLDOWN_PERIOD);
+            Toast.makeText(getContext(), "Catch!", Toast.LENGTH_SHORT).show();
+
+
+
+
+//            String roomId = "roomIddummy1111";
+//            firebaseManager.getFullRoomDataAsync(roomId)
+//                    .thenAccept(roomSnapshot -> {
+//                        if (roomSnapshot != null) {
+//                            // Get the cat's coordinate
+//                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+//                            // Get the mice's coordinates
+//                            List<Pair<Double, Double>> mouseCoordinates = getMouseCoordinates(roomSnapshot);
+//
+//                            // Log the cat's coordinate
+//                            if (catCoordinate != null) {
+//                                Log.d("HomeFragment", "Cat Coordinate: Lat=" + catCoordinate.first + ", Lng=" + catCoordinate.second);
+//                            } else {
+//                                Log.e("HomeFragment", "Cat coordinate not found");
+//                            }
+//
+//                            // Log the mice's coordinates
+//                            if (!mouseCoordinates.isEmpty()) {
+//                                for (int i = 0; i < mouseCoordinates.size(); i++) {
+//                                    Pair<Double, Double> mouseCoord = mouseCoordinates.get(i);
+//                                    Log.d("HomeFragment", "Mouse " + (i + 1) + " Coordinate: Lat=" + mouseCoord.first + ", Lng=" + mouseCoord.second);
+//                                }
+//                            } else {
+//                                Log.e("HomeFragment", "No mouse coordinates found");
+//                            }
+//                        } else {
+//                            Log.e("HomeFragment", "Room data is null");
+//                        }
+//                    })
+//                    .exceptionally(throwable -> {
+//                        Log.e("HomeFragment", "Error retrieving room data: " + throwable.getMessage());
+//                        return null;
+//                    });
+
+
         });
     }
 
+    private void startCooldownTimer(Button button, long cooldownDuration) {
+        new CountDownTimer(cooldownDuration, 1000) {
 
+            public void onTick(long millisUntilFinished) {
+                long secondsRemaining = millisUntilFinished / 1000;
+                button.setText("Cool down: " + secondsRemaining + " s");
+            }
+
+            public void onFinish() {
+                button.setText("Catch");
+            }
+        }.start();
+    }
 
 
     public View onCreateView(@NonNull LayoutInflater inflater,
@@ -162,6 +202,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
 
         startUpdatingLocation();
+
+
+
 
         // TODO: hotfix for null room id cuz we don't have landing page here
 
@@ -184,6 +227,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         startUpdatingLocation();
     }
+
+
 
     private boolean joinedRoom(){
         return firebaseManager.getRoomId() != null;
