@@ -17,6 +17,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -45,6 +46,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -82,6 +88,86 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         // set up and start the trigger to get device location
         setLocationUpdateCallback();
     }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+        catchMouseButton.setOnClickListener(v -> {
+            //show owner id
+            firebaseManager.getRoomOwnerAsync("roomId12345").thenAccept(ownerId -> {
+                if (ownerId != null) {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Owner ID: " + ownerId, Toast.LENGTH_SHORT).show();
+                    });
+                } else {
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Owner ID not found.", Toast.LENGTH_SHORT).show();
+                    });
+                }
+            }).exceptionally(throwable -> {
+                getActivity().runOnUiThread(() -> {
+                    Toast.makeText(getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+                return null;
+            });
+
+
+//            if (catchMouseState) {
+//                Toast.makeText(getContext(), "Mouse caught!", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(getContext(), "No mouse caught!", Toast.LENGTH_SHORT).show();
+//            }
+        });
+    }
+
+//    public boolean catchMouse(String ownerId) {
+//        Double playerLat;/* obtain current player's latitude */;
+//        Double playerLng; /* obtain current player's longitude */;
+//
+//        CompletableFuture<Boolean> catchStatusFuture = new CompletableFuture<>();
+//
+//        firebaseManager.getLocatioWithId(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
+//            for (HashMap<String, Pair<Double, Double>> locationData : locations) {
+//                for (Map.Entry<String, Pair<Double, Double>> entry : locationData.entrySet()) {
+//                    String playerId = entry.getKey();
+//                    // if owner id is the key id set playerLat and playerLng
+//                    if (){
+//                        playerLat = entry.getValue().first;
+//                        playerLng = entry.getValue().second;
+//                    }
+//                    Double mouseLat = entry.getValue().first;
+//                    Double mouseLng = entry.getValue().second;
+//
+//                    // Calculate distance
+//                    float[] result = new float[1];
+//                    Location.distanceBetween(playerLat, playerLng, mouseLat, mouseLng, result);
+//                    float distanceInMeters = result[0];
+//
+//                    if (distanceInMeters <= 15) {
+//                        // Mouse caught, store the UUID for communication
+//                        firebaseManager.setPlayerId(playerId); // Save caught player’s ID
+//                        catchStatusFuture.complete(true);
+//                        return;
+//                    }
+//                }
+//            }
+//            catchStatusFuture.complete(false); // No mouse caught if we exit loop without finding one
+//        }).exceptionally(e -> {
+//            Log.e("catchMouse", "Error fetching locations", e);
+//            catchStatusFuture.complete(false);
+//            return null;
+//        });
+//
+//        try {
+//            return catchStatusFuture.get(); // Get result of the async operation
+//        } catch (InterruptedException | ExecutionException e) {
+//            Log.e("catchMouse", "Error completing catch status future", e);
+//            return false;
+//        }
+//    }
+
+
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
