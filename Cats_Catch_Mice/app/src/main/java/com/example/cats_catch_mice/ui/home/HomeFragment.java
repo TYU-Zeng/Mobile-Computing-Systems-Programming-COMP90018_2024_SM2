@@ -297,9 +297,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void showUnimelb() {
-        map.addMarker(new MarkerOptions()
-                .position(UNIMELB_BOUNDARY.getCenter())
-                .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
         map.setLatLngBoundsForCameraTarget(UNIMELB_BOUNDARY);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
@@ -370,9 +367,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
                     Log.d("debugging", "last location got");
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
-                    );
                     Log.d("debugging", "Lat: " + location.getLatitude() +
                             ", Long: " + location.getLongitude());
                     double lat = location.getLatitude();
