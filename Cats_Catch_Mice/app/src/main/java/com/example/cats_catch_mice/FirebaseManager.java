@@ -179,6 +179,8 @@ public class FirebaseManager extends ViewModel {
                 for(Map.Entry<String, Object> member: membersData.entrySet()){
                     Map<String, Object> memberData = (Map<String, Object>) member.getValue();
 
+                    if (!(Boolean) memberData.get("visible")) continue;
+
                     Double lat = (Double) memberData.get("lat");
                     Double lng = (Double) memberData.get("lng");
 
@@ -215,7 +217,14 @@ public class FirebaseManager extends ViewModel {
         }
     }
 
-    public void addPlayerData(String playerId, double lat, double lng, int item1, int item2, String roomId) {
+    public void generatePlayerId() {
+        String randomId = UUID.randomUUID().toString().substring(0, 8);
+        int randomFiveDigitNumber = (int) (Math.random() * 90000) + 10000;
+        String playerId = "UUID" + randomId + randomFiveDigitNumber;
+        setPlayerId(playerId);
+    }
+
+    public void addPlayerData(String playerId, double lat, double lng, int item1, int item2, boolean visible, String roomId) {
         DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
 
         // 直接写入数据到这个特定的 child
@@ -224,6 +233,7 @@ public class FirebaseManager extends ViewModel {
         memberData.put("lng", lng);
         memberData.put("item1", item1);
         memberData.put("item2", item2);
+        memberData.put("visible", visible);
 
         // 确保数据写入成功后调用
         memberRef.setValue(memberData).addOnCompleteListener(task -> {
@@ -294,6 +304,29 @@ public class FirebaseManager extends ViewModel {
     }
 
     public void setFirebaseRoomData(String roomId, String roomOwnerId) {
+        DatabaseReference roomRefs = FirebaseDatabase.getInstance().getReference();
+
+        Map<String, Object> memberData = new HashMap<>();
+        memberData.put("lat", 0.0d);
+        memberData.put("lng", 0.0d);
+        memberData.put("item1", 0);
+        memberData.put("item2", 0);
+        memberData.put("visible", true);
+
+        Map<String, Object> members = new HashMap<>();
+        members.put(roomOwnerId, memberData);
+
+        Map<String, Object> roomData = new HashMap<>();
+        roomData.put("members", members);
+        roomData.put("owner", roomOwnerId);
+
+        roomRefs.child("rooms").child(roomId).setValue(roomData).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d("debugging", "Data written successfully to Firebase.");
+            } else {
+                Log.d("debugging", "Failed to write data to Firebase.");
+            }
+        });
 
     }
 
