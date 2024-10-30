@@ -29,7 +29,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
@@ -55,8 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
