@@ -164,23 +164,6 @@ public class MainActivity extends AppCompatActivity {
 
 
             return true;
-
-
-
-        } else if (item.getItemId() == R.id.menu_scanner) {
-            // 点击后跳转到 QRScannerFragment
-            Log.d(TAG, "onOptionsItemSelected: join room button clicked");
-            // TODO: QRScannerFragment 创建实例
-            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
-            navController.navigate(R.id.navigation_scanner);
-            // toast
-//            Toast.makeText(this, "Join Room clicked", Toast.LENGTH_SHORT).show();
-
-            return true;
-
-
-
-
         }else if (item.getItemId() == R.id.menu_quit) {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
@@ -214,6 +197,13 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Cannot Share QR Code before join a room!", Toast.LENGTH_SHORT).show();
             }
 
+            return true;
+        } else if (item.getItemId() == R.id.menu_joinRoom) {
+            // 点击后跳转到 QRScannerFragment
+            Log.d(TAG, "onOptionsItemSelected: join room button clicked");
+            // TODO: QRScannerFragment 创建实例
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.navigation_scanner);
             return true;
         }
         return true;
