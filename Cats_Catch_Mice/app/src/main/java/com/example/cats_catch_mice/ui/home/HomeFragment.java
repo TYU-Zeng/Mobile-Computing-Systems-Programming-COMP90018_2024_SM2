@@ -341,16 +341,35 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private void updateMap() {
         map.clear();
-        firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
-            for (Pair<Double, Double> location : locations) {
-                map.addMarker(new MarkerOptions()
-                        .position(new LatLng(location.first, location.second))
-                        .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
-            }
-            Log.d("debugging", "unimelb map updated");
-        }, handler::post).exceptionally(throwable -> {
-            return null;
-        });
+
+        firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
+                .thenAccept(roomSnapshot -> {
+                    if (roomSnapshot != null) {
+
+                        // update cat icon on map if player is the owner (cat)
+                        if (firebaseManager.isOwner()) {
+                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+                            if (catCoordinate != null) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(catCoordinate.first, catCoordinate.second))
+                                        .title("Marker").icon(getScaledIcon(R.drawable.cat1, ICON_SCALE)).flat(true));
+                            }
+                        }
+
+                        // update mice on map
+                        List<Pair<Double, Double>> mouseDataList = getMouseCoordinates(roomSnapshot);
+                        if (!mouseDataList.isEmpty()) {
+                            for (Pair<Double, Double> mouseCoordinate : mouseDataList) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(mouseCoordinate.first, mouseCoordinate.second))
+                                        .title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
+                            }
+                        }
+                    }
+                })
+                .exceptionally(throwable -> {
+                    return null;
+                });
     }
 
     private void setLocationUpdateCallback() {
