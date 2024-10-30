@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        } else if (item.getItemId() == R.id.menu_scanner) {
+        } else if (item.getItemId() == R.id.menu_joinRoom) {
             // 点击后跳转到 QRScannerFragment
             Log.d(TAG, "onOptionsItemSelected: join room button clicked");
             // TODO: QRScannerFragment 创建实例
