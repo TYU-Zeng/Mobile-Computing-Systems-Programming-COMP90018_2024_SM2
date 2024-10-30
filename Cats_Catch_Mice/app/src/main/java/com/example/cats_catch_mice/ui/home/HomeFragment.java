@@ -144,8 +144,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Toast.makeText(getContext(), "Catch!", Toast.LENGTH_SHORT).show();
 
 
-
-
 //            String roomId = "roomIddummy1111";
 //            firebaseManager.getFullRoomDataAsync(roomId)
 //                    .thenAccept(roomSnapshot -> {
@@ -214,7 +212,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        if(joinedRoom()) {
+        if (joinedRoom()) {
             startUpdatingLocation();
         } else {
             Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
@@ -226,7 +224,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(executor != null) executor.shutdown();
+        if (executor != null) executor.shutdown();
     }
 
     /* Periodic check if player joins room */
@@ -243,7 +241,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void checkRoomSchedule() {
-        if(joinedRoom()){
+        if (joinedRoom()) {
             mainHandler.post(() -> {
                 onMapReady(this.map);
                 if (roomCheckTask != null && !roomCheckTask.isCancelled()) {
@@ -272,8 +270,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
 
-
-    private boolean joinedRoom(){
+    private boolean joinedRoom() {
         return firebaseManager.getRoomId() != null;
     }
 
@@ -285,6 +282,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
     }
+
     private void updateLocationUI() {
         Log.d("debugging", "updating UI");
         if (this.map == null)
@@ -303,10 +301,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     // helper for icon rendering on map
-    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
+    private BitmapDescriptor getScaledIcon(int resourceID, float scale) {
         Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
-        int height = Math.round(icon.getHeight()*scale);
-        int width= Math.round(icon.getWidth()*scale);
+        int height = Math.round(icon.getHeight() * scale);
+        int width = Math.round(icon.getWidth() * scale);
         Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
         return BitmapDescriptorFactory.fromBitmap(scaledIcon);
     }
@@ -314,20 +312,21 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     /* Periodic map update*/
 
     private void startUpdatingLocation() {
-        if(!locationPermissionGranted){
+        if (!locationPermissionGranted) {
             return;
         }
         LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
         try {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-        }catch(SecurityException e) {
+        } catch (SecurityException e) {
             Log.d(LOG_TAG, "Error when request location updates");
         }
     }
+
     private void updateMap() {
         map.clear();
         firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
-            for (Pair<Double, Double> location : locations){
+            for (Pair<Double, Double> location : locations) {
                 map.addMarker(new MarkerOptions()
                         .position(new LatLng(location.first, location.second))
                         .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
@@ -337,7 +336,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return null;
         });
     }
-    private void setLocationUpdateCallback(){
+
+    private void setLocationUpdateCallback() {
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -381,6 +381,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
+
     private void setResultPermissionLauncher() {
         resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
@@ -409,6 +410,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .create()
                 .show();
     }
+
     // open Settings on user's phone
     private void openSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -512,5 +514,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return null;
         }
     }
+}
 
 
