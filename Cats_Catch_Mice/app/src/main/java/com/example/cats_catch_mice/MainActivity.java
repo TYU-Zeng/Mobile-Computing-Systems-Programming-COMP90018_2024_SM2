@@ -152,6 +152,13 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_createRoom) {
+
+            // inform user who has already been in a room on create room button clicked
+            if(firebaseManager.getRoomId()!= null) {
+                Toast.makeText(this, "You are already in a room.", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
             String generateRoomId = firebaseManager.createRoom(firebaseManager.getPlayerId());
             Log.d("MailActivity", "Create room: Room ID: " + generateRoomId);
 
