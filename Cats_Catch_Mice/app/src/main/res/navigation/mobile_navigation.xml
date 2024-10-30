@@ -41,4 +41,34 @@
         android:name="com.example.cats_catch_mice.ui.itemList.ItemDetailFragment"
         tools:layout="@layout/fragment_item_detail" />
 
+    <fragment
+        android:id="@+id/navigation_scanner"
+        android:name="com.example.cats_catch_mice.QRScannerFragment"
+        android:label="@string/QR_Scanner"
+        tools:layout="@layout/fragment_q_r_scanner" />
+
+
+<!--        测试片段      -->
+
+
+    <action
+        android:id="@+id/action_global_navigation_qr_test"
+        app:destination="@id/navigation_qr_test" />
+
+
+    <fragment
+        android:id="@+id/navigation_qr_test"
+        android:name="com.example.cats_catch_mice.QRTest"
+        android:label="QR Code"
+        tools:layout="@layout/fragment_q_r_test">
+        <argument
+            android:name="room_id"
+            app:argType="string" />
+    </fragment>
+
+
+
+
+
+
 </navigation>
