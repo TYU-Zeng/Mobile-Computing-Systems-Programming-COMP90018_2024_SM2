@@ -125,6 +125,8 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        // create player id
+        firebaseManager.generatePlayerId();
     }
 
     /**
