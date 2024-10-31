@@ -79,6 +79,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final LatLng CHEST4_COOR = new LatLng(-37.7999, 144.963312);
     private static final LatLng CHEST5_COOR = new LatLng(-37.7968, 144.9628);
 
+    // decoy offset constants
+    private static final double RANDOM_SCALE = 0.0004;
+    private static final double RANDOM_SHIFT = 0.0002;
 
     private FragmentMapBinding binding;
     private GoogleMap map;
@@ -382,6 +385,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         } catch (SecurityException e) {
             Log.d(LOG_TAG, "Error when request location updates");
         }
+    }
+
+    private double getRandomOffset() {
+        return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
     }
 
     private void updateMap() {
