@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import com.example.cats_catch_mice.FirebaseManager;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.navigation.Navigation;
 
 //import com.example.cats_catch_mice.databinding.FragmentItemDetailBinding;
 //
@@ -113,7 +114,8 @@ public class ItemDetailFragment extends Fragment {
 
         // return
         binding.buttonCancel.setOnClickListener(v -> {
-            ((AppCompatActivity) requireActivity()).getSupportFragmentManager().popBackStack();
+//            ((AppCompatActivity) requireActivity()).getSupportFragmentManager().popBackStack();
+            Navigation.findNavController(v).navigateUp();
         });
 
         // TODO: call item function
