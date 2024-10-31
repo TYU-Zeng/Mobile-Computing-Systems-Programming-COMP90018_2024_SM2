@@ -73,6 +73,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final float ICON_SCALE = 0.08f;
     private static final long CATCH_BUTTON_COOLDOWN_PERIOD = 30000L; // 30 seconds in milliseconds
 
+    // nfc coordinates (fixed)
+    private static final LatLng CHEST1_COOR = new LatLng(-37.7996, 144.9618);
+    private static final LatLng CHEST2_COOR = new LatLng(-37.7973, 144.9602);
+    private static final LatLng CHEST3_COOR = new LatLng(-37.8017, 144.960198);
+    private static final LatLng CHEST4_COOR = new LatLng(-37.7999, 144.963312);
+    private static final LatLng CHEST5_COOR = new LatLng(-37.7968, 144.9628);
+
+
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
@@ -278,6 +286,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             this.map = map;
         }
         showUnimelb();
+        showChest();
 
         if (!joinedRoom()) {
             Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
@@ -299,6 +308,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.setLatLngBoundsForCameraTarget(UNIMELB_BOUNDARY);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
+    }
+
+    private void showChest() {
+        map.addMarker(new MarkerOptions().position(CHEST1_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
+        map.addMarker(new MarkerOptions().position(CHEST2_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
+        map.addMarker(new MarkerOptions().position(CHEST3_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
+        map.addMarker(new MarkerOptions().position(CHEST4_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
+        map.addMarker(new MarkerOptions().position(CHEST5_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
     }
 
     private void updateLocationUI() {
@@ -343,6 +360,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private void updateMap() {
         map.clear();
+
+        showChest();
 
         firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
                 .thenAccept(roomSnapshot -> {
