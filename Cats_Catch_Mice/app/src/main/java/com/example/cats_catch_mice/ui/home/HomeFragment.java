@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -85,6 +86,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
     private boolean catchButtonCooldown = false;
+    private TextView uncaughtMiceTextView;
 
     private HomeViewModel homeViewModel;
     private FusedLocationProviderClient fusedLocationClient;
@@ -126,6 +128,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         if(!isFragmentAttached()) return;
 
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+        uncaughtMiceTextView = view.findViewById(R.id.uncaught_mice_count);
+        if(firebaseManager.getRoomId() != null) {
+            uncaughtMiceTextView.setVisibility(View.VISIBLE);
+        }
 
         Boolean isOwner = firebaseManager.getOwnerFlag();
         if (isOwner) {
@@ -222,6 +228,50 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         });
     }
+
+    private int getUncaughtMiceCount(DataSnapshot roomSnapshot) {
+        int uncaughtMiceCount = 0;
+
+        if (roomSnapshot == null) {
+            Log.e("HomeFragment", "Room snapshot is null");
+            return 0;
+        }
+
+        // Retrieve the owner ID (cat's player ID)
+        String ownerId = roomSnapshot.child("owner").getValue(String.class);
+        if (ownerId == null) {
+            Log.e("HomeFragment", "Owner ID not found in room data");
+            return 0;
+        }
+
+        // Get the 'members' snapshot
+        DataSnapshot membersSnapshot = roomSnapshot.child("members");
+        if (!membersSnapshot.exists()) {
+            Log.e("HomeFragment", "Members data does not exist");
+            return 0;
+        }
+
+        // Iterate through each member
+        for (DataSnapshot memberSnapshot : membersSnapshot.getChildren()) {
+            String memberId = memberSnapshot.getKey();
+
+            // Skip the owner (cat)
+            if (memberId.equals(ownerId)) {
+                continue;
+            }
+
+            // Get 'beCaught' field
+            Boolean beCaught = memberSnapshot.child("beCaught").getValue(Boolean.class);
+
+            // If beCaught is false or null (default to false)
+            if (beCaught == null || !beCaught) {
+                uncaughtMiceCount++;
+            }
+        }
+
+        return uncaughtMiceCount;
+    }
+
 
     private void startCooldownTimer(Button button, long cooldownDuration) {
         new CountDownTimer(cooldownDuration, 1000) {
@@ -408,6 +458,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                         .position(new LatLng(mouseCoordinate.first, mouseCoordinate.second))
                                         .title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
                             }
+                        }
+
+                        int uncaughtMiceCount = getUncaughtMiceCount(roomSnapshot);
+
+                        if (getActivity() != null) {
+                            getActivity().runOnUiThread(() -> {
+                                uncaughtMiceTextView.setText("Uncaught Mice: " + uncaughtMiceCount);
+                            });
                         }
                     }
                 })

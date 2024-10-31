@@ -9,9 +9,11 @@
     <item android:id="@+id/menu_joinRoom"
         android:title= "@string/join_Room"/>
 
-
     <item android:id="@+id/menu_qrCode"
         android:title="@string/share_qrcode"/>
+
+<!--    <item android:id="@+id/menu_info"-->
+<!--        android:title=""-->
 
     <item android:id="@+id/menu_quit"
         android:title="@string/quit"/>

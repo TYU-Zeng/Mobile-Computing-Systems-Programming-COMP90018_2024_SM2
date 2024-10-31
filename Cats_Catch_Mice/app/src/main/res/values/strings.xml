@@ -14,6 +14,7 @@
     <string name="next">Next</string>
     <string name="previous">Previous</string>
     <string name="share_qrcode">Share QR Code</string>
+    <string name="player_info">Show Player List</string>
 
     <string name="lorem_ipsum">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam in scelerisque sem. Mauris
