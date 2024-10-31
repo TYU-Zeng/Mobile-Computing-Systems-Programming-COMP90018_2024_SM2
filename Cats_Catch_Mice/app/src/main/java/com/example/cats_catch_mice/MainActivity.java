@@ -57,6 +57,10 @@ public class MainActivity extends AppCompatActivity {
     private RoomManager roomManager;
 
 
+    private long lastNfcTagTime = 0;
+    // NFC tag cool down
+    private static final long NFC_TAG_COOLDOWN_PERIOD = 2 * 60 * 1000; // 2 minutes in milliseconds
+
     private AppBarConfiguration appBarConfiguration; // Declare as a field
     private FirebaseManager firebaseManager;
 
@@ -288,19 +292,26 @@ public class MainActivity extends AppCompatActivity {
 
             String shareRoomId = firebaseManager.getRoomId();
             if (shareRoomId != null) {
-                if(nfcController.getState()) {
-                    nfcController.handleTag(intent);
-                } else {
-                    Toast.makeText(this, "You have reached the upper bound of reading tags", Toast.LENGTH_SHORT).show();
+                long currentTime = System.currentTimeMillis();
 
+                if (currentTime - lastNfcTagTime >= NFC_TAG_COOLDOWN_PERIOD) {
+                    // 足够的时间已经过去，允许扫描
+                    lastNfcTagTime = currentTime;
+
+                    if (nfcController.getState()) {
+                        nfcController.handleTag(intent);
+                    } else {
+                        Toast.makeText(this, "You have reached the upper bound of reading tags", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    // 冷却时间未结束，计算剩余时间并提示用户
+                    long remainingTime = (NFC_TAG_COOLDOWN_PERIOD - (currentTime - lastNfcTagTime)) / 1000; // 以秒为单位
+                    Toast.makeText(this, remainingTime + "s Cool Down", Toast.LENGTH_SHORT).show();
                 }
             } else {
                 Log.d(TAG, "onOptionsItemSelected: roomId is null");
                 Toast.makeText(this, "Join room first!", Toast.LENGTH_SHORT).show();
             }
-
-
-
 //            nfcController.writeTag(intent);
 
         }

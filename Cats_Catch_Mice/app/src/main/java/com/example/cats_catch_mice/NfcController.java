@@ -24,8 +24,6 @@ public class NfcController {
     private boolean readFlag = true;
     private int tagCount = 0;
 
-
-
     // 构造函数，传入 Activity
     public NfcController(Activity activity, FirebaseManager firebaseManager) {
         this.activity = activity;
@@ -64,9 +62,12 @@ public class NfcController {
                             } else if(tagCount <= UPPER_BOUND) {
                                 String playerId = firebaseManager.getPlayerId();
                                 String roomId = firebaseManager.getRoomId();
-                                Toast.makeText(activity, "Read content: " + itemId + "\n" + (UPPER_BOUND - tagCount) + " chance to get item", Toast.LENGTH_SHORT).show();
-                                tagCount++;
+
                                 firebaseManager.incrementItemCount(playerId, itemId, roomId);
+                                Toast.makeText(activity, "Get item: " + itemId + "\n" + (UPPER_BOUND - tagCount) + " chance to get item", Toast.LENGTH_SHORT).show();
+                                tagCount++;
+                                Log.d("NFC", "add item in room: " + roomId + " player: " + playerId);
+
                             }
 
 
@@ -172,7 +173,4 @@ public class NfcController {
     public boolean getState() {
         return readFlag;
     }
-
-
-
 }

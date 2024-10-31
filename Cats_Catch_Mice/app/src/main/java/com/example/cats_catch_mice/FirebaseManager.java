@@ -5,6 +5,7 @@ import static android.content.ContentValues.TAG;
 import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import java.lang.reflect.Array;
 import java.security.SecureRandom;
@@ -528,6 +529,7 @@ public class FirebaseManager extends ViewModel {
     }
 
     public void setPlayerId(String id){
+        Log.d(TAG, "setPlayerId: " + id);
         this.playerId = id;
     }
 
