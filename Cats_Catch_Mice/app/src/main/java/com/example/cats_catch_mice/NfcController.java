@@ -62,10 +62,10 @@ public class NfcController {
 
 
                             if (tagCount > UPPER_BOUND) {
-                                Toast.makeText(activity, "You have reached the upper bound of reading tags", Toast.LENGTH_SHORT).show();
+
                                 readFlag = false;
                             } else if(tagCount <= UPPER_BOUND) {
-                                Toast.makeText(activity, "Read content: " + itemId, Toast.LENGTH_SHORT).show();
+                                Toast.makeText(activity, "Read content: " + itemId + "\n" + (UPPER_BOUND - tagCount) + " chance to get item", Toast.LENGTH_SHORT).show();
                                 tagCount++;
                                 firebaseManager.incrementItemCount(playerId, itemId, roomId);
                             }

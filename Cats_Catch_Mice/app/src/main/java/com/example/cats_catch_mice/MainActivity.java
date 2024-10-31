@@ -285,10 +285,24 @@ public class MainActivity extends AppCompatActivity {
         )) {
             // write
             Log.d("NFC", "NFC Tag discovered!");
-//            nfcController.writeTag(intent);
-            if(nfcController.getState()) {
-                nfcController.handleTag(intent);
+
+            String shareRoomId = firebaseManager.getRoomId();
+            if (shareRoomId != null) {
+                if(nfcController.getState()) {
+                    nfcController.handleTag(intent);
+                } else {
+                    Toast.makeText(this, "You have reached the upper bound of reading tags", Toast.LENGTH_SHORT).show();
+
+                }
+            } else {
+                Log.d(TAG, "onOptionsItemSelected: roomId is null");
+                Toast.makeText(this, "Join room first!", Toast.LENGTH_SHORT).show();
             }
+
+
+
+//            nfcController.writeTag(intent);
+
         }
     }
 
