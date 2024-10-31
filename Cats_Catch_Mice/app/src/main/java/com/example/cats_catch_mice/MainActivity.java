@@ -182,6 +182,8 @@ public class MainActivity extends AppCompatActivity {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
 
+//            firebaseManager.setRoomId(null);
+
             // TODO: double check 是否退出
             // 如果退出直接roommanager.leaveRoom(currentRoomId, userId);
             // 停止所有的thread
@@ -281,11 +283,12 @@ public class MainActivity extends AppCompatActivity {
                         NfcAdapter.ACTION_TECH_DISCOVERED.equals(intent.getAction()) ||
                         NfcAdapter.ACTION_NDEF_DISCOVERED.equals(intent.getAction())
         )) {
-            // 写入模式
+            // write
             Log.d("NFC", "NFC Tag discovered!");
 //            nfcController.writeTag(intent);
-
-            nfcController.handleTag(intent);
+            if(nfcController.getState()) {
+                nfcController.handleTag(intent);
+            }
         }
     }
 

@@ -76,6 +76,7 @@ public class FirebaseManager extends ViewModel {
     private String roomId;
     private String playerId;
     private boolean isOwner;
+    private String roomOwnerId;
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -442,6 +443,10 @@ public class FirebaseManager extends ViewModel {
         Log.d("debugging", info);
     }
 
+    public void setOwnerFlag(boolean isOwner) {
+        this.isOwner = isOwner;
+    }
+
     public Set<String> getAllExistingIdsFromDatabase() {
         DatabaseReference reference = database.getReference("rooms");
         Set<String> ids = null;
@@ -498,6 +503,10 @@ public class FirebaseManager extends ViewModel {
 
     public String getPlayerId(){
         return this.playerId;
+    }
+
+    public boolean getOwnerFlag() {
+        return this.isOwner;
     }
 
     public boolean isOwner() {

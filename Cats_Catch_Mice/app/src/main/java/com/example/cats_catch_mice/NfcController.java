@@ -17,10 +17,14 @@ import java.util.Arrays;
 
 public class NfcController {
 
+    private static final int UPPER_BOUND = 6;
+
     private Activity activity;
     private String playerId;
     private String roomId;
     private FirebaseManager firebaseManager;
+    private boolean readFlag = true;
+    private int tagCount = 0;
 
 
     // 构造函数，传入 Activity
@@ -55,9 +59,17 @@ public class NfcController {
                         if (record.getTnf() == NdefRecord.TNF_WELL_KNOWN &&
                                 Arrays.equals(record.getType(), NdefRecord.RTD_TEXT)) {
                             String itemId = readText(record);
-                            Toast.makeText(activity, "Read content: " + itemId, Toast.LENGTH_SHORT).show();
 
-                            firebaseManager.incrementItemCount(playerId, itemId, roomId);
+
+                            if (tagCount > UPPER_BOUND) {
+                                Toast.makeText(activity, "You have reached the upper bound of reading tags", Toast.LENGTH_SHORT).show();
+                                readFlag = false;
+                            } else if(tagCount <= UPPER_BOUND) {
+                                Toast.makeText(activity, "Read content: " + itemId, Toast.LENGTH_SHORT).show();
+                                tagCount++;
+                                firebaseManager.incrementItemCount(playerId, itemId, roomId);
+                            }
+
 
                             Log.d("NFC", "Read content: " + itemId);
                         }
@@ -158,6 +170,8 @@ public class NfcController {
         }
     }
 
-
+    public boolean getState() {
+        return readFlag;
+    }
 
 }
