@@ -274,7 +274,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
-        this.map = map;
+        if (this.map == null) {
+            this.map = map;
+        }
         showUnimelb();
 
         if (!joinedRoom()) {
