@@ -333,7 +333,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         if (!locationPermissionGranted) {
             return;
         }
-        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
+        LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(TRIGGER_INTERVAL).build();
         try {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
         } catch (SecurityException e) {
