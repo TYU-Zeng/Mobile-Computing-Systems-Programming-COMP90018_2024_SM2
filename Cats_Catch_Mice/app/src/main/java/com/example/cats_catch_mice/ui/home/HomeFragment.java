@@ -29,7 +29,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
@@ -55,8 +54,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -73,7 +70,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             new LatLng(-37.796215, 144.965135)
     );
     private static final long TRIGGER_INTERVAL = 5000; //milliseconds
-    private static final float MOUSE_ICON_SCALE = 0.1f;
+    private static final float ICON_SCALE = 0.08f;
     private static final long CATCH_BUTTON_COOLDOWN_PERIOD = 30000L; // 30 seconds in milliseconds
 
     private FragmentMapBinding binding;
@@ -297,9 +294,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void showUnimelb() {
-        map.addMarker(new MarkerOptions()
-                .position(UNIMELB_BOUNDARY.getCenter())
-                .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
         map.setLatLngBoundsForCameraTarget(UNIMELB_BOUNDARY);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
@@ -347,16 +341,35 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private void updateMap() {
         map.clear();
-        firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
-            for (Pair<Double, Double> location : locations) {
-                map.addMarker(new MarkerOptions()
-                        .position(new LatLng(location.first, location.second))
-                        .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
-            }
-            Log.d("debugging", "unimelb map updated");
-        }, handler::post).exceptionally(throwable -> {
-            return null;
-        });
+
+        firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
+                .thenAccept(roomSnapshot -> {
+                    if (roomSnapshot != null) {
+
+                        // update cat icon on map if player is the owner (cat)
+                        if (firebaseManager.isOwner()) {
+                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+                            if (catCoordinate != null) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(catCoordinate.first, catCoordinate.second))
+                                        .title("Marker").icon(getScaledIcon(R.drawable.cat1, ICON_SCALE)).flat(true));
+                            }
+                        }
+
+                        // update mice on map
+                        List<Pair<Double, Double>> mouseDataList = getMouseCoordinates(roomSnapshot);
+                        if (!mouseDataList.isEmpty()) {
+                            for (Pair<Double, Double> mouseCoordinate : mouseDataList) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(mouseCoordinate.first, mouseCoordinate.second))
+                                        .title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
+                            }
+                        }
+                    }
+                })
+                .exceptionally(throwable -> {
+                    return null;
+                });
     }
 
     private void setLocationUpdateCallback() {
@@ -370,9 +383,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
                     Log.d("debugging", "last location got");
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
-                    );
                     Log.d("debugging", "Lat: " + location.getLatitude() +
                             ", Long: " + location.getLongitude());
                     double lat = location.getLatitude();
