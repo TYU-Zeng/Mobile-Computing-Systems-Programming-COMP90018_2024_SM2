@@ -254,23 +254,8 @@ public class FirebaseManager extends ViewModel {
         });
     }
 
-    /*
-    // 定义一个 memberData 变量来存储异步结果
-    Map<String, Object> memberData = new HashMap<>();
 
-    // 调用异步方法，并使用 thenAccept 来接住结果
-    getPlayerDataAsync("UUID12345", "owner123", "roomId12345").thenAccept(data -> {
-        if (data != null) {
-            memberData.putAll(data);  // 将异步获取的数据存入 memberData
-            System.out.println("Member data: " + memberData);
-        } else {
-            System.out.println("Member data not found.");
-        }
-    });
 
-    // 注意：此时 memberData 可能还没有赋值完成，因为这是异步操作
-
-     */
     public CompletableFuture<Map<String, Object>> getPlayerDataAsync(String playerId, String roomId) {
         CompletableFuture<Map<String, Object>> future = new CompletableFuture<>();
 
