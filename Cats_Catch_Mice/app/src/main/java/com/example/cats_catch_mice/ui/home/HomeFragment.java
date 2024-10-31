@@ -54,6 +54,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -391,6 +392,23 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
     }
 
+    private void showDecoy() {
+        if(!firebaseManager.hasDecoy()) return;
+
+        Pair<Double, Double> decoyPosition = firebaseManager.getDecoyPosition();
+        Pair<Double, Double> newDecoyPosition = new Pair<>(decoyPosition.first + getRandomOffset(), decoyPosition.second + getRandomOffset());
+
+        LatLng originalCoordinate = new LatLng(decoyPosition.first, decoyPosition.second);
+        LatLng newCoordinate = new LatLng(newDecoyPosition.first, newDecoyPosition.second);
+
+        if (UNIMELB_BOUNDARY.contains(newCoordinate)){
+            firebaseManager.setDecoyPosition(newDecoyPosition);
+            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+        }else {
+            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+        }
+    }
+
     private void updateMap() {
 
         if(!isFragmentAttached()) return;
@@ -398,6 +416,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.clear();
 
         showChest();
+        showDecoy();
 
         firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
                 .thenAccept(roomSnapshot -> {
