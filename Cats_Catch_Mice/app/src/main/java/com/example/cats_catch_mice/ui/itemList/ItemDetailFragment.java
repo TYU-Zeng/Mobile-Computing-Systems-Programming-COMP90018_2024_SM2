@@ -136,6 +136,15 @@ public class ItemDetailFragment extends Fragment {
         });
     }
 
+    private void userItem(String itemName) {
+
+        if(itemName.toLowerCase().contains("decoy")) {
+            itemViewModel.startDecoyWithTimer();
+        }else if(itemName.toLowerCase().contains("invisible")) {
+
+        }
+    }
+
     // Clean up the binding reference when the fragment is destroyed
     @Override
     public void onDestroyView() {
