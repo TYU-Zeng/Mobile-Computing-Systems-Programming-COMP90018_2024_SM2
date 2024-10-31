@@ -68,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
     // current room id for map sharing
     private String currentRoomId = null;
     private Bitmap qrCodeBitmap = null;
-    private String userId = null;
     private RoomData roomData = null;
     private Boolean isHost = false;
 
@@ -81,9 +80,6 @@ public class MainActivity extends AppCompatActivity {
 
         // init firebase on manager created
         firebaseManager = new ViewModelProvider(this).get(FirebaseManager.class);
-
-        //userId = generateUUID();
-        Log.d("UUID", "onCreate: UUID: " + userId);
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -129,15 +125,13 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
-        // FirebaseManager firebaseManager = new FirebaseManager();
-
-        // 监听从 QRScannerFragment 传回的数据
-
-
+        // create player id
+        firebaseManager.generatePlayerId();
     }
 
     /**
      * Create top menu
+     *
      * @param menu
      * @return
      */
@@ -150,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Menu item click event
+     *
      * @param item
      * @return
      */
@@ -157,14 +152,33 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         if (item.getItemId() == R.id.menu_createRoom) {
-            String generateRoomId = firebaseManager.createRoom(userId);
+
+            // inform user who has already been in a room on create room button clicked
+            if(firebaseManager.getRoomId()!= null) {
+                Toast.makeText(this, "You are already in a room.", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            String generateRoomId = firebaseManager.createRoom(firebaseManager.getPlayerId());
             Log.d("MailActivity", "Create room: Room ID: " + generateRoomId);
 
             Toast.makeText(this, "Room id: " + generateRoomId.substring(6), Toast.LENGTH_SHORT).show();
 
 
             return true;
-        }else if (item.getItemId() == R.id.menu_quit) {
+
+
+        } else if (item.getItemId() == R.id.menu_joinRoom) {
+            // 点击后跳转到 QRScannerFragment
+            Log.d(TAG, "onOptionsItemSelected: join room button clicked");
+            // TODO: QRScannerFragment 创建实例
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.navigation_scanner);
+
+            return true;
+
+
+        } else if (item.getItemId() == R.id.menu_quit) {
             // TODO: click "Quit" function
             Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
 
@@ -192,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
                 bundle.putString("room_id", shareRoomId);
 
                 navController.navigate(R.id.action_global_navigation_qr_test, bundle);
-            }else {
+            } else {
                 Log.d(TAG, "onOptionsItemSelected: roomId is null");
                 Toast.makeText(this, "Cannot Share QR Code before join a room!", Toast.LENGTH_SHORT).show();
             }
@@ -219,7 +233,6 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * Click event for button
-     *
      */
     @Override
     public boolean onSupportNavigateUp() {
@@ -290,6 +303,4 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .show();
     }
-
-
 }

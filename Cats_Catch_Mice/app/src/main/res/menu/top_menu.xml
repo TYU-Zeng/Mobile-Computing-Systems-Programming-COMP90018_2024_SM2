@@ -13,12 +13,7 @@
     <item android:id="@+id/menu_qrCode"
         android:title="@string/share_qrcode"/>
 
-
-
     <item android:id="@+id/menu_quit"
         android:title="@string/quit"/>
-
-
-
 
 </menu>

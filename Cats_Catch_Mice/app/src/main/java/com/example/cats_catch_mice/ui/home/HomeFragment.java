@@ -28,7 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.cats_catch_mice.FirebaseManager;
 import com.example.cats_catch_mice.R;
@@ -54,8 +53,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -67,7 +69,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             new LatLng(-37.796215, 144.965135)
     );
     private static final long TRIGGER_INTERVAL = 5000; //milliseconds
-    private static final float MOUSE_ICON_SCALE = 0.1f;
+    private static final float ICON_SCALE = 0.08f;
     private static final long CATCH_BUTTON_COOLDOWN_PERIOD = 30000L; // 30 seconds in milliseconds
 
     private FragmentMapBinding binding;
@@ -83,6 +85,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private FirebaseManager firebaseManager;
     private Handler handler;
 
+    private ScheduledExecutorService executor;
+    private ScheduledFuture<?> roomCheckTask;
+    private static final long ROOM_CHECK_INTERVAL = 5;
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -97,6 +104,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         // set up and start the trigger to get device location
         setLocationUpdateCallback();
+
+        // set single thread to check if player joins room
+        executor = Executors.newSingleThreadScheduledExecutor();
     }
 
     @Override
@@ -129,8 +139,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             }
 
             // Proceed with the button's action
-//            String roomId = firebaseManager.getRoomId(); // Get the actual room ID
-            String roomId = "roomIddummy1111";
+            String roomId = firebaseManager.getRoomId(); // Get the actual room ID
             if (roomId == null) {
                 Toast.makeText(getContext(), "You are not in a room.", Toast.LENGTH_SHORT).show();
                 return;
@@ -221,14 +230,43 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             mapFragment.getMapAsync(this);
         }
 
-        startUpdatingLocation();
-
-
-
-
-        // TODO: hotfix for null room id cuz we don't have landing page here
+        if (joinedRoom()) {
+            startUpdatingLocation();
+        } else {
+            Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
+        }
 
         return root;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (executor != null) executor.shutdown();
+    }
+
+    /* Periodic check if player joins room */
+
+    private void startJoinRoomCheck() {
+        if (roomCheckTask == null || roomCheckTask.isCancelled()) {
+            roomCheckTask = executor.scheduleWithFixedDelay(
+                    this::checkRoomSchedule,
+                    0,
+                    ROOM_CHECK_INTERVAL,
+                    TimeUnit.SECONDS
+            );
+        }
+    }
+
+    private void checkRoomSchedule() {
+        if (joinedRoom()) {
+            mainHandler.post(() -> {
+                onMapReady(this.map);
+                if (roomCheckTask != null && !roomCheckTask.isCancelled()) {
+                    roomCheckTask.cancel(true);
+                }
+            });
+        }
     }
 
     /* Map */
@@ -237,31 +275,29 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(@NonNull GoogleMap map) {
         this.map = map;
         showUnimelb();
-        getLocationPermission();
-        updateLocationUI();
 
-        if(!joinedRoom()){
+        if (!joinedRoom()) {
             Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
+            startJoinRoomCheck();
             return;
         }
 
+        getLocationPermission();
+        updateLocationUI();
         startUpdatingLocation();
     }
 
 
-
-    private boolean joinedRoom(){
+    private boolean joinedRoom() {
         return firebaseManager.getRoomId() != null;
     }
 
     private void showUnimelb() {
-        map.addMarker(new MarkerOptions()
-                .position(UNIMELB_BOUNDARY.getCenter())
-                .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
         map.setLatLngBoundsForCameraTarget(UNIMELB_BOUNDARY);
         map.moveCamera(CameraUpdateFactory.newLatLngZoom(UNIMELB_BOUNDARY.getCenter(), DEFAULT_ZOOM));
         Log.d("debugging", "unimelb map rendered");
     }
+
     private void updateLocationUI() {
         Log.d("debugging", "updating UI");
         if (this.map == null)
@@ -280,10 +316,10 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     // helper for icon rendering on map
-    private BitmapDescriptor getScaledIcon(int resourceID, float scale){
+    private BitmapDescriptor getScaledIcon(int resourceID, float scale) {
         Bitmap icon = BitmapFactory.decodeResource(getResources(), resourceID);
-        int height = Math.round(icon.getHeight()*scale);
-        int width= Math.round(icon.getWidth()*scale);
+        int height = Math.round(icon.getHeight() * scale);
+        int width = Math.round(icon.getWidth() * scale);
         Bitmap scaledIcon = Bitmap.createScaledBitmap(icon, width, height, false);
         return BitmapDescriptorFactory.fromBitmap(scaledIcon);
     }
@@ -291,29 +327,51 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     /* Periodic map update*/
 
     private void startUpdatingLocation() {
-        if(!locationPermissionGranted){
+        if (!locationPermissionGranted) {
             return;
         }
         LocationRequest locationRequest = new LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY).setIntervalMillis(5000).build();
         try {
             fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
-        }catch(SecurityException e) {
+        } catch (SecurityException e) {
             Log.d(LOG_TAG, "Error when request location updates");
         }
     }
+
     private void updateMap() {
-        firebaseManager.getLocations(firebaseManager.getRoomId()).thenAcceptAsync(locations -> {
-            for (Pair<Double, Double> location : locations){
-                map.addMarker(new MarkerOptions()
-                        .position(new LatLng(location.first, location.second))
-                        .title("Marker").icon(getScaledIcon(R.drawable.mouse, MOUSE_ICON_SCALE)).flat(true));
-            }
-            Log.d("debugging", "unimelb map updated");
-        }, handler::post).exceptionally(throwable -> {
-            return null;
-        });
+        map.clear();
+
+        firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
+                .thenAccept(roomSnapshot -> {
+                    if (roomSnapshot != null) {
+
+                        // update cat icon on map if player is the owner (cat)
+                        if (firebaseManager.isOwner()) {
+                            Pair<Double, Double> catCoordinate = getCatCoordinate(roomSnapshot);
+                            if (catCoordinate != null) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(catCoordinate.first, catCoordinate.second))
+                                        .title("Marker").icon(getScaledIcon(R.drawable.cat1, ICON_SCALE)).flat(true));
+                            }
+                        }
+
+                        // update mice on map
+                        List<Pair<Double, Double>> mouseDataList = getMouseCoordinates(roomSnapshot);
+                        if (!mouseDataList.isEmpty()) {
+                            for (Pair<Double, Double> mouseCoordinate : mouseDataList) {
+                                map.addMarker(new MarkerOptions()
+                                        .position(new LatLng(mouseCoordinate.first, mouseCoordinate.second))
+                                        .title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
+                            }
+                        }
+                    }
+                })
+                .exceptionally(throwable -> {
+                    return null;
+                });
     }
-    private void setLocationUpdateCallback(){
+
+    private void setLocationUpdateCallback() {
         locationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -324,17 +382,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 Location location = locationResult.getLastLocation();
                 if (location != null) {
                     Log.d("debugging", "last location got");
-                    map.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                            new LatLng(location.getLatitude(), location.getLongitude()), USER_LOCATION_ZOOM)
-                    );
                     Log.d("debugging", "Lat: " + location.getLatitude() +
                             ", Long: " + location.getLongitude());
                     double lat = location.getLatitude();
                     double lng = location.getLongitude();
 
-                    // TODO: change to actual player id
-                    String playerId = "UUID11111";
-                    firebaseManager.updateLocation(playerId, lat, lng, firebaseManager.getRoomId());
+                    firebaseManager.updateLocation(firebaseManager.getPlayerId(), lat, lng, firebaseManager.getRoomId());
                     updateMap();
                 }
             }
@@ -359,6 +412,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             resultPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION);
         }
     }
+
     private void setResultPermissionLauncher() {
         resultPermissionLauncher = registerForActivityResult(new ActivityResultContracts.RequestPermission(), isGranted -> {
             if (isGranted) {
@@ -387,6 +441,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .create()
                 .show();
     }
+
     // open Settings on user's phone
     private void openSettings() {
         Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
@@ -573,6 +628,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return null;
         }
     }
-
-
 }
+
+
