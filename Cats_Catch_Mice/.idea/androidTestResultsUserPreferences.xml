@@ -11,6 +11,7 @@
                   <entry key="Duration" value="90" />
                   <entry key="OnePlus KB2000" value="120" />
                   <entry key="Tests" value="360" />
+                  <entry key="motorola moto g53 5G" value="120" />
                 </map>
               </option>
             </AndroidTestResultsTableState>
@@ -23,7 +24,9 @@
                 <map>
                   <entry key="Duration" value="90" />
                   <entry key="OnePlus KB2000" value="120" />
+                  <entry key="Pixel_4_API_33" value="120" />
                   <entry key="Tests" value="360" />
+                  <entry key="motorola moto g53 5G" value="120" />
                 </map>
               </option>
             </AndroidTestResultsTableState>

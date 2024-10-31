@@ -22,7 +22,6 @@ import android.widget.Button;
 import android.widget.Toast;
 import androidx.lifecycle.ViewModelProvider;
 
-
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -123,6 +122,17 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState);
 
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
+
+        Boolean isOwner = firebaseManager.getOwnerFlag();
+        if (isOwner) {
+            // 玩家是猫，显示并设置按钮
+            catchMouseButton.setVisibility(View.VISIBLE);
+
+        } else {
+            // 玩家是老鼠，隐藏按钮
+            catchMouseButton.setVisibility(View.GONE);
+        }
+
         String platerId = firebaseManager.getPlayerId();
 
 

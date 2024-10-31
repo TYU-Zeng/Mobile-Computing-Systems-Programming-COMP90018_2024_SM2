@@ -17,17 +17,16 @@ import java.util.Arrays;
 
 public class NfcController {
 
-    private Activity activity;
-    private String playerId;
-    private String roomId;
-    private FirebaseManager firebaseManager;
+    private static final int UPPER_BOUND = 6;
 
+    private Activity activity;
+    private FirebaseManager firebaseManager;
+    private boolean readFlag = true;
+    private int tagCount = 0;
 
     // 构造函数，传入 Activity
-    public NfcController(Activity activity, String playerId, FirebaseManager firebaseManager, String roomId) {
+    public NfcController(Activity activity, FirebaseManager firebaseManager) {
         this.activity = activity;
-        this.playerId = playerId;
-        this.roomId = roomId;
         this.firebaseManager = firebaseManager;
     }
 
@@ -55,9 +54,22 @@ public class NfcController {
                         if (record.getTnf() == NdefRecord.TNF_WELL_KNOWN &&
                                 Arrays.equals(record.getType(), NdefRecord.RTD_TEXT)) {
                             String itemId = readText(record);
-                            Toast.makeText(activity, "Read content: " + itemId, Toast.LENGTH_SHORT).show();
 
-                            firebaseManager.incrementItemCount(playerId, itemId, roomId);
+
+                            if (tagCount > UPPER_BOUND) {
+
+                                readFlag = false;
+                            } else if(tagCount <= UPPER_BOUND) {
+                                String playerId = firebaseManager.getPlayerId();
+                                String roomId = firebaseManager.getRoomId();
+
+                                firebaseManager.incrementItemCount(playerId, itemId, roomId);
+                                Toast.makeText(activity, "Get item: " + itemId + "\n" + (UPPER_BOUND - tagCount) + " chance to get item", Toast.LENGTH_SHORT).show();
+                                tagCount++;
+                                Log.d("NFC", "add item in room: " + roomId + " player: " + playerId);
+
+                            }
+
 
                             Log.d("NFC", "Read content: " + itemId);
                         }
@@ -158,6 +170,7 @@ public class NfcController {
         }
     }
 
-
-
+    public boolean getState() {
+        return readFlag;
+    }
 }
