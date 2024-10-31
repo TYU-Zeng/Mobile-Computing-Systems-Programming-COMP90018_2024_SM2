@@ -200,7 +200,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                                 // You can update the mouse's status in Firebase if needed
                                 // For example:
-                                // firebaseManager.updateMouseCaught(roomId, caughtMouseId);
+                                firebaseManager.updateMouseCaught(roomId, caughtMouseId);
 
                                 getActivity().runOnUiThread(() -> {
                                     Toast.makeText(getContext(), "Mouse caught!" , Toast.LENGTH_SHORT).show();

@@ -244,6 +244,7 @@ public class FirebaseManager extends ViewModel {
         memberData.put("item1", item1);
         memberData.put("item2", item2);
         memberData.put("visible", visible);
+        memberData.put("beCaught", false);
 
         // 确保数据写入成功后调用
         memberRef.setValue(memberData).addOnCompleteListener(task -> {
@@ -253,6 +254,25 @@ public class FirebaseManager extends ViewModel {
                 System.err.println("Failed to write data to Firebase.");
             }
         });
+    }
+
+    public void updateMouseCaught(String roomId, String playerId) {
+        executor.execute(() -> {
+            DatabaseReference beCaughtRef = database.getReference("rooms")
+                    .child(roomId)
+                    .child("members")
+                    .child(playerId)
+                    .child("beCaught");
+
+            beCaughtRef.setValue(true).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Log.d("FirebaseManager", "beCaught field updated to true for player: " + playerId);
+                } else {
+                    Log.e("FirebaseManager", "Failed to update beCaught field for player: " + playerId, task.getException());
+                }
+            });
+        });
+
     }
 
 
@@ -310,6 +330,7 @@ public class FirebaseManager extends ViewModel {
         memberData.put("item1", 0);
         memberData.put("item2", 0);
         memberData.put("visible", true);
+        memberData.put("beCaught", false);
 
         Map<String, Object> members = new HashMap<>();
         members.put(roomOwnerId, memberData);
