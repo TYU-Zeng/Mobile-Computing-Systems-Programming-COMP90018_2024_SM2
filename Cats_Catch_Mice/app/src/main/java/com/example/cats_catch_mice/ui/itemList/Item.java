@@ -4,7 +4,7 @@ public class Item {
     private String name;
     private String description;
     private int count;
-    private int imageResId;  // New field for image resource
+    private int imageResId;  // e.g. R.drawable.itemicon_item1_demo
 
     public Item(String name, String description, int count, int imageResId) {
         this.name = name;

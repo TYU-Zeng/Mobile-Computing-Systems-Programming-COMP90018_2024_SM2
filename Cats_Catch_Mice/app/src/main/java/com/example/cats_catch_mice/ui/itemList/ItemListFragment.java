@@ -21,11 +21,9 @@ import com.example.cats_catch_mice.FirebaseManager;
 
 public class ItemListFragment extends Fragment {
 
-//    private ItemViewModel itemViewModel;
     private ItemAdapter itemAdapter;
-    private FragmentItemListBinding binding; // Declare binding
+    private FragmentItemListBinding binding;
     private FirebaseManager itemViewModel;
-//    private FirebaseManager firebaseManager;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -38,10 +36,6 @@ public class ItemListFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
 
-//        firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
-//        if(firebaseManager!=null){
-////            Log.d(TAG, )
-//        }
         // Inflate the layout using View Binding
         binding = FragmentItemListBinding.inflate(inflater, container, false);
         View view = binding.getRoot();
@@ -49,30 +43,13 @@ public class ItemListFragment extends Fragment {
         // Set up the RecyclerView using the binding
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
-//        itemAdapter = new ItemAdapter(item -> {
-//            // When an item is clicked, navigate to the ItemDetailFragment and pass the item details
-//            Bundle bundle = new Bundle();
-//            bundle.putString("itemName", item.getName());
-//            bundle.putInt("itemCount", item.getCount());
-////            bundle.putString("itemImageUrl", item.getImageUrl());
-//            bundle.putInt("itemImage", item.getImageResId());
-//            Navigation.findNavController(view).navigate(R.id.action_itemListFragment_to_itemDetailFragment, bundle);
-//        });
-        // Set up Adapter (assuming you already have a list of items)
-
         itemAdapter = new ItemAdapter(new ArrayList<>());
         binding.recyclerView.setAdapter(itemAdapter);
 
-//        binding.recyclerView.setAdapter(itemAdapter);
-
-
-        // Get the ViewModel and observe the item list
-//        itemViewModel = new ViewModelProvider(requireActivity()).get(ItemViewModel.class);
-
-//        ItemViewModelFactory factory = new ItemViewModelFactory(firebaseManager);
-//        itemViewModel = new ViewModelProvider(this, factory).get(ItemViewModel.class);
+        // Update the item list
         itemViewModel.getItemListLiveData().observe(getViewLifecycleOwner(), items -> {
             itemAdapter.setItems(items);
+            itemAdapter.notifyDataSetChanged();
         });
 
         return view;

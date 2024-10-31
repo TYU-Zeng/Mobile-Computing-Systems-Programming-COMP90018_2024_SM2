@@ -2,6 +2,7 @@ package com.example.cats_catch_mice;
 
 import static android.content.ContentValues.TAG;
 
+import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 
@@ -81,7 +82,7 @@ public class FirebaseManager extends ViewModel {
     private String playerId;
     private boolean isOwner;
 
-    private MutableLiveData<List<Item>> itemListLiveData;
+    private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();;
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -285,8 +286,10 @@ public class FirebaseManager extends ViewModel {
                 if (snapshot.exists()) {
                     Map<String, Object> memberData = (Map<String, Object>) snapshot.getValue();
                     future.complete(memberData);  // 完成并返回数据
+                    Log.d("getPlayerDataAsync", "future completed with memberData");
                 } else {
                     future.complete(null);  // 没有数据时返回 null
+                    Log.d("getPlayerDataAsync", "future completed with null");
                 }
             }
 
@@ -338,40 +341,46 @@ public class FirebaseManager extends ViewModel {
 
     }
 
+    /*
+        Updates the item list LiveData
+     */
 
     public LiveData<List<Item>> getItemListLiveData() {
         List<Item> itemList = new ArrayList<>();
 
-        String playerId = "UUID12345";  // 预先存在的玩家ID
-        String roomId = "roomId12345";
-
+//        dummy for testing
+        String playerId = "UUID2018b95f70569";  // 预先存在的玩家ID
+        String roomId = "roomIddummy1111";
+//        TODO: null handling
         if (this.getPlayerId() == null ){
-            Log.d("itemListLiveData", "Error: playerId is null, using 12345");
+            Log.d("itemListLiveData", "Error: playerId is null");
         } else if ( this.getRoomId() == null){
-            Log.d("itemListLiveData", "Error: roomId is null, using 12345");
+            Log.d("itemListLiveData", "Error: roomId is null");
         }
         else{
-            playerId = this.getPlayerId();  // 预先存在的玩家ID
+            playerId = this.getPlayerId();
             roomId = this.getRoomId();
         }
-        CompletableFuture<Map<String, Object>> future = this.getPlayerDataAsync(playerId,roomId);
-        try {
-            Log.d("itemListLiveData", "getPlayerDataAsync: in try, waiting for the future");
-            Map<String, Object> memberData = future.get();  // 等待异步结果
-            Log.d("itemListLiveData", "item data accquired");
-            int item1Count = (int) memberData.get("item1");
-            int item2Count = (int) memberData.get("item2");
-            itemList.add(new Item("item1", "item1 description", item1Count, R.drawable.itemicon_item1_demo));
-            itemList.add(new Item("item2", "item2 description", item2Count, R.drawable.mouse));
-            itemListLiveData.postValue(itemList);
-        } catch (ExecutionException | InterruptedException e) {
-            Log.d("itemListLiveData", "failed to get player data, load dummy item data");
-            itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
-            itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
-            itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
-            itemListLiveData.postValue(itemList);
-        }
+        CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+        future.whenComplete((memberData, throwable) -> {
+            if (throwable != null) {
+                // Handle any errors, load dummy data if needed
+                Log.d("itemListLiveData", "Failed to get player data, loading dummy data");
+                itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+            } else {
+                // Process memberData and populate the itemList
+                Log.d("itemListLiveData", "Player data acquired, processing data");
+                int item1Count = ((Number) memberData.getOrDefault("item1", 0)).intValue();
+                int item2Count = ((Number) memberData.getOrDefault("item2", 0)).intValue();
 
+                // TODO: Item names, descriptions and corresponding icons need to be manually editted here as there's only count data from firebase
+                itemList.add(new Item("item1", "item1 description", item1Count, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("item2", "item2 description", item2Count, R.drawable.mouse));
+            }
+            itemListLiveData.postValue(itemList);
+        });
         return itemListLiveData;
     }
 

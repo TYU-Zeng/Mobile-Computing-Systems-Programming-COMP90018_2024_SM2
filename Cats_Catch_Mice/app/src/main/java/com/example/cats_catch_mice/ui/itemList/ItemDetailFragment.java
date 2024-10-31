@@ -67,6 +67,7 @@ public class ItemDetailFragment extends Fragment {
     private FirebaseManager itemViewModel;
     private FragmentItemDetailBinding binding; // Declare binding
     private String itemName;
+    private String itemDescription;
     private int itemCount;
 //    private String itemImageUrl;
     private int imageResId;
@@ -87,6 +88,7 @@ public class ItemDetailFragment extends Fragment {
         // Get the arguments passed from ItemListFragment
         if (getArguments() != null) {
             itemName = getArguments().getString("itemName");
+            itemDescription = getArguments().getString("itemDescription");
             itemCount = getArguments().getInt("itemCount");
 //            itemImageUrl = getArguments().getString("itemImageUrl");
             imageResId = getArguments().getInt("itemImage");
@@ -94,26 +96,13 @@ public class ItemDetailFragment extends Fragment {
             // Populate UI with item details using binding
             binding.itemNameTextView.setText(itemName);
             binding.itemCountTextView.setText(String.valueOf(itemCount));
-//            Picasso.get().load(itemImageUrl).into(binding.itemImageView);
+            binding.itemDetailDescription.setText(itemDescription);
             binding.itemImageView.setImageResource(imageResId);
         }
 
         // Get ViewModel
 //        itemViewModel = new ViewModelProvider(requireActivity()).get(ItemViewModel.class);
         itemViewModel = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
-        // Handle "use" button click using binding
-        binding.useButton.setOnClickListener(v -> {
-            if (itemCount > 0) {
-                itemCount--;
-                binding.itemCountTextView.setText(String.valueOf(itemCount));
-
-                // Update the item count in Firestore through ViewModel
-//                itemViewModel.useItem(itemName, itemCount); // Assume itemName is used as the item ID
-                itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), itemName, itemViewModel.getRoomId());
-
-            }
-//            Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
-        });
 
         return view;
     }
@@ -122,14 +111,26 @@ public class ItemDetailFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        // TODO: add button function
+        // return
         binding.buttonCancel.setOnClickListener(v -> {
             ((AppCompatActivity) requireActivity()).getSupportFragmentManager().popBackStack();
         });
 
         // TODO: call item function
         binding.useButton.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
+            if (itemCount > 0) {
+                itemCount--;
+                binding.itemCountTextView.setText(String.valueOf(itemCount));
+
+                // Update the item count in Firestore
+//                itemViewModel.decreaseItemCount("UUID2018b95f70569", itemName, "roomIddummy1111");
+                itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), itemName, itemViewModel.getRoomId());
+                Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(getContext(), "No item left!", Toast.LENGTH_SHORT).show();
+            }
+
+
         });
     }
 
