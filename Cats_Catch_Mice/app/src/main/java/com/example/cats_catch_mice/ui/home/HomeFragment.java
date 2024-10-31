@@ -102,6 +102,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        if(!isFragmentAttached()) return;
+
         homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
@@ -120,6 +122,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        if(!isFragmentAttached()) return;
 
         Button catchMouseButton = view.findViewById(R.id.catch_mouse);
 
@@ -292,6 +296,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
+
+        if(!isFragmentAttached()) return;
+
         if (this.map == null) {
             this.map = map;
         }
@@ -357,6 +364,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     /* Periodic map update*/
 
     private void startUpdatingLocation() {
+
+        if(!isFragmentAttached()) return;
+
         if (!locationPermissionGranted) {
             return;
         }
@@ -369,6 +379,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void updateMap() {
+
+        if(!isFragmentAttached()) return;
+
         map.clear();
 
         showChest();
@@ -430,6 +443,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     /* Location permission */
 
     private void getLocationPermission() {
+
+        if(!isFragmentAttached()) return;
+
         if (this.getContext() == null) {
             Log.e(LOG_TAG, "Error when getting context");
             return;
@@ -464,6 +480,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     // show dialog when user denies location permission
     private void showLocationRequireDialog() {
+
+        if(!isFragmentAttached()) return;
+
         new AlertDialog.Builder(this.getContext())
                 .setTitle("Location permission required")
                 .setMessage("The game needs location permission to function properly. Please turn it on.")
@@ -659,6 +678,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Log.e("HomeFragment", "Invalid coordinates for owner");
             return null;
         }
+    }
+
+    /* check fragment attachment */
+    private boolean isFragmentAttached() {
+        return (getActivity() != null && isAdded() && !isDetached());
     }
 }
 
