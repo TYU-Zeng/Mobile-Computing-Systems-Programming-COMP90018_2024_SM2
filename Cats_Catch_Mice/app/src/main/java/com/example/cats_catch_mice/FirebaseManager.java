@@ -2,14 +2,18 @@ package com.example.cats_catch_mice;
 
 import static android.content.ContentValues.TAG;
 
+import android.os.Build;
 import android.util.Log;
 import android.util.Pair;
 
 import java.lang.reflect.Array;
 import java.security.SecureRandom;
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.example.cats_catch_mice.ui.itemList.Item;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,6 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -42,9 +47,9 @@ public class FirebaseManager extends ViewModel {
 
     "rooms": {
     "roomId12345": {
-      "owner": "UUID12345",
-      "members": {
-        "UUID12345": {
+      
+        "UUID12345":"owner": "UUID12345",
+      "members": { {
           "lat": 37.7749,
           "lng": -122.4194,
           "item1": 0,
@@ -77,6 +82,8 @@ public class FirebaseManager extends ViewModel {
     private String playerId;
     private boolean isOwner;
     private String roomOwnerId;
+
+    private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();;
 
     public FirebaseManager() {
         database = FirebaseDatabase.getInstance();
@@ -280,8 +287,10 @@ public class FirebaseManager extends ViewModel {
                 if (snapshot.exists()) {
                     Map<String, Object> memberData = (Map<String, Object>) snapshot.getValue();
                     future.complete(memberData);  // 完成并返回数据
+                    Log.d("getPlayerDataAsync", "future completed with memberData");
                 } else {
                     future.complete(null);  // 没有数据时返回 null
+                    Log.d("getPlayerDataAsync", "future completed with null");
                 }
             }
 
@@ -333,6 +342,48 @@ public class FirebaseManager extends ViewModel {
 
     }
 
+    /*
+        Updates the item list LiveData
+     */
+
+    public LiveData<List<Item>> getItemListLiveData() {
+        List<Item> itemList = new ArrayList<>();
+
+//        dummy for testing
+        String playerId = "UUID2018b95f70569";  // 预先存在的玩家ID
+        String roomId = "roomIddummy1111";
+//        TODO: null handling
+        if (this.getPlayerId() == null ){
+            Log.d("itemListLiveData", "Error: playerId is null");
+        } else if ( this.getRoomId() == null){
+            Log.d("itemListLiveData", "Error: roomId is null");
+        }
+        else{
+            playerId = this.getPlayerId();
+            roomId = this.getRoomId();
+        }
+        CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
+        future.whenComplete((memberData, throwable) -> {
+            if (throwable != null) {
+                // Handle any errors, load dummy data if needed
+                Log.d("itemListLiveData", "Failed to get player data, loading dummy data");
+                itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("Health Potion", "Sample description", 5, R.drawable.itemicon_item1_demo));
+            } else {
+                // Process memberData and populate the itemList
+                Log.d("itemListLiveData", "Player data acquired, processing data");
+                int item1Count = ((Number) memberData.getOrDefault("item1", 0)).intValue();
+                int item2Count = ((Number) memberData.getOrDefault("item2", 0)).intValue();
+
+                // TODO: Item names, descriptions and corresponding icons need to be manually editted here as there's only count data from firebase
+                itemList.add(new Item("item1", "item1 description", item1Count, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("item2", "item2 description", item2Count, R.drawable.mouse));
+            }
+            itemListLiveData.postValue(itemList);
+        });
+        return itemListLiveData;
+    }
 
 
     public CompletableFuture<Map<String, Object>> getRoomDataAsync(String roomId) {
