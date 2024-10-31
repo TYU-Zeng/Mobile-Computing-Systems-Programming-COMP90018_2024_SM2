@@ -263,6 +263,12 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        binding = null;
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (executor != null) executor.shutdown();
