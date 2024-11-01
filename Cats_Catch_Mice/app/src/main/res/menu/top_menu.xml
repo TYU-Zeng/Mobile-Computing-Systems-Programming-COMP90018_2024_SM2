@@ -16,6 +16,6 @@
 <!--        android:title=""-->
 
     <item android:id="@+id/menu_quit"
-        android:title="@string/quit"/>
+        android:title="Quit Game"/>
 
 </menu>
