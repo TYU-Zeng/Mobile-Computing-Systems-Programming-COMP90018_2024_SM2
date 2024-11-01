@@ -76,6 +76,7 @@ public class FirebaseManager extends ViewModel {
     private static final String ROOM_ID_PREFIX = "roomId";
     private static final int RANDOM_NUMBER_BOUND = 100000;
     private static final int DECOY_TIMER = 30000;
+    private static final int INVISIBLE_TIMER = 20000;
 
     private final ThreadPoolExecutor executor;
     private SecureRandom secureRandom;
@@ -476,7 +477,21 @@ public class FirebaseManager extends ViewModel {
         });
     }
 
+    public void setSelfVisibility(boolean visibility) {
+        DatabaseReference itemRef = database.getReference("rooms")
+                .child(this.roomId)
+                .child("members")
+                .child(this.playerId)
+                .child("visible");
 
+        itemRef.setValue(visibility).addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                Log.d("FirebaseManager", "Visible successfully set to false");
+            }else {
+                Log.d("FirebaseManager", "Failed to set visible to false");
+            }
+        });
+    }
 
 
     /*
@@ -548,6 +563,24 @@ public class FirebaseManager extends ViewModel {
             }
             // remove decoy when time's up
             setDecoy(false);
+        }).start();
+    }
+
+    public void startInvisibleWithTimer() {
+
+        new Thread(() -> {
+            // put on invisible cloak and start timer
+            setSelfVisibility(false);
+            Log.d("debugging", "wear invisible");
+            try {
+                Thread.sleep(INVISIBLE_TIMER);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e("debugging", "Thread was interrupted: " + e.getMessage());
+            }
+            // take off the invisible cloak
+            Log.d("debugging", "take off invisible");
+            setSelfVisibility(true);
         }).start();
     }
 
