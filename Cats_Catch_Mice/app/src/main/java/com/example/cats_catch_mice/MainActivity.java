@@ -38,8 +38,6 @@ import androidx.annotation.NonNull;
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
-    private RoomManager roomManager;
-
 
     private long lastNfcTagTime = 0;
     // NFC tag cool down
@@ -52,12 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private NfcAdapter nfcAdapter;
     private PendingIntent pendingIntent;
     private NfcController nfcController;
-
-    // current room id for map sharing
-    private String currentRoomId = null;
-    private Bitmap qrCodeBitmap = null;
-    private RoomData roomData = null;
-    private Boolean isHost = false;
 
 
     @Override
@@ -72,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        roomManager = new RoomManager();
         // Initialize NfcController
         nfcController = new NfcController(this, firebaseManager);
 
@@ -227,7 +218,6 @@ public class MainActivity extends AppCompatActivity {
             String shareRoomId = firebaseManager.getRoomId();
             if (shareRoomId != null) {
                 Log.d(TAG, "onOptionsItemSelected: roomId = " + shareRoomId);
-                currentRoomId = shareRoomId;
 
                 NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
                 Bundle bundle = new Bundle();
