@@ -31,20 +31,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Cats_Catch_Mice"
         tools:targetApi="31">
-<!--        <activity-->
-<!--            android:name=".ItemDetail"-->
-<!--            android:exported="false" />-->
 
         <activity
             android:name=".PortraitCaptureActivity"
             android:screenOrientation="portrait"
            >
         </activity>
-
-
-        <activity
-            android:name=".ItemDetailFragment"
-            android:exported="false" />
 
         <activity
             android:name=".MainActivity"
