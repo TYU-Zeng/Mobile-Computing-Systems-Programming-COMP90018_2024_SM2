@@ -1,4 +1,3 @@
-// QRCodeFragment.java
 package com.example.cats_catch_mice;
 
 import android.graphics.Bitmap;
@@ -36,11 +35,6 @@ public class JoinRoomFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             roomId = getArguments().getString("room_id");
-            // If using Safe Args:
-            // QRTestArgs args = QRTestArgs.fromBundle(getArguments());
-            // roomId = args.getRoomId();
-
-
         }
     }
 
