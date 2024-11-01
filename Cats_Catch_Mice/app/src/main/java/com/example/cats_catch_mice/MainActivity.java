@@ -11,6 +11,8 @@ import android.nfc.NfcAdapter;
 import android.nfc.NfcManager;
 import android.nfc.Tag;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -205,11 +207,20 @@ public class MainActivity extends AppCompatActivity {
 
                         if (firebaseManager.isOwner()) { // owner quits
 
-                            Log.d("debugging", "owner quits");
+                            // set owner of room to null
+                            firebaseManager.removeOwner(roomId);
+
+                            new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    // delete room in db
+                                    Log.d("debugging", "owner removes room");
+                                    firebaseManager.removeRoom(roomId);
+                                }
+                            }, 3000);
 
                         }else { // player quits
-                            Log.d("debugging", "player quits");
-
+                            firebaseManager.deletePlayerDataById(roomId, playerId);
                         }
 
                         // clear all data and returns to starting fragment
