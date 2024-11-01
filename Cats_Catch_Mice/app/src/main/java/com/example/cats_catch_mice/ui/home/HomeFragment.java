@@ -686,7 +686,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 mouseLocation.setLongitude(mouseCoordinate.second);
 
                 float distance = catLocation.distanceTo(mouseLocation);
-                if (distance <= 15 && distance < minDistance) {
+                if (distance <= 150 && distance < minDistance) {
                     minDistance = distance;
                     closestMouseId = mouseId;
                 }

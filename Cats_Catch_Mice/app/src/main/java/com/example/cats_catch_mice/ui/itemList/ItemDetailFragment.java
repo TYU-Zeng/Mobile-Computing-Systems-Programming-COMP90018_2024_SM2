@@ -1,6 +1,7 @@
 package com.example.cats_catch_mice.ui.itemList;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -72,10 +73,14 @@ public class ItemDetailFragment extends Fragment {
     private int itemCount;
 //    private String itemImageUrl;
     private int imageResId;
+    private FirebaseManager firebaseManager;
+    private boolean beCaught;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
+
     }
 
     @Nullable
@@ -111,6 +116,14 @@ public class ItemDetailFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        beCaught = firebaseManager.getBeCaughtFlag();
+        Log.d("Item Detail", "onViewCreated: " + beCaught);
+
+        if (!beCaught) {
+            firebaseManager.fetchBeCaughtFlag(firebaseManager.getRoomId(), firebaseManager.getPlayerId());
+            beCaught = firebaseManager.getBeCaughtFlag();
+            Log.d("Item Detail", "onViewCreated: set becaught flag: " + beCaught);
+        }
 
         // return
         binding.buttonCancel.setOnClickListener(v -> {
@@ -120,8 +133,19 @@ public class ItemDetailFragment extends Fragment {
 
         // TODO: call item function
         binding.useButton.setOnClickListener(v -> {
+
+            if (!beCaught) {
+
+            }
+            Log.d("USE ITEM", "onViewCreated: check beCaught when click: " + beCaught);
+
+            if (beCaught) {
+                Toast.makeText(getContext(), "You are caught! You cannot use item!", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
             if (itemCount > 0) {
-                itemCount--;
+                itemCount = Math.max(itemCount - 1, 0);
                 binding.itemCountTextView.setText(String.valueOf(itemCount));
 
                 // Update the item count in Firestore

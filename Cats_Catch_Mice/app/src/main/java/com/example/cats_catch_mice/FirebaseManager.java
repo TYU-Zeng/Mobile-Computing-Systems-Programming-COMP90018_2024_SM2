@@ -90,6 +90,7 @@ public class FirebaseManager extends ViewModel {
     private double lastLng;
     private boolean enableDecoy;
     private Pair<Double, Double> decoyPosition;
+    private boolean beCaught;
 
     private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();;
 
@@ -283,10 +284,30 @@ public class FirebaseManager extends ViewModel {
                     Log.e("FirebaseManager", "Failed to update beCaught field for player: " + playerId, task.getException());
                 }
             });
-
-
         });
+    }
 
+    public void fetchBeCaughtFlag(String roomId, String playerId) {
+        DatabaseReference caughtRef = FirebaseDatabase.getInstance()
+                .getReference("rooms")
+                .child(roomId)
+                .child("members")
+                .child(playerId)
+                .child("beCaught");
+
+        caughtRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.exists()) {
+                    beCaught = snapshot.getValue(Boolean.class);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("FirebaseManager", "Failed to fetch beCaught flag: " + error.getMessage());
+            }
+        });
     }
 
 
@@ -572,7 +593,6 @@ public class FirebaseManager extends ViewModel {
 
     public void startDecoyWithTimer() {
 
-
         setDecoyPosition(new Pair<>(lastLat, lastLng));
 
         new Thread(() -> {
@@ -617,6 +637,15 @@ public class FirebaseManager extends ViewModel {
     public void setPlayerId(String id){
         Log.d(TAG, "setPlayerId: " + id);
         this.playerId = id;
+    }
+
+    public void setBeCaught(boolean flag) {
+        Log.d(TAG, "setBeCaught: " + flag);
+        this.beCaught = flag;
+    }
+
+    public boolean getBeCaughtFlag() {
+        return this.beCaught;
     }
 
     public void setDecoy(boolean flag) {
