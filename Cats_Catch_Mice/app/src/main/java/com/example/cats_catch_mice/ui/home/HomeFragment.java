@@ -573,6 +573,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             Boolean visible = memberSnapshot.child("visible").getValue(Boolean.class);
             Log.d("HomeFragment", "Member " + memberId + " visible: " + visible);
 
+            if (!visible) continue;
+
             // Temporarily ignore 'visible' check for debugging
             // if (visible == null || !visible) {
             //     Log.d("HomeFragment", "Skipping member " + memberId + " due to visibility");
