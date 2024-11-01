@@ -127,6 +127,7 @@ public class ItemDetailFragment extends Fragment {
                 // Update the item count in Firestore
 //                itemViewModel.decreaseItemCount("UUID2018b95f70569", itemName, "roomIddummy1111");
                 itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), itemName, itemViewModel.getRoomId());
+                userItem(itemName);
                 Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), "No item left!", Toast.LENGTH_SHORT).show();
