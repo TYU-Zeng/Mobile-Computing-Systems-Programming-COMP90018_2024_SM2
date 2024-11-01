@@ -316,7 +316,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             this.map = map;
         }
         showUnimelb();
-        showChest();
 
         if (!joinedRoom()) {
             Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
@@ -324,6 +323,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
 
+        showChest();
         getLocationPermission();
         updateLocationUI();
         startUpdatingLocation();
