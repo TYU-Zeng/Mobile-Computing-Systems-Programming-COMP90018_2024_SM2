@@ -344,6 +344,19 @@ public class FirebaseManager extends ViewModel {
         return future;
     }
 
+    public void deletePlayerDataById(String roomId, String playerId) {
+
+        DatabaseReference playerRef = FirebaseDatabase.getInstance().getReference("rooms").child(roomId).child("members").child(playerId);
+
+        playerRef.removeValue().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                Log.d("FirebaseManager", "Player data deleted");
+            }else {
+                Log.e("FirebaseManager", "Error when deleting player data");
+            }
+        });
+    }
+
     public String createRoom(String ownerId) {
         UUID uuid = UUID.randomUUID();
         String surfixId = uuid.toString().replace("-", "").substring(0, 5);
@@ -625,6 +638,22 @@ public class FirebaseManager extends ViewModel {
             Log.d("debugging", "take off invisible");
             setSelfVisibility(true);
         }).start();
+    }
+
+    public void removeOwner(String roomId) {
+        DatabaseReference roomRef = database.getReference("rooms").child(roomId).child("owner");
+        roomRef.setValue(null).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                Log.d("debugging", "Owner removed.");
+            }else{
+                Log.d("debugging", "Error when removing owner.");
+            }
+        });
+    }
+
+    public void removeRoom(String roomId) {
+        DatabaseReference roomRef = database.getReference("rooms").child(roomId);
+        roomRef.removeValue();
     }
 
 
