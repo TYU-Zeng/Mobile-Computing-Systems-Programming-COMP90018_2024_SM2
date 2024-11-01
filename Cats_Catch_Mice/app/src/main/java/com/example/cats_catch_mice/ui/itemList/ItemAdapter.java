@@ -45,7 +45,7 @@ public class ItemAdapter extends RecyclerView.Adapter<ItemAdapter.ItemViewHolder
         Item item = items.get(position);
 
         holder.binding.itemListNameTextView.setText(item.getName());
-        holder.binding.itemListCountTextView.setText(String.valueOf(item.getCount()));
+        holder.binding.itemListCountTextView.setText("Count: " + String.valueOf(item.getCount()));
         holder.binding.itemListImageView.setImageResource(item.getImageResId());
 
         holder.itemView.setOnClickListener(v -> {

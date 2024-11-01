@@ -101,7 +101,7 @@ public class ItemDetailFragment extends Fragment {
 
             // Populate UI with item details using binding
             binding.itemNameTextView.setText(itemName);
-            binding.itemCountTextView.setText(String.valueOf(itemCount));
+            binding.itemCountTextView.setText("Count: " + String.valueOf(itemCount));
             binding.itemDetailDescription.setText(itemDescription);
             binding.itemImageView.setImageResource(imageResId);
         }
