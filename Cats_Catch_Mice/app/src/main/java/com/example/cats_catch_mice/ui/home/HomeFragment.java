@@ -528,9 +528,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         if (UNIMELB_BOUNDARY.contains(newCoordinate)){
             firebaseManager.setDecoyPosition(newDecoyPosition);
-            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
         }else {
-            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
         }
     }
 
