@@ -1,13 +1,9 @@
 package com.example.cats_catch_mice.ui.itemList;
 
 import android.view.LayoutInflater;
-import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-//import com.squareup.picasso.Picasso;
 import com.example.cats_catch_mice.R;
 import android.os.Bundle;
 import androidx.navigation.Navigation;

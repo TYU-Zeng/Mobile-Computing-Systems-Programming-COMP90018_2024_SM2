@@ -2,7 +2,6 @@ package com.example.cats_catch_mice.ui.itemList;
 
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,11 +9,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.navigation.Navigation;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.example.cats_catch_mice.databinding.FragmentItemListBinding; // Import binding class
-
-import com.example.cats_catch_mice.R;
 
 import java.util.ArrayList;
 import com.example.cats_catch_mice.FirebaseManager;
