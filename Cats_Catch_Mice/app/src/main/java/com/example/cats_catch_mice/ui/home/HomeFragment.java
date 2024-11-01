@@ -391,11 +391,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     private void showChest() {
-        map.addMarker(new MarkerOptions().position(CHEST1_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
-        map.addMarker(new MarkerOptions().position(CHEST2_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
-        map.addMarker(new MarkerOptions().position(CHEST3_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
-        map.addMarker(new MarkerOptions().position(CHEST4_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
-        map.addMarker(new MarkerOptions().position(CHEST5_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true));
+        map.addMarker(new MarkerOptions().position(CHEST1_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
+        map.addMarker(new MarkerOptions().position(CHEST2_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
+        map.addMarker(new MarkerOptions().position(CHEST3_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
+        map.addMarker(new MarkerOptions().position(CHEST4_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
+        map.addMarker(new MarkerOptions().position(CHEST5_COOR).title("Marker").icon(getScaledIcon(R.drawable.chest, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
     }
 
     private void updateLocationUI() {
@@ -460,7 +460,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             if (catCoordinate != null) {
                                 map.addMarker(new MarkerOptions()
                                         .position(new LatLng(catCoordinate.first, catCoordinate.second))
-                                        .title("Marker").icon(getScaledIcon(R.drawable.cat1, ICON_SCALE)).flat(true));
+                                        .title("Marker")
+                                        .icon(getScaledIcon(R.drawable.cat1, ICON_SCALE))
+                                        .flat(true)
+                                        .anchor(0.5f, 0.5f)
+                                );
                             }
                         }
 
@@ -470,7 +474,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                             for (Pair<Double, Double> mouseCoordinate : mouseDataList) {
                                 map.addMarker(new MarkerOptions()
                                         .position(new LatLng(mouseCoordinate.first, mouseCoordinate.second))
-                                        .title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
+                                        .title("Marker")
+                                        .icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE))
+                                        .flat(true)
+                                        .anchor(0.5f, 0.5f)
+                                );
                             }
                         }
 
@@ -528,9 +536,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
         if (UNIMELB_BOUNDARY.contains(newCoordinate)){
             firebaseManager.setDecoyPosition(newDecoyPosition);
-            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
+            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true).anchor(0.5f, 0.5f));
         }else {
-            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true));
+            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
         }
     }
 
