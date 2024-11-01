@@ -269,6 +269,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     @Override
     public void onDestroyView() {
         super.onDestroyView();
+
+        // hot fix for multiple request to db
+        fusedLocationClient.removeLocationUpdates(locationCallback);
         binding = null;
     }
 
