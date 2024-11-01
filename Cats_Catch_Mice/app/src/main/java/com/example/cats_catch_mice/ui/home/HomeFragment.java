@@ -212,14 +212,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                 // For example:
                                 firebaseManager.updateMouseCaught(roomId, caughtMouseId);
 
-                                getActivity().runOnUiThread(() -> {
-                                    Toast.makeText(getContext(), "Mouse caught!" , Toast.LENGTH_SHORT).show();
-                                });
+
+                                Toast.makeText(getContext(), "Caught a mouse!" , Toast.LENGTH_SHORT).show();
+
                             } else {
                                 // No mouse within 15 meters
-                                getActivity().runOnUiThread(() -> {
-                                    Toast.makeText(getContext(), "No mouse catched...", Toast.LENGTH_SHORT).show();
-                                });
+
+                                Toast.makeText(getContext(), "No mouse caught...", Toast.LENGTH_SHORT).show();
+
                             }
                         } else {
                             Log.e("HomeFragment", "Room data is null");
@@ -633,9 +633,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             // Get the 'visible' field
             Boolean visible = memberSnapshot.child("visible").getValue(Boolean.class);
+            Boolean beCaught = memberSnapshot.child("beCaught").getValue(Boolean.class);
             Log.d("HomeFragment", "Member " + memberId + " visible: " + visible);
 
             if (!visible) continue;
+            if (beCaught) continue;
 
             // Temporarily ignore 'visible' check for debugging
             // if (visible == null || !visible) {
@@ -723,6 +725,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             // Skip the owner (cat)
             if (memberId.equals(ownerId)) {
+                continue;
+            }
+
+            // Skip the becaught member
+            if (Boolean.TRUE.equals(memberSnapshot.child("beCaught").getValue(Boolean.class))) {
                 continue;
             }
 

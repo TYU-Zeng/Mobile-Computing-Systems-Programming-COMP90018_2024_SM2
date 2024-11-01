@@ -283,6 +283,8 @@ public class FirebaseManager extends ViewModel {
                     Log.e("FirebaseManager", "Failed to update beCaught field for player: " + playerId, task.getException());
                 }
             });
+
+
         });
 
     }
