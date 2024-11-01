@@ -65,7 +65,6 @@ import java.util.concurrent.TimeUnit;
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private static final String LOG_TAG = "MapFragment";
-    private static final int USER_LOCATION_ZOOM = 18;
     private static final int DEFAULT_ZOOM = 16;
     private static final LatLngBounds UNIMELB_BOUNDARY = new LatLngBounds(
             new LatLng(-37.802506, 144.956938),
@@ -90,7 +89,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private GoogleMap map;
     private boolean locationPermissionGranted;
     private ActivityResultLauncher<String> resultPermissionLauncher;
-    private boolean catchButtonCooldown = false;
     private TextView uncaughtMiceTextView;
 
     private HomeViewModel homeViewModel;
@@ -98,7 +96,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private LocationCallback locationCallback;
 
     private FirebaseManager firebaseManager;
-    private Handler handler;
 
     private ScheduledExecutorService executor;
     private ScheduledFuture<?> roomCheckTask;
@@ -114,7 +111,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         homeViewModel = new ViewModelProvider(requireActivity()).get(HomeViewModel.class);
 
         firebaseManager = new ViewModelProvider(requireActivity()).get(FirebaseManager.class);
-        handler = new Handler(Looper.getMainLooper());
 
         // callback for location permission request
         setResultPermissionLauncher();
@@ -147,9 +143,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             // 玩家是老鼠，隐藏按钮
             catchMouseButton.setVisibility(View.GONE);
         }
-
-        String platerId = firebaseManager.getPlayerId();
-
 
 
         // Check if cooldown is active and update button text accordingly
@@ -210,7 +203,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                                 Log.d("HomeFragment", "Caught Mouse ID: " + caughtMouseId);
 
                                 // You can update the mouse's status in Firebase if needed
-                                // For example:
                                 firebaseManager.updateMouseCaught(roomId, caughtMouseId);
 
 
@@ -654,12 +646,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
             if (!visible) continue;
             if (beCaught) continue;
-
-            // Temporarily ignore 'visible' check for debugging
-            // if (visible == null || !visible) {
-            //     Log.d("HomeFragment", "Skipping member " + memberId + " due to visibility");
-            //     continue;
-            // }
 
             // Get latitude and longitude
             Double lat = memberSnapshot.child("lat").getValue(Double.class);
