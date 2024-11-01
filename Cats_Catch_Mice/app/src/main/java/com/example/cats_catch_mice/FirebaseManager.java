@@ -84,6 +84,8 @@ public class FirebaseManager extends ViewModel {
     private boolean isOwner;
     private String roomOwnerId;
 
+    private double lastLat;
+    private double lastLng;
     private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();;
 
     public FirebaseManager() {
@@ -126,6 +128,11 @@ public class FirebaseManager extends ViewModel {
     }
 
     public void updateLocation(String playerId, double lat, double lng, String roomId){
+
+        // set last known coordinate
+        lastLat = lat;
+        lastLng = lng;
+
         executor.execute(() -> {
             DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
             CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
