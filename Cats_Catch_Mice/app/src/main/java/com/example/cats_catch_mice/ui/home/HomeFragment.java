@@ -31,6 +31,7 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.example.cats_catch_mice.FirebaseManager;
+import com.example.cats_catch_mice.MainActivity;
 import com.example.cats_catch_mice.R;
 import com.example.cats_catch_mice.databinding.FragmentMapBinding;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -346,6 +347,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
     private void checkRoomSchedule() {
         if (joinedRoom()) {
+
+            // set room status listener in main activity
+            if (requireActivity() instanceof MainActivity) {
+                Log.d("debugging", "room status listener set.");
+                ((MainActivity) requireActivity()).startListeningToRoomStatus(firebaseManager.getRoomId());
+            }
+
             mainHandler.post(() -> {
                 onMapReady(this.map);
                 if (roomCheckTask != null && !roomCheckTask.isCancelled()) {
