@@ -58,7 +58,7 @@
 
     <fragment
         android:id="@+id/navigation_qr_test"
-        android:name="com.example.cats_catch_mice.QRTest"
+        android:name="com.example.cats_catch_mice.JoinRoomFragment"
         android:label="QR Code"
         tools:layout="@layout/fragment_q_r_test">
         <argument

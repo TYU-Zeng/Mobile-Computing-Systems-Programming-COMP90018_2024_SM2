@@ -20,12 +20,12 @@ import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
 
-public class QRTest extends Fragment {
+public class JoinRoomFragment extends Fragment {
 
     private static final String ARG_ROOM_ID = "room_id";
     private String roomId;
 
-    public QRTest() {
+    public JoinRoomFragment() {
         // Required empty public constructor
     }
 
