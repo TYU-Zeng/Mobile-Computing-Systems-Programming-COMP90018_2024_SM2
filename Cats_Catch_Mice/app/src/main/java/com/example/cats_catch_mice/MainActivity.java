@@ -360,4 +360,32 @@ public class MainActivity extends AppCompatActivity {
                 })
                 .show();
     }
+
+    public void startListeningToRoomStatus(String roomId) {
+        DatabaseReference roomRef = firebaseManager.getDatabase().getReference("rooms").child(roomId).child("owner");
+        roomRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                String owner = snapshot.getValue(String.class);
+                if (owner == null) {
+                    ownerLeaves();
+                }
+            }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("debugging", "Error when setting listener for room status");
+            }
+        });
+    }
+
+    private void ownerLeaves() {
+        if (firebaseManager.isOwner()) return;
+
+        Log.d("debugging", "owner leaves");
+        // clear all data and returns to starting fragment
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finishAndRemoveTask();
+    }
 }
