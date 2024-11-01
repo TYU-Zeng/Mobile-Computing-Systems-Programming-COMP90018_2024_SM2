@@ -124,9 +124,8 @@ public class ItemDetailFragment extends Fragment {
                 itemCount--;
                 binding.itemCountTextView.setText(String.valueOf(itemCount));
 
-                // Update the item count in Firestore
-//                itemViewModel.decreaseItemCount("UUID2018b95f70569", itemName, "roomIddummy1111");
-                itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), itemName, itemViewModel.getRoomId());
+                // Moved to Us
+                // itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), itemName, itemViewModel.getRoomId());
                 userItem(itemName);
                 Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
             } else {
@@ -141,8 +140,10 @@ public class ItemDetailFragment extends Fragment {
 
         if(itemName.toLowerCase().contains("decoy")) {
             itemViewModel.startDecoyWithTimer();
+            itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), "item2", itemViewModel.getRoomId());
         }else if(itemName.toLowerCase().contains("invisible")) {
             itemViewModel.startInvisibleWithTimer();
+            itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), "item1", itemViewModel.getRoomId());
         }
     }
 
