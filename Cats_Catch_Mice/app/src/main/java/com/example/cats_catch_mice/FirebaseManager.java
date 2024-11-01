@@ -682,4 +682,8 @@ public class FirebaseManager extends ViewModel {
         return new Pair<>(decoyPosition.first, decoyPosition.second);
     }
 
+    public FirebaseDatabase getDatabase() {
+        return this.database;
+    }
+
 }
