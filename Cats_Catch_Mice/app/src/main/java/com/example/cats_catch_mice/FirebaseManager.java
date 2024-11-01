@@ -396,8 +396,8 @@ public class FirebaseManager extends ViewModel {
                 int item2Count = ((Number) memberData.getOrDefault("item2", 0)).intValue();
 
                 // TODO: Item names, descriptions and corresponding icons need to be manually editted here as there's only count data from firebase
-                itemList.add(new Item("Invisible cloak", "Wear the invisible cloak for 20 seconds so that no one can see you!", item1Count, R.drawable.itemicon_item1_demo));
-                itemList.add(new Item("Decoy", "Place a decoy at the current position. It will only last 30 seconds!", item2Count, R.drawable.mouse));
+                itemList.add(new Item("Invisible cloak", "Wear the invisible cloak for 20 seconds so that no one can see you!", item1Count, R.drawable.invisible));
+                itemList.add(new Item("Decoy", "Place a decoy at the current position. It will only last 30 seconds!", item2Count, R.drawable.decoy));
             }
             itemListLiveData.postValue(itemList);
         });
