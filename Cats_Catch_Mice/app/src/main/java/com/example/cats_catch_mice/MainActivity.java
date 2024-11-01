@@ -5,7 +5,6 @@ import static android.content.ContentValues.TAG;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.nfc.NfcAdapter;
 import android.os.Bundle;
 import android.os.Handler;
@@ -159,12 +158,6 @@ public class MainActivity extends AppCompatActivity {
 
         } else if (item.getItemId() == R.id.menu_quit) {
 
-            // TODO: double check 是否退出
-            // 如果退出直接roommanager.leaveRoom(currentRoomId, userId);
-            // 停止所有的thread
-            // 删除roomid
-            // 跳转到初始化面
-
             if(firebaseManager.getRoomId() == null) {
                 Toast.makeText(this, "You must be in a room to quit.", Toast.LENGTH_SHORT).show();
                 return true;
@@ -211,9 +204,7 @@ public class MainActivity extends AppCompatActivity {
             onBackPressed();
         } else if (item.getItemId() == R.id.menu_qrCode) {
             Log.d("Bitmap", "onOptionsItemSelected: create bit map");
-            //
 
-//            String shareRoomId = "roomId123";
             // Pass the roomId as an argument
             String shareRoomId = firebaseManager.getRoomId();
             if (shareRoomId != null) {
@@ -324,7 +315,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onOptionsItemSelected: roomId is null");
                 Toast.makeText(this, "Join room first!", Toast.LENGTH_SHORT).show();
             }
-//            nfcController.writeTag(intent);
 
         }
     }
