@@ -219,15 +219,15 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             }, 3000);
 
+                            // clear all data and returns to starting fragment
+                            Intent intent = new Intent(this, MainActivity.class);
+                            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                            startActivity(intent);
+                            finishAndRemoveTask();
+
                         }else { // player quits
                             firebaseManager.deletePlayerDataById(roomId, playerId);
                         }
-
-                        // clear all data and returns to starting fragment
-                        Intent intent = new Intent(this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
-                        finishAndRemoveTask();
                     })
                     .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                     .setCancelable(false)
@@ -393,10 +393,20 @@ public class MainActivity extends AppCompatActivity {
         if (firebaseManager.isOwner()) return;
 
         Log.d("debugging", "owner leaves");
-        // clear all data and returns to starting fragment
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        startActivity(intent);
-        finishAndRemoveTask();
+        new AlertDialog.Builder(this)
+                .setTitle("Game ended")
+                .setMessage("The owner leaves the room.")
+                .setPositiveButton("Ok", (dialog, which) -> {
+
+                    // clear all data and returns to starting fragment
+                    Intent intent = new Intent(this, MainActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                    startActivity(intent);
+                    finishAndRemoveTask();
+
+                    dialog.dismiss();
+                })
+                .setCancelable(false)
+                .show();
     }
 }
