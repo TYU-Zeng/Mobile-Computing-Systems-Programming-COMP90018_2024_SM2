@@ -4,7 +4,6 @@ import static android.content.ContentValues.TAG;
 
 import android.util.Log;
 import android.util.Pair;
-import java.security.SecureRandom;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
