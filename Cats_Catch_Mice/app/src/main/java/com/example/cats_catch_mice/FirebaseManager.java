@@ -75,6 +75,7 @@ public class FirebaseManager extends ViewModel {
     private static final int MAX_NUM_ITEMS = 2;
     private static final String ROOM_ID_PREFIX = "roomId";
     private static final int RANDOM_NUMBER_BOUND = 100000;
+    private static final int DECOY_TIMER = 30000;
 
     private final ThreadPoolExecutor executor;
     private SecureRandom secureRandom;
@@ -86,6 +87,9 @@ public class FirebaseManager extends ViewModel {
 
     private double lastLat;
     private double lastLng;
+    private boolean enableDecoy;
+    private Pair<Double, Double> decoyPosition;
+
     private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();;
 
     public FirebaseManager() {
@@ -528,6 +532,25 @@ public class FirebaseManager extends ViewModel {
         return future;
     }
 
+    public void startDecoyWithTimer() {
+
+
+        setDecoyPosition(new Pair<>(lastLat, lastLng));
+
+        new Thread(() -> {
+            // put decoy and start timer
+            setDecoy(true);
+            try {
+                Thread.sleep(DECOY_TIMER);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e("debugging", "Thread was interrupted: " + e.getMessage());
+            }
+            // remove decoy when time's up
+            setDecoy(false);
+        }).start();
+    }
+
 
     // setter
     public void setRoomId(String id){
@@ -538,6 +561,18 @@ public class FirebaseManager extends ViewModel {
     public void setPlayerId(String id){
         Log.d(TAG, "setPlayerId: " + id);
         this.playerId = id;
+    }
+
+    public void setDecoy(boolean flag) {
+        this.enableDecoy = flag;
+    }
+
+    public boolean hasDecoy() {
+        return this.enableDecoy;
+    }
+
+    public void setDecoyPosition(Pair<Double,Double> newPosition) {
+        decoyPosition = new Pair<>(newPosition.first, newPosition.second);
     }
 
     // getter
@@ -558,5 +593,8 @@ public class FirebaseManager extends ViewModel {
         return this.isOwner;
     }
 
+    public Pair<Double, Double> getDecoyPosition() {
+        return new Pair<>(decoyPosition.first, decoyPosition.second);
+    }
 
 }
