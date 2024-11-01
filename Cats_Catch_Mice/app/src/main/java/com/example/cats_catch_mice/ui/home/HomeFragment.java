@@ -388,27 +388,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
     }
 
-    private double getRandomOffset() {
-        return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
-    }
-
-    private void showDecoy() {
-        if(!firebaseManager.hasDecoy()) return;
-
-        Pair<Double, Double> decoyPosition = firebaseManager.getDecoyPosition();
-        Pair<Double, Double> newDecoyPosition = new Pair<>(decoyPosition.first + getRandomOffset(), decoyPosition.second + getRandomOffset());
-
-        LatLng originalCoordinate = new LatLng(decoyPosition.first, decoyPosition.second);
-        LatLng newCoordinate = new LatLng(newDecoyPosition.first, newDecoyPosition.second);
-
-        if (UNIMELB_BOUNDARY.contains(newCoordinate)){
-            firebaseManager.setDecoyPosition(newDecoyPosition);
-            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
-        }else {
-            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
-        }
-    }
-
     private void updateMap() {
 
         if(!isFragmentAttached()) return;
@@ -471,6 +450,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         };
     }
 
+    /* Decoy */
+
+    private double getRandomOffset() {
+        return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
+    }
+
+    private void showDecoy() {
+        if(!firebaseManager.hasDecoy()) return;
+
+        Pair<Double, Double> decoyPosition = firebaseManager.getDecoyPosition();
+        Pair<Double, Double> newDecoyPosition = new Pair<>(decoyPosition.first + getRandomOffset(), decoyPosition.second + getRandomOffset());
+
+        LatLng originalCoordinate = new LatLng(decoyPosition.first, decoyPosition.second);
+        LatLng newCoordinate = new LatLng(newDecoyPosition.first, newDecoyPosition.second);
+
+        if (UNIMELB_BOUNDARY.contains(newCoordinate)){
+            firebaseManager.setDecoyPosition(newDecoyPosition);
+            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+        }else {
+            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+        }
+    }
 
     /* Location permission */
 
