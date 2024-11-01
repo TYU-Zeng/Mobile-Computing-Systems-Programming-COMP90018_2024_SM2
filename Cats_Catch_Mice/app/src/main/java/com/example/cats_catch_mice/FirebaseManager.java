@@ -75,6 +75,8 @@ public class FirebaseManager extends ViewModel {
     private static final int MAX_NUM_ITEMS = 2;
     private static final String ROOM_ID_PREFIX = "roomId";
     private static final int RANDOM_NUMBER_BOUND = 100000;
+    private static final int DECOY_TIMER = 30000;
+    private static final int INVISIBLE_TIMER = 20000;
 
     private final ThreadPoolExecutor executor;
     private SecureRandom secureRandom;
@@ -83,6 +85,11 @@ public class FirebaseManager extends ViewModel {
     private String playerId;
     private boolean isOwner;
     private String roomOwnerId;
+
+    private double lastLat;
+    private double lastLng;
+    private boolean enableDecoy;
+    private Pair<Double, Double> decoyPosition;
 
     private MutableLiveData<List<Item>> itemListLiveData = new MutableLiveData<>();;
 
@@ -126,6 +133,11 @@ public class FirebaseManager extends ViewModel {
     }
 
     public void updateLocation(String playerId, double lat, double lng, String roomId){
+
+        // set last known coordinate
+        lastLat = lat;
+        lastLng = lng;
+
         executor.execute(() -> {
             DatabaseReference memberRef = database.getReference("rooms").child(roomId).child("members").child(playerId);
             CompletableFuture<Map<String, Object>> future = getPlayerDataAsync(playerId, roomId);
@@ -384,8 +396,8 @@ public class FirebaseManager extends ViewModel {
                 int item2Count = ((Number) memberData.getOrDefault("item2", 0)).intValue();
 
                 // TODO: Item names, descriptions and corresponding icons need to be manually editted here as there's only count data from firebase
-                itemList.add(new Item("item1", "item1 description", item1Count, R.drawable.itemicon_item1_demo));
-                itemList.add(new Item("item2", "item2 description", item2Count, R.drawable.mouse));
+                itemList.add(new Item("Invisible cloak", "Wear the invisible cloak for 20 seconds so that no one can see you!", item1Count, R.drawable.itemicon_item1_demo));
+                itemList.add(new Item("Decoy", "Place a decoy at the current position. It will only last 30 seconds!", item2Count, R.drawable.mouse));
             }
             itemListLiveData.postValue(itemList);
         });
@@ -486,7 +498,21 @@ public class FirebaseManager extends ViewModel {
         });
     }
 
+    public void setSelfVisibility(boolean visibility) {
+        DatabaseReference itemRef = database.getReference("rooms")
+                .child(this.roomId)
+                .child("members")
+                .child(this.playerId)
+                .child("visible");
 
+        itemRef.setValue(visibility).addOnCompleteListener(task -> {
+            if(task.isSuccessful()) {
+                Log.d("FirebaseManager", "Visible successfully set to false");
+            }else {
+                Log.d("FirebaseManager", "Failed to set visible to false");
+            }
+        });
+    }
 
 
     /*
@@ -542,6 +568,43 @@ public class FirebaseManager extends ViewModel {
         return future;
     }
 
+    public void startDecoyWithTimer() {
+
+
+        setDecoyPosition(new Pair<>(lastLat, lastLng));
+
+        new Thread(() -> {
+            // put decoy and start timer
+            setDecoy(true);
+            try {
+                Thread.sleep(DECOY_TIMER);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e("debugging", "Thread was interrupted: " + e.getMessage());
+            }
+            // remove decoy when time's up
+            setDecoy(false);
+        }).start();
+    }
+
+    public void startInvisibleWithTimer() {
+
+        new Thread(() -> {
+            // put on invisible cloak and start timer
+            setSelfVisibility(false);
+            Log.d("debugging", "wear invisible");
+            try {
+                Thread.sleep(INVISIBLE_TIMER);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                Log.e("debugging", "Thread was interrupted: " + e.getMessage());
+            }
+            // take off the invisible cloak
+            Log.d("debugging", "take off invisible");
+            setSelfVisibility(true);
+        }).start();
+    }
+
 
     // setter
     public void setRoomId(String id){
@@ -552,6 +615,18 @@ public class FirebaseManager extends ViewModel {
     public void setPlayerId(String id){
         Log.d(TAG, "setPlayerId: " + id);
         this.playerId = id;
+    }
+
+    public void setDecoy(boolean flag) {
+        this.enableDecoy = flag;
+    }
+
+    public boolean hasDecoy() {
+        return this.enableDecoy;
+    }
+
+    public void setDecoyPosition(Pair<Double,Double> newPosition) {
+        decoyPosition = new Pair<>(newPosition.first, newPosition.second);
     }
 
     // getter
@@ -572,5 +647,8 @@ public class FirebaseManager extends ViewModel {
         return this.isOwner;
     }
 
+    public Pair<Double, Double> getDecoyPosition() {
+        return new Pair<>(decoyPosition.first, decoyPosition.second);
+    }
 
 }

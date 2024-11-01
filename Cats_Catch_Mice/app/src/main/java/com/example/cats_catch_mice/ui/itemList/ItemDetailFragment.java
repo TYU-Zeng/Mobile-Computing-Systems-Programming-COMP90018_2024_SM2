@@ -127,6 +127,7 @@ public class ItemDetailFragment extends Fragment {
                 // Update the item count in Firestore
 //                itemViewModel.decreaseItemCount("UUID2018b95f70569", itemName, "roomIddummy1111");
                 itemViewModel.decreaseItemCount(itemViewModel.getPlayerId(), itemName, itemViewModel.getRoomId());
+                userItem(itemName);
                 Toast.makeText(getContext(), "Item used!", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(getContext(), "No item left!", Toast.LENGTH_SHORT).show();
@@ -134,6 +135,15 @@ public class ItemDetailFragment extends Fragment {
 
 
         });
+    }
+
+    private void userItem(String itemName) {
+
+        if(itemName.toLowerCase().contains("decoy")) {
+            itemViewModel.startDecoyWithTimer();
+        }else if(itemName.toLowerCase().contains("invisible")) {
+            itemViewModel.startInvisibleWithTimer();
+        }
     }
 
     // Clean up the binding reference when the fragment is destroyed

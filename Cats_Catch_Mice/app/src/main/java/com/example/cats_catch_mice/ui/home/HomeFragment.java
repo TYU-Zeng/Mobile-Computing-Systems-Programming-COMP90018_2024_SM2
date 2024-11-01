@@ -55,6 +55,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Random;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -80,6 +81,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final LatLng CHEST4_COOR = new LatLng(-37.7999, 144.963312);
     private static final LatLng CHEST5_COOR = new LatLng(-37.7968, 144.9628);
 
+    // decoy offset constants
+    private static final double RANDOM_SCALE = 0.0004;
+    private static final double RANDOM_SHIFT = 0.0002;
 
     private FragmentMapBinding binding;
     private GoogleMap map;
@@ -313,6 +317,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        // hot fix for multiple request to db
+        fusedLocationClient.removeLocationUpdates(locationCallback);
+        binding = null;
+    }
+
+    @Override
     public void onDestroy() {
         super.onDestroy();
         if (executor != null) executor.shutdown();
@@ -353,7 +366,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             this.map = map;
         }
         showUnimelb();
-        showChest();
 
         if (!joinedRoom()) {
             Toast.makeText(getContext(), "You need to join a room first.", Toast.LENGTH_SHORT).show();
@@ -361,6 +373,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             return;
         }
 
+        showChest();
         getLocationPermission();
         updateLocationUI();
         startUpdatingLocation();
@@ -435,6 +448,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.clear();
 
         showChest();
+        showDecoy();
 
         firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
                 .thenAccept(roomSnapshot -> {
@@ -497,6 +511,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         };
     }
 
+    /* Decoy */
+
+    private double getRandomOffset() {
+        return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
+    }
+
+    private void showDecoy() {
+        if(!firebaseManager.hasDecoy()) return;
+
+        Pair<Double, Double> decoyPosition = firebaseManager.getDecoyPosition();
+        Pair<Double, Double> newDecoyPosition = new Pair<>(decoyPosition.first + getRandomOffset(), decoyPosition.second + getRandomOffset());
+
+        LatLng originalCoordinate = new LatLng(decoyPosition.first, decoyPosition.second);
+        LatLng newCoordinate = new LatLng(newDecoyPosition.first, newDecoyPosition.second);
+
+        if (UNIMELB_BOUNDARY.contains(newCoordinate)){
+            firebaseManager.setDecoyPosition(newDecoyPosition);
+            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+        }else {
+            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse2, ICON_SCALE)).flat(true));
+        }
+    }
 
     /* Location permission */
 
@@ -598,6 +634,8 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
             // Get the 'visible' field
             Boolean visible = memberSnapshot.child("visible").getValue(Boolean.class);
             Log.d("HomeFragment", "Member " + memberId + " visible: " + visible);
+
+            if (!visible) continue;
 
             // Temporarily ignore 'visible' check for debugging
             // if (visible == null || !visible) {
