@@ -42,7 +42,6 @@ public class FirebaseManager extends ViewModel {
     private static final int MIN_NUM_ITEMS = 0;
     private static final int MAX_NUM_ITEMS = 2;
     private static final String ROOM_ID_PREFIX = "roomId";
-    private static final int RANDOM_NUMBER_BOUND = 100000;
     private static final int DECOY_TIMER = 30000;
     private static final int INVISIBLE_TIMER = 20000;
 
