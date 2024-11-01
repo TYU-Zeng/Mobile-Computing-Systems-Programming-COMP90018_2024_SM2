@@ -228,6 +228,12 @@ public class MainActivity extends AppCompatActivity {
             NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
             navController.navigate(R.id.navigation_scanner);
             return true;
+        } else if (item.getItemId() == R.id.menu_about) {
+            // 点击后跳转到 AboutFragment
+            Log.d(TAG, "onOptionsItemSelected: about button clicked");
+            NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
+            navController.navigate(R.id.navigation_about);
+            return true;
         }
         return true;
     }

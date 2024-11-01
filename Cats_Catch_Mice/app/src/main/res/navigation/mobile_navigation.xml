@@ -47,6 +47,11 @@
         android:label="@string/QR_Scanner"
         tools:layout="@layout/fragment_q_r_scanner" />
 
+    <fragment
+        android:id="@+id/navigation_about"
+        android:name="com.example.cats_catch_mice.AboutFragment"
+        android:label="@string/about"
+        tools:layout="@layout/fragment_about" />
 
 <!--        测试片段      -->
 
