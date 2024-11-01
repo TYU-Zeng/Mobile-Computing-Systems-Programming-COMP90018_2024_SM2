@@ -141,7 +141,7 @@ public class ItemDetailFragment extends Fragment {
         if(itemName.toLowerCase().contains("decoy")) {
             itemViewModel.startDecoyWithTimer();
         }else if(itemName.toLowerCase().contains("invisible")) {
-
+            itemViewModel.startInvisibleWithTimer();
         }
     }
 
