@@ -183,16 +183,45 @@ public class MainActivity extends AppCompatActivity {
 
 
         } else if (item.getItemId() == R.id.menu_quit) {
-            // TODO: click "Quit" function
-            Toast.makeText(this, "Quit clicked", Toast.LENGTH_SHORT).show();
-
-//            firebaseManager.setRoomId(null);
 
             // TODO: double check 是否退出
             // 如果退出直接roommanager.leaveRoom(currentRoomId, userId);
             // 停止所有的thread
             // 删除roomid
             // 跳转到初始化面
+
+            if(firebaseManager.getRoomId() == null) {
+                Toast.makeText(this, "You must be in a room to quit.", Toast.LENGTH_SHORT).show();
+                return true;
+            }
+
+            new AlertDialog.Builder(this)
+                    .setTitle("Quit room")
+                    .setMessage("Are you sure you want to quit the game? (leave the current room)")
+                    .setPositiveButton("Yes", (dialog, which) -> {
+
+                        String roomId = firebaseManager.getRoomId();
+                        String playerId = firebaseManager.getPlayerId();
+
+                        if (firebaseManager.isOwner()) { // owner quits
+
+                            Log.d("debugging", "owner quits");
+
+                        }else { // player quits
+                            Log.d("debugging", "player quits");
+
+                        }
+
+                        // clear all data and returns to starting fragment
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        finishAndRemoveTask();
+                    })
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
+                    .setCancelable(false)
+                    .create()
+                    .show();
 
         } else if (item.getItemId() == android.R.id.home) {
             onBackPressed();
