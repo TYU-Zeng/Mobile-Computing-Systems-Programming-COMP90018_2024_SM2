@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/menu_about_text"
+        android:layout_width="324dp"
+        android:layout_height="662dp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="10dp"
+        android:gravity="start"
+        android:text="Catch me if you can!\n\nReady to stir up some classic cat-and-mouse mayhem?\n\nHere’s how it goes: if you’re the one creating the room, congratulations—you’re the Cat! Share the fun by sending your friends the QR code to join as Mice. Once everyone’s in, the chase begins!\n\nAs the Cat, you’ll see all the Mice scurrying around on your map, just waiting to be caught. Spot one nearby? Hit that “Catch” button, and they’re yours!\n\nMice, it’s your job to outsmart the Cat. Look for treasure chests on the map, head over, scan the NFC sticker, and collect items to boost your getaway skills.\n\nNow, let’s see if you can outwit each other. Game on!"
+        android:textColor="@android:color/black"
+        android:textSize="20sp" />
+
+
+</FrameLayout>
