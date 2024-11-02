@@ -444,7 +444,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.clear();
 
         showChest();
-//        showDecoy();
 
         firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
                 .thenAccept(roomSnapshot -> {
