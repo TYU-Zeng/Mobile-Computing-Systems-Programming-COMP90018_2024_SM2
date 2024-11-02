@@ -2,6 +2,8 @@ package com.example.cats_catch_mice;
 
 import static android.content.ContentValues.TAG;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.util.Pair;
 import androidx.annotation.NonNull;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -44,6 +47,11 @@ public class FirebaseManager extends ViewModel {
     private static final String ROOM_ID_PREFIX = "roomId";
     private static final int DECOY_TIMER = 30000;
     private static final int INVISIBLE_TIMER = 20000;
+    private static final int DECOY_POSITION_UPDATE_INTERVAL = 2000;
+
+    // decoy offset constants
+    private static final double RANDOM_SCALE = 0.0004;
+    private static final double RANDOM_SHIFT = 0.0002;
 
     private final ThreadPoolExecutor executor;
     private FirebaseDatabase database;
@@ -53,7 +61,6 @@ public class FirebaseManager extends ViewModel {
 
     private double lastLat;
     private double lastLng;
-    private boolean enableDecoy;
     private Pair<Double, Double> decoyPosition;
     private boolean beCaught;
 
@@ -570,20 +577,61 @@ public class FirebaseManager extends ViewModel {
 
     public void startDecoyWithTimer() {
 
+        Handler handler = new Handler(Looper.getMainLooper());
         setDecoyPosition(new Pair<>(lastLat, lastLng));
 
         new Thread(() -> {
-            // put decoy and start timer
-            setDecoy(true);
-            try {
-                Thread.sleep(DECOY_TIMER);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Log.e("debugging", "Thread was interrupted: " + e.getMessage());
-            }
-            // remove decoy when time's up
-            setDecoy(false);
+
+            // put decoy and "start timer"
+            addSelfDecoy();
+            setDecoyPosition(new Pair<>(lastLat, lastLng));
+
+            final int[] updateCount = {0};
+
+            Runnable decoyPositionUpdate = new Runnable() {
+                @Override
+                public void run() {
+                    if (updateCount[0] < DECOY_TIMER/DECOY_POSITION_UPDATE_INTERVAL) {
+                        Pair<Double, Double> decoyPosition = getDecoyPosition();
+                        updateLocation("decoy-" + playerId,
+                                decoyPosition.first,
+                                decoyPosition.second,
+                                roomId);
+                        setDecoyPosition(new Pair<>(
+                                decoyPosition.first + getRandomOffset(),
+                                decoyPosition.second + getRandomOffset()
+                        ));
+                        updateCount[0]++;
+
+                        handler.postDelayed(this, DECOY_POSITION_UPDATE_INTERVAL);
+                    } else {
+                        handler.postDelayed(() -> {
+                            removeSelfDecoy();
+                        }, DECOY_POSITION_UPDATE_INTERVAL);
+                    }
+                }
+            };
+            handler.post(decoyPositionUpdate);
         }).start();
+    }
+
+    private double getRandomOffset() {
+        return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
+    }
+
+    public void addSelfDecoy() {
+        addPlayerData("decoy-" + this.playerId, lastLat, lastLng, 0,0,true, roomId);
+    }
+
+    public void removeSelfDecoy() {
+        DatabaseReference roomRef = database.getReference("rooms").child(roomId).child("members").child("decoy-"+this.playerId);
+        roomRef.removeValue().addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                Log.d("debugging", "Decoy removed.");
+            }else{
+                Log.d("debugging", "Error when removing decoy.");
+            }
+        });
     }
 
     public void startInvisibleWithTimer() {
@@ -639,14 +687,6 @@ public class FirebaseManager extends ViewModel {
 
     public boolean getBeCaughtFlag() {
         return this.beCaught;
-    }
-
-    public void setDecoy(boolean flag) {
-        this.enableDecoy = flag;
-    }
-
-    public boolean hasDecoy() {
-        return this.enableDecoy;
     }
 
     public void setDecoyPosition(Pair<Double,Double> newPosition) {

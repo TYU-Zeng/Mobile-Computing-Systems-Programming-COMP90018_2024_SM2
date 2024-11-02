@@ -81,10 +81,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private static final LatLng CHEST4_COOR = new LatLng(-37.7999, 144.963312);
     private static final LatLng CHEST5_COOR = new LatLng(-37.7968, 144.9628);
 
-    // decoy offset constants
-    private static final double RANDOM_SCALE = 0.0004;
-    private static final double RANDOM_SHIFT = 0.0002;
-
     private FragmentMapBinding binding;
     private GoogleMap map;
     private boolean locationPermissionGranted;
@@ -448,7 +444,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         map.clear();
 
         showChest();
-        showDecoy();
+//        showDecoy();
 
         firebaseManager.getFullRoomDataAsync(firebaseManager.getRoomId())
                 .thenAccept(roomSnapshot -> {
@@ -517,29 +513,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 }
             }
         };
-    }
-
-    /* Decoy */
-
-    private double getRandomOffset() {
-        return new Random().nextDouble() * RANDOM_SCALE - RANDOM_SHIFT;
-    }
-
-    private void showDecoy() {
-        if(!firebaseManager.hasDecoy()) return;
-
-        Pair<Double, Double> decoyPosition = firebaseManager.getDecoyPosition();
-        Pair<Double, Double> newDecoyPosition = new Pair<>(decoyPosition.first + getRandomOffset(), decoyPosition.second + getRandomOffset());
-
-        LatLng originalCoordinate = new LatLng(decoyPosition.first, decoyPosition.second);
-        LatLng newCoordinate = new LatLng(newDecoyPosition.first, newDecoyPosition.second);
-
-        if (UNIMELB_BOUNDARY.contains(newCoordinate)){
-            firebaseManager.setDecoyPosition(newDecoyPosition);
-            map.addMarker(new MarkerOptions().position(newCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true).anchor(0.5f, 0.5f));
-        }else {
-            map.addMarker(new MarkerOptions().position(originalCoordinate).title("Marker").icon(getScaledIcon(R.drawable.mouse1, ICON_SCALE)).flat(true).anchor(0.5f,0.5f));
-        }
     }
 
     /* Location permission */
